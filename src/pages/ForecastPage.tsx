@@ -4,7 +4,9 @@ import { POINTS, SIGNS, type PlanetKey } from '../astro/constants'
 import { upcomingLunarPhases, bodyLongitude, toTime } from '../astro/ephemeris'
 import { findTransitEvents, scoreRange, type TransitEvent } from '../astro/transits'
 import { computeChart } from '../astro/chart'
+import { AiReading } from '../components/AiReading'
 import { ChartWheel } from '../components/ChartWheel'
+import { forecastSummary } from '../ai/prompts'
 import { AreaMeters, FlowChart } from '../components/Charts'
 import { MoonPhase } from '../components/MoonPhase'
 import { transitHeadline, transitText } from '../interpret/aspects'
@@ -179,6 +181,15 @@ export function ForecastPage({ natal, go }: { natal: Chart | null; go: (r: Route
             ))}
             {events.length === 0 && <p className="glass pad">Nenhum trânsito exato neste período com os filtros atuais.</p>}
           </section>
+
+          {days.length > 0 && (
+            <AiReading
+              kind="previsao"
+              cacheKey={`${natal.birth?.name}|${natal.date.toISOString()}|${start.toISOString().slice(0, 10)}|${range}`}
+              getSummary={() => forecastSummary(natal, findTransitEvents(natal, start, range, [...FAST, ...SLOW]), days)}
+              onOpenSettings={() => go('ajustes')}
+            />
+          )}
 
           <section className="glass pad">
             <h2>Ciclo lunar</h2>

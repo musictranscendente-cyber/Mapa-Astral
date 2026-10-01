@@ -35,14 +35,14 @@ export function useProfiles() {
   useEffect(() => write(KEY, profiles), [profiles])
   useEffect(() => write(ACTIVE, activeId), [activeId])
 
-  const save = useCallback((data: BirthData, id?: string) => {
+  const save = useCallback((data: BirthData, id?: string, activate = true) => {
     const pid = id ?? crypto.randomUUID()
     setProfiles((list) => {
       const existing = list.find((p) => p.id === pid)
       const next: Profile = { ...data, id: pid, createdAt: existing?.createdAt ?? Date.now() }
       return existing ? list.map((p) => (p.id === pid ? next : p)) : [...list, next]
     })
-    setActiveId(pid)
+    if (activate) setActiveId(pid)
     return pid
   }, [])
 
@@ -58,10 +58,12 @@ export function useProfiles() {
 export interface Settings {
   houseSystem: HouseSystem
   motion: boolean
+  notify: boolean
+  notifyHour: number
 }
 
 export function useSettings() {
-  const [settings, setSettings] = useState<Settings>(() => ({ houseSystem: 'placidus', motion: true, ...read<Partial<Settings>>(SETTINGS, {}) }))
+  const [settings, setSettings] = useState<Settings>(() => ({ houseSystem: 'placidus', motion: true, notify: false, notifyHour: 8, ...read<Partial<Settings>>(SETTINGS, {}) }))
   useEffect(() => write(SETTINGS, settings), [settings])
   return [settings, setSettings] as const
 }
