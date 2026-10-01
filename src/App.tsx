@@ -8,20 +8,28 @@ import { NatalPage } from './pages/NatalPage'
 import { SkyPage } from './pages/SkyPage'
 import { ForecastPage } from './pages/ForecastPage'
 import { ProfilesPage } from './pages/ProfilesPage'
+import { SynastryPage } from './pages/SynastryPage'
+import { SolarReturnPage } from './pages/SolarReturnPage'
+import { SettingsPage } from './pages/SettingsPage'
+import { armInAppTimer, registerServiceWorker, scheduleMessages } from './lib/notifications'
 
-export type Route = 'inicio' | 'mapa' | 'ceu' | 'previsoes' | 'perfis'
+export type Route = 'inicio' | 'mapa' | 'ceu' | 'previsoes' | 'sinastria' | 'revolucao' | 'perfis' | 'ajustes'
 
 const NAV: { key: Route; label: string; icon: string }[] = [
   { key: 'inicio', label: 'Início', icon: '✦' },
   { key: 'mapa', label: 'Mapa Natal', icon: '☉' },
   { key: 'ceu', label: 'Céu de Hoje', icon: '☽' },
   { key: 'previsoes', label: 'Previsões', icon: '✧' },
-  { key: 'perfis', label: 'Perfis', icon: '♡' },
+  { key: 'sinastria', label: 'Sinastria', icon: '♡' },
+  { key: 'revolucao', label: 'Rev. Solar', icon: '☼' },
+  { key: 'perfis', label: 'Perfis', icon: '☷' },
 ]
+
+const ROUTES: Route[] = [...NAV.map((n) => n.key), 'ajustes']
 
 const readRoute = (): Route => {
   const h = window.location.hash.replace(/^#\/?/, '') as Route
-  return NAV.some((n) => n.key === h) ? h : 'inicio'
+  return ROUTES.includes(h) ? h : 'inicio'
 }
 
 export default function App() {
@@ -49,6 +57,14 @@ export default function App() {
     }
   }, [active, settings.houseSystem])
 
+  // Daily notifications: keep the service worker's message queue fresh for the active profile.
+  useEffect(() => {
+    registerServiceWorker()
+    if (!settings.notify) return
+    scheduleMessages(natal, true, settings.notifyHour)
+    return armInAppTimer(settings.notifyHour)
+  }, [natal, settings.notify, settings.notifyHour])
+
   const page = (() => {
     switch (route) {
       case 'mapa':
@@ -57,6 +73,17 @@ export default function App() {
         return <SkyPage natal={natal} profile={active} settings={settings} go={go} />
       case 'previsoes':
         return <ForecastPage natal={natal} go={go} />
+      case 'sinastria':
+        return (
+          <SynastryPage
+            profiles={profiles} activeId={active?.id ?? null} houseSystem={settings.houseSystem}
+            onSave={(d) => save(d, undefined, false)} go={go}
+          />
+        )
+      case 'revolucao':
+        return <SolarReturnPage key={active?.id} natal={natal} houseSystem={settings.houseSystem} go={go} />
+      case 'ajustes':
+        return <SettingsPage natal={natal} settings={settings} setSettings={setSettings} />
       case 'perfis':
         return (
           <ProfilesPage
@@ -93,12 +120,8 @@ export default function App() {
               {profiles.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}
             </select>
           )}
-          <button
-            className="icon-btn"
-            title={settings.motion ? 'Pausar animações' : 'Ativar animações'}
-            onClick={() => setSettings((s) => ({ ...s, motion: !s.motion }))}
-          >
-            {settings.motion ? '◉' : '○'}
+          <button className={`icon-btn ${route === 'ajustes' ? 'on' : ''}`} title="Ajustes" aria-label="Ajustes" onClick={() => go('ajustes')}>
+            ⚙
           </button>
         </div>
       </header>

@@ -4,7 +4,9 @@ import { ASPECT_POINTS } from '../astro/chart'
 import { ELEMENT_INFO, POINTS, SIGNS, formatDegree, norm360, type PointKey } from '../astro/constants'
 import { HOUSE_SYSTEMS } from '../astro/houses'
 import { formatInZone, localToUtc, offsetLabel } from '../astro/time'
+import { AiReading } from '../components/AiReading'
 import { ChartWheel } from '../components/ChartWheel'
+import { chartSummary } from '../ai/prompts'
 import { ElementBars } from '../components/Charts'
 import { natalAspectText } from '../interpret/aspects'
 import { HOUSE_TEXT, PLANET_TEXT, planetInHouse } from '../interpret/planets'
@@ -13,7 +15,7 @@ import { SIGN_TEXT } from '../interpret/signs'
 import type { Settings } from '../lib/profiles'
 import type { Route } from '../App'
 
-type Tab = 'relatorio' | 'planetas' | 'casas' | 'aspectos' | 'elementos'
+type Tab = 'relatorio' | 'ia' | 'planetas' | 'casas' | 'aspectos' | 'elementos'
 
 interface Props {
   natal: Chart | null
@@ -75,6 +77,7 @@ export function NatalPage({ natal, settings, setSettings, go }: Props) {
       <nav className="tabs">
         {([
           ['relatorio', 'Relatório'],
+          ['ia', '✦ Leitura IA'],
           ['planetas', 'Planetas'],
           ['casas', 'Casas'],
           ['aspectos', 'Aspectos'],
@@ -99,6 +102,14 @@ export function NatalPage({ natal, settings, setSettings, go }: Props) {
               </article>
             ))}
           </div>
+        )}
+        {tab === 'ia' && (
+          <AiReading
+            kind="natal"
+            cacheKey={`${b.name}|${utc.toISOString()}|${b.latitude},${b.longitude}|${natal.houseSystem}`}
+            getSummary={() => chartSummary(natal)}
+            onOpenSettings={() => go('ajustes')}
+          />
         )}
         {tab === 'planetas' && <PlanetTable chart={natal} onPick={(k) => { setSelected(k); window.scrollTo({ top: 0, behavior: 'smooth' }) }} />}
         {tab === 'casas' && <HouseTable chart={natal} />}
