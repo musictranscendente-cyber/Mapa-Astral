@@ -1,0 +1,11 @@
+{
+  "name": "Mapa Astral",
+  "short_name": "Mapa Astral",
+  "description": "Mapa astral preciso, céu do dia e previsões personalizadas.",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#07061a",
+  "theme_color": "#07061a",
+  "lang": "pt-BR",
+  "icons": [{ "src": "favicon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }]
+}
