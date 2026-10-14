@@ -21,6 +21,8 @@ céu do dia e projeção de trânsitos pessoais para os dias e meses seguintes.
   Periodic Background Sync no app instalado; nos demais navegadores, ao abrir o app).
 - **Leitura por IA** — texto personalizado gerado pelo Claude (`claude-opus-5-5`, streaming) para mapa natal, sinastria,
   revolução solar e previsões, a partir das posições já calculadas.
+- **Conta e sincronização** — entrar com Google ou com código enviado por e-mail (sem senha); os mapas sobem para a nuvem
+  (Supabase) e aparecem em qualquer aparelho; exclusão de conta pelo próprio usuário. Configuração em `docs/configurar-login.md`.
 - **Perfis** — vários mapas salvos localmente no dispositivo; impressão/PDF do relatório; instalável (manifest PWA).
 
 ## Precisão
