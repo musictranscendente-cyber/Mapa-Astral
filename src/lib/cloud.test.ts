@@ -33,3 +33,14 @@ describe('sincronização de mapas', () => {
     expect(toUpload).toHaveLength(0)
   })
 })
+
+describe('endereço do Supabase', async () => {
+  const { normalizeSupabaseUrl } = await import('./supabase')
+  it('aceita a URL com caminho, barra ou espaços extras', () => {
+    expect(normalizeSupabaseUrl('https://abc.supabase.co/rest/v1/')).toBe('https://abc.supabase.co')
+    expect(normalizeSupabaseUrl(' https://abc.supabase.co/ ')).toBe('https://abc.supabase.co')
+    expect(normalizeSupabaseUrl('https://abc.supabase.co')).toBe('https://abc.supabase.co')
+    expect(normalizeSupabaseUrl('sb_publishable_xyz')).toBeUndefined()
+    expect(normalizeSupabaseUrl('')).toBeUndefined()
+  })
+})

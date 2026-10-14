@@ -1,7 +1,18 @@
 import { createClient, type SupabaseClient } from '@supabase/supabase-js'
 
-const URL = import.meta.env.VITE_SUPABASE_URL as string | undefined
-const ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY as string | undefined
+/** Accepts the project URL even if pasted with a trailing path such as `/rest/v1/`. */
+export function normalizeSupabaseUrl(raw: string | undefined): string | undefined {
+  const v = raw?.trim()
+  if (!v) return undefined
+  try {
+    return new globalThis.URL(v).origin
+  } catch {
+    return undefined
+  }
+}
+
+const URL = normalizeSupabaseUrl(import.meta.env.VITE_SUPABASE_URL as string | undefined)
+const ANON_KEY = (import.meta.env.VITE_SUPABASE_ANON_KEY as string | undefined)?.trim() || undefined
 
 /** Login and sync are enabled only when the Supabase project is configured at build time. */
 export const authConfigured = !!URL && !!ANON_KEY
