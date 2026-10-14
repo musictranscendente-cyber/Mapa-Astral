@@ -29,6 +29,9 @@ jobs:
         env:
           # Optional: URL of the AI reading endpoint (Settings → Variables → Actions).
           VITE_AI_ENDPOINT: ${{ vars.VITE_AI_ENDPOINT }}
+          # Login and cloud sync (see docs/configurar-login.md).
+          VITE_SUPABASE_URL: ${{ vars.VITE_SUPABASE_URL }}
+          VITE_SUPABASE_ANON_KEY: ${{ vars.VITE_SUPABASE_ANON_KEY }}
       - uses: actions/upload-pages-artifact@v3
         with:
           path: dist

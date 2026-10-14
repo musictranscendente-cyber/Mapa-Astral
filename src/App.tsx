@@ -11,9 +11,11 @@ import { ProfilesPage } from './pages/ProfilesPage'
 import { SynastryPage } from './pages/SynastryPage'
 import { SolarReturnPage } from './pages/SolarReturnPage'
 import { SettingsPage } from './pages/SettingsPage'
+import { AccountPage } from './pages/AccountPage'
+import { useAuth } from './lib/auth'
 import { armInAppTimer, registerServiceWorker, scheduleMessages } from './lib/notifications'
 
-export type Route = 'inicio' | 'mapa' | 'ceu' | 'previsoes' | 'sinastria' | 'revolucao' | 'perfis' | 'ajustes'
+export type Route = 'inicio' | 'mapa' | 'ceu' | 'previsoes' | 'sinastria' | 'revolucao' | 'perfis' | 'ajustes' | 'conta'
 
 const NAV: { key: Route; label: string; icon: string }[] = [
   { key: 'inicio', label: 'Início', icon: '✦' },
@@ -25,7 +27,7 @@ const NAV: { key: Route; label: string; icon: string }[] = [
   { key: 'perfis', label: 'Perfis', icon: '☷' },
 ]
 
-const ROUTES: Route[] = [...NAV.map((n) => n.key), 'ajustes']
+const ROUTES: Route[] = [...NAV.map((n) => n.key), 'ajustes', 'conta']
 
 const readRoute = (): Route => {
   const h = window.location.hash.replace(/^#\/?/, '') as Route
@@ -34,7 +36,8 @@ const readRoute = (): Route => {
 
 export default function App() {
   const [route, setRoute] = useState<Route>(readRoute)
-  const { profiles, active, setActiveId, save, remove } = useProfiles()
+  const auth = useAuth()
+  const { profiles, active, setActiveId, save, remove, clearLocal, sync } = useProfiles(auth.user?.id ?? null)
   const [settings, setSettings] = useSettings()
 
   useEffect(() => {
@@ -82,6 +85,8 @@ export default function App() {
         )
       case 'revolucao':
         return <SolarReturnPage key={active?.id} natal={natal} houseSystem={settings.houseSystem} go={go} />
+      case 'conta':
+        return <AccountPage user={auth.user} loading={auth.loading} sync={sync} profileCount={profiles.length} onClearLocal={clearLocal} />
       case 'ajustes':
         return <SettingsPage natal={natal} settings={settings} setSettings={setSettings} />
       case 'perfis':
@@ -120,6 +125,12 @@ export default function App() {
               {profiles.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}
             </select>
           )}
+          <button className={`icon-btn account-btn ${route === 'conta' ? 'on' : ''}`} title={auth.user ? 'Minha conta' : 'Entrar'} aria-label="Conta" onClick={() => go('conta')}>
+            {auth.user?.user_metadata?.avatar_url
+              ? <img src={auth.user.user_metadata.avatar_url as string} alt="" referrerPolicy="no-referrer" />
+              : auth.user ? (auth.user.email ?? '?').charAt(0).toUpperCase() : '☺'}
+            {auth.user && <i className={`sync-dot ${sync}`} />}
+          </button>
           <button className={`icon-btn ${route === 'ajustes' ? 'on' : ''}`} title="Ajustes" aria-label="Ajustes" onClick={() => go('ajustes')}>
             ⚙
           </button>
