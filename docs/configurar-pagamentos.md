@@ -1,7 +1,13 @@
 # Configurar os pagamentos (Mercado Pago)
 
-O sistema pago já está no código, mas fica **desligado** até você terminar estes passos.
-Enquanto estiver desligado, o app continua todo liberado, como antes.
+O sistema pago está **ligado** no site: os bloqueios e a página 💎 Planos já aparecem.
+Até você terminar estes passos, porém, as compras reais e as análises pelo servidor ainda não funcionam.
+
+**Simulador (só para o dono do app):** em **Ajustes → 🧪 Simulador de planos**, ligue a simulação para:
+- ver o app como *Sem login*, *Conta grátis*, *Estrela* ou *Cosmos*;
+- comprar avulsos e planos com um **saldo fictício** (começa em R$ 500).
+
+Nada é cobrado e a simulação vale só no aparelho. O simulador aparece apenas quando você entra com o e-mail do dono. Para liberar outro e-mail, peça a inclusão em `src/billing/sim.ts`.
 
 Como funciona:
 
@@ -72,13 +78,9 @@ Depois:
 2. Abra **Supabase Functions**, clique em **Run workflow** e confirme.
 3. Quando o círculo ficar verde ✅, as funções `analysis`, `checkout` e `mp-webhook` estão no ar. Você pode conferir no Supabase, em **Edge Functions**.
 
-## Passo 6 — Ligar o sistema pago no site
+## Passo 6 — Sistema pago no site
 
-1. No GitHub, vá em **Settings → Secrets and variables → Actions**, aba **Variables**, e clique em **New repository variable**.
-2. Crie a variável **`VITE_BILLING`** com o valor **`on`**.
-3. Vá em **Actions → Deploy → Run workflow** (ou faça qualquer atualização no `main`).
-
-Pronto: os bloqueios, a página **💎 Planos** e os botões de compra aparecem no app.
+O sistema pago já vem ligado. Com os passos 1 a 5 feitos, as compras pelo Mercado Pago passam a funcionar de verdade.
 
 ## Passo 7 — Testar uma compra real
 
@@ -95,4 +97,7 @@ Pronto: os bloqueios, a página **💎 Planos** e os botões de compra aparecem 
   1. No Mercado Pago, confira o webhook (URL e evento **Pagamentos**).
   2. No Supabase, veja os registros em **Edge Functions → mp-webhook → Logs**.
 - **Análise não gera**: confira o secret `ANTHROPIC_API_KEY` e se a conta da Anthropic tem créditos.
-- **Desligar tudo rapidamente**: apague a variável `VITE_BILLING` e rode o **Deploy** de novo.
+- **Desligar tudo rapidamente**:
+  1. No GitHub, vá em **Settings → Secrets and variables → Actions → Variables**.
+  2. Crie a variável `VITE_BILLING` com o valor `off`.
+  3. Rode o **Deploy** de novo. O app volta a ficar todo liberado.

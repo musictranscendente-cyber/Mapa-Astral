@@ -32,7 +32,7 @@ jobs:
           # Login and cloud sync (see docs/configurar-login.md).
           VITE_SUPABASE_URL: ${{ vars.VITE_SUPABASE_URL }}
           VITE_SUPABASE_ANON_KEY: ${{ vars.VITE_SUPABASE_ANON_KEY }}
-          # Paid plans: set to "on" after configuring payments (see docs/configurar-pagamentos.md).
+          # Paid plans are on by default; set the variable to "off" to open everything (docs/configurar-pagamentos.md).
           VITE_BILLING: ${{ vars.VITE_BILLING }}
       - uses: actions/upload-pages-artifact@v3
         with:

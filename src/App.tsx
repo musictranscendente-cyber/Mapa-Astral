@@ -16,6 +16,8 @@ import { PlansPage } from './pages/PlansPage'
 import { rememberReturn, takeReturn, useAuth, type AuthState } from './lib/auth'
 import { AccessProvider } from './billing/access'
 import { useAccess } from './billing/context'
+import { getSim } from './billing/sim'
+import { formatBRL } from './billing/rules'
 import type { BirthData } from './astro/chart'
 import { armInAppTimer, registerServiceWorker, scheduleMessages } from './lib/notifications'
 
@@ -42,7 +44,7 @@ const readRoute = (): Route => {
 export default function App() {
   const auth = useAuth()
   return (
-    <AccessProvider userId={auth.user?.id ?? null}>
+    <AccessProvider userId={auth.user?.id ?? null} email={auth.user?.email ?? null}>
       <Main auth={auth} />
     </AccessProvider>
   )
@@ -130,7 +132,7 @@ function Main({ auth }: { auth: AuthState }) {
       case 'planos':
         return <PlansPage natal={natal} go={go} />
       case 'ajustes':
-        return <SettingsPage natal={natal} settings={settings} setSettings={setSettings} />
+        return <SettingsPage natal={natal} settings={settings} setSettings={setSettings} go={go} />
       case 'perfis':
         return (
           <ProfilesPage
@@ -183,6 +185,11 @@ function Main({ auth }: { auth: AuthState }) {
           </button>
         </div>
       </header>
+      {access.simulated && (
+        <button className="sim-pill" onClick={() => go('ajustes')} title="Abrir o simulador em Ajustes">
+          🧪 Simulação · {access.loggedIn ? (access.plan === 'cosmos' ? 'Cosmos' : access.plan === 'estrela' ? 'Estrela' : 'Grátis') : 'Sem login'} · {formatBRL(getSim().balance)}
+        </button>
+      )}
       <main key={route} className="page">
         {notice && <p className="glass pad notice" onClick={() => setNotice('')}>{notice}</p>}
         {page}

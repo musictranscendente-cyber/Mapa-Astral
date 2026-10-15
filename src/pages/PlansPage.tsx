@@ -35,6 +35,7 @@ export function PlansPage({ natal, go }: Props) {
   const access = useAccess()
   const [busy, setBusy] = useState<string>('')
   const [error, setError] = useState('')
+  const [done, setDone] = useState('')
   const [status] = useState(returnStatus)
   const refresh = access.refresh
 
@@ -50,11 +51,19 @@ export function PlansPage({ natal, go }: Props) {
   }, [status, refresh])
 
   const buy = async (offer: Offer | ProductKey) => {
-    if (!access.loggedIn) { rememberReturn(); go('conta'); return }
+    if (!access.loggedIn) { rememberReturn(); go(access.simulated ? 'ajustes' : 'conta'); return }
     const k = typeof offer === 'string' ? offer : offer.product
     setBusy(k)
     setError('')
-    try { await access.buy(offer) } catch (e) { setError(e instanceof Error ? e.message : String(e)); setBusy('') }
+    setDone('')
+    try {
+      await access.buy(offer)
+      // Real purchases leave for Mercado Pago; simulated ones finish here.
+      if (access.simulated) { setDone(PRODUCTS[k].name); setBusy('') }
+    } catch (e) {
+      setError(e instanceof Error ? e.message : String(e))
+      setBusy('')
+    }
   }
 
   if (!access.enabled) {
@@ -88,6 +97,8 @@ export function PlansPage({ natal, go }: Props) {
         <p className="muted">O cálculo do mapa é sempre grátis. Os planos liberam as análises completas, as previsões longas e as comparações.</p>
       </header>
 
+      {access.simulated && <p className="glass pad notice sim">🧪 Simulação ligada: as compras usam o saldo fictício de Ajustes e nada é cobrado.</p>}
+      {done && <p className="glass pad notice good">✓ Compra simulada concluída: {done}. O acesso já está liberado.</p>}
       {status === 'approved' && <p className="glass pad notice good">✓ Pagamento aprovado! Seu acesso é liberado em instantes.</p>}
       {(status === 'pending' || status === 'in_process') && <p className="glass pad notice">⏳ Pagamento em processamento. Assim que for confirmado (no Pix, em segundos), o acesso é liberado automaticamente.</p>}
       {status === 'rejected' && <p className="glass pad notice bad">O pagamento não foi aprovado. Você pode tentar de novo com outra forma de pagamento.</p>}

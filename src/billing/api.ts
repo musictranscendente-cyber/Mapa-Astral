@@ -1,8 +1,8 @@
 import { authConfigured, supabase } from '../lib/supabase'
 import { EMPTY_ACCESS, buildAccess, type AccessData, type AnalysisLogRow, type EntitlementRow, type ProductKey, type PurchaseRow, type Scope } from './rules'
 
-/** Paid features are switched on at build time, once payments are configured (see docs/configurar-pagamentos.md). */
-export const BILLING = import.meta.env.VITE_BILLING === 'on' && authConfigured
+/** Paid features are on unless the build sets VITE_BILLING=off (see docs/configurar-pagamentos.md). */
+export const BILLING = import.meta.env.VITE_BILLING !== 'off' && authConfigured
 
 export async function fetchAccess(userId: string): Promise<AccessData> {
   if (!supabase) return EMPTY_ACCESS

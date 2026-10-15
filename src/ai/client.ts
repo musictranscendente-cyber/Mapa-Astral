@@ -9,13 +9,21 @@ interface Options {
   summary: string
   /** What is being analysed (see billing/rules); the server charges the right allowance. */
   accessKey: string
+  /** Owner simulator: don't charge the account; use the personal key or a sample text. */
+  simulated?: boolean
   onText: (delta: string) => void
   signal?: AbortSignal
 }
 
 /** Streams a reading. Uses the server endpoint when configured, else the user's own key. */
-export async function generateReading({ kind, summary, accessKey, onText, signal }: Options): Promise<string> {
+export async function generateReading({ kind, summary, accessKey, simulated, onText, signal }: Options): Promise<string> {
   const data = clampSummary(summary)
+  if (simulated) {
+    const key = getUserKey()
+    if (key) return viaBrowser(key, kind, data, onText, signal)
+    if (AI_ENDPOINT) return viaEndpoint(kind, data, onText, signal)
+    return sampleText(onText, signal)
+  }
   if (BILLING) return viaAccount(kind, data, accessKey, onText, signal)
   if (AI_ENDPOINT) return viaEndpoint(kind, data, onText, signal)
   const key = getUserKey()
@@ -92,4 +100,22 @@ async function viaBrowser(apiKey: string, kind: ReadingKind, summary: string, on
     if (e instanceof Anthropic.APIError) throw new AiError(`Erro no serviço de análise (${e.status ?? 'rede'}).`)
     throw e
   }
+}
+
+const SAMPLE = `## Simulação da análise completa
+
+Este é um **texto de exemplo** do simulador: a compra e o saldo de análises funcionaram como funcionariam para um cliente.
+
+Para ver a análise real durante a simulação, informe a chave de ativação em *Ajustes → Análise completa*.
+
+- O saldo de análises foi descontado da simulação.
+- Nenhum valor foi cobrado.`
+
+async function sampleText(onText: (d: string) => void, signal?: AbortSignal) {
+  for (const word of SAMPLE.split(/(?<= )/)) {
+    if (signal?.aborted) break
+    onText(word)
+    await new Promise((r) => setTimeout(r, 18))
+  }
+  return SAMPLE
 }

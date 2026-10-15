@@ -61,11 +61,13 @@ function AiReadingInner({ kind, getSummary, accessKey, offer, go, storageKey: ke
         kind,
         summary: getSummary(),
         accessKey,
+        simulated: access.simulated,
         signal: ctl.signal,
         onText: (d) => { acc += d; setText(acc) },
       })
       writeCache(key, full || acc)
       setStatus('done')
+      if (access.simulated && allowance.source) access.recordUse(kind, accessKey, allowance.source)
       access.refresh()
     } catch (e) {
       if (ctl.signal.aborted) return
