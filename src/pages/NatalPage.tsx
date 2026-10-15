@@ -13,6 +13,10 @@ import { HOUSE_TEXT, PLANET_TEXT, planetInHouse } from '../interpret/planets'
 import { buildNatalReport, planetInSign } from '../interpret/report'
 import { SIGN_TEXT } from '../interpret/signs'
 import type { Settings } from '../lib/profiles'
+import { useAccess } from '../billing/context'
+import { birthKey } from '../billing/keys'
+import { natalKey } from '../billing/rules'
+import { Locked } from '../components/Locked'
 import type { Route } from '../App'
 
 type Tab = 'relatorio' | 'ia' | 'planetas' | 'casas' | 'aspectos' | 'elementos'
@@ -28,6 +32,7 @@ export function NatalPage({ natal, settings, setSettings, go }: Props) {
   const [selected, setSelected] = useState<PointKey | null>(null)
   const [tab, setTab] = useState<Tab>('relatorio')
   const report = useMemo(() => (natal ? buildNatalReport(natal) : []), [natal])
+  const access = useAccess()
 
   if (!natal || !natal.birth) {
     return (
@@ -41,6 +46,9 @@ export function NatalPage({ natal, settings, setSettings, go }: Props) {
 
   const b = natal.birth
   const utc = localToUtc(b.local, b.timeZone)
+  const bk = birthKey(b)
+  const needsLogin = access.enabled && !access.loggedIn
+  const loginLock = (title: string) => <Locked title={title} text="Crie sua conta grátis: seus mapas ficam salvos e você libera o relatório completo." go={go} />
   const when = formatInZone(utc, b.timeZone, { dateStyle: 'long', ...(b.timeUnknown ? {} : { timeStyle: 'short' }) })
 
   return (
@@ -90,7 +98,7 @@ export function NatalPage({ natal, settings, setSettings, go }: Props) {
       <section className="tab-body" key={tab}>
         {tab === 'relatorio' && (
           <div className="report">
-            {report.map((s, i) => (
+            {(needsLogin ? report.slice(0, 3) : report).map((s, i) => (
               <article key={s.id} className="glass report-card" style={{ animationDelay: `${Math.min(i, 8) * 0.06}s`, ['--accent' as string]: s.color ?? '#ffe8a3' }}>
                 <div className="report-glyph">{s.glyph}</div>
                 <div>
@@ -101,20 +109,24 @@ export function NatalPage({ natal, settings, setSettings, go }: Props) {
                 </div>
               </article>
             ))}
+            {needsLogin && loginLock(`Mais ${report.length - 3} capítulos do seu relatório`)}
           </div>
         )}
         {tab === 'ia' && (
           <AiReading
             kind="natal"
             cacheKey={`${b.name}|${utc.toISOString()}|${b.latitude},${b.longitude}|${natal.houseSystem}`}
+            accessKey={natalKey(bk)}
+            offer={{ product: 'natal', scope: { birth: bk }, label: b.name }}
             getSummary={() => chartSummary(natal)}
-            onOpenSettings={() => go('ajustes')}
+            go={go}
           />
         )}
         {tab === 'planetas' && <PlanetTable chart={natal} onPick={(k) => { setSelected(k); window.scrollTo({ top: 0, behavior: 'smooth' }) }} />}
-        {tab === 'casas' && <HouseTable chart={natal} />}
-        {tab === 'aspectos' && <AspectGrid chart={natal} />}
-        {tab === 'elementos' && (
+        {needsLogin && (tab === 'casas' || tab === 'aspectos' || tab === 'elementos') && loginLock('Casas, aspectos e elementos do seu mapa')}
+        {!needsLogin && tab === 'casas' && <HouseTable chart={natal} />}
+        {!needsLogin && tab === 'aspectos' && <AspectGrid chart={natal} />}
+        {!needsLogin && tab === 'elementos' && (
           <div className="glass pad">
             <ElementBars balance={natal.balance} />
             {natal.hasHouses && <Hemispheres chart={natal} />}

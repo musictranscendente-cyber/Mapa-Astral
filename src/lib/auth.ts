@@ -36,8 +36,28 @@ export function useAuth(): AuthState {
   return { user: session?.user ?? null, loading }
 }
 
+const PENDING = 'mapa-astral:return-to'
+
+/** Remember the screen that asked for a login, to come back to it afterwards. */
+export function rememberReturn(hash = window.location.hash) {
+  try { sessionStorage.setItem(PENDING, hash) } catch { /* ignore */ }
+}
+
+/** The screen saved by rememberReturn (read once). */
+export function takeReturn(): string | null {
+  try {
+    const v = sessionStorage.getItem(PENDING)
+    sessionStorage.removeItem(PENDING)
+    return v
+  } catch {
+    return null
+  }
+}
+
 const rememberRoute = () => {
-  try { sessionStorage.setItem(RETURN_ROUTE, window.location.hash || '#/conta') } catch { /* ignore */ }
+  let target = window.location.hash || '#/conta'
+  try { target = sessionStorage.getItem(PENDING) || target } catch { /* ignore */ }
+  try { sessionStorage.setItem(RETURN_ROUTE, target) } catch { /* ignore */ }
 }
 
 export async function signInWithGoogle() {

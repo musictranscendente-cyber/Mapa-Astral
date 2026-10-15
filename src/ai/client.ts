@@ -1,21 +1,41 @@
 import Anthropic from '@anthropic-ai/sdk'
 import { SYSTEM_PROMPT, buildUserPrompt, clampSummary, type ReadingKind } from './prompts'
 import { AI_ENDPOINT, AI_MODEL, AiError, getUserKey } from './config'
+import { BILLING } from '../billing/api'
+import { supabase, supabaseAnonKey, supabaseUrl } from '../lib/supabase'
 
 interface Options {
   kind: ReadingKind
   summary: string
+  /** What is being analysed (see billing/rules); the server charges the right allowance. */
+  accessKey: string
   onText: (delta: string) => void
   signal?: AbortSignal
 }
 
 /** Streams a reading. Uses the server endpoint when configured, else the user's own key. */
-export async function generateReading({ kind, summary, onText, signal }: Options): Promise<string> {
+export async function generateReading({ kind, summary, accessKey, onText, signal }: Options): Promise<string> {
   const data = clampSummary(summary)
+  if (BILLING) return viaAccount(kind, data, accessKey, onText, signal)
   if (AI_ENDPOINT) return viaEndpoint(kind, data, onText, signal)
   const key = getUserKey()
   if (!key) throw new AiError('Ative a análise completa em Ajustes.')
   return viaBrowser(key, kind, data, onText, signal)
+}
+
+/** Signed-in mode: the account's plan or purchases pay for the analysis (Supabase Edge Function). */
+async function viaAccount(kind: ReadingKind, summary: string, accessKey: string, onText: (d: string) => void, signal?: AbortSignal) {
+  const { data } = (await supabase?.auth.getSession()) ?? { data: { session: null } }
+  const token = data.session?.access_token
+  if (!token) throw new AiError('Entre na sua conta para gerar a análise completa.')
+  const res = await fetch(`${supabaseUrl}/functions/v1/analysis`, {
+    method: 'POST',
+    headers: { 'content-type': 'application/json', authorization: `Bearer ${token}`, apikey: supabaseAnonKey! },
+    body: JSON.stringify({ kind, summary, key: accessKey }),
+    signal,
+  })
+  if (res.status === 402) throw new AiError('Seu saldo de análises acabou. Libere esta análise ou escolha um plano.')
+  return readStream(res, onText)
 }
 
 async function viaEndpoint(kind: ReadingKind, summary: string, onText: (d: string) => void, signal?: AbortSignal) {
@@ -25,6 +45,10 @@ async function viaEndpoint(kind: ReadingKind, summary: string, onText: (d: strin
     body: JSON.stringify({ kind, summary }),
     signal,
   })
+  return readStream(res, onText)
+}
+
+async function readStream(res: Response, onText: (d: string) => void) {
   if (!res.ok || !res.body) throw new AiError(`O serviço de análise respondeu com erro (${res.status}).`)
   const reader = res.body.getReader()
   const decoder = new TextDecoder()

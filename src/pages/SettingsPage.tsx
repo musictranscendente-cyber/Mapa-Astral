@@ -4,6 +4,7 @@ import { HOUSE_SYSTEMS } from '../astro/houses'
 import { AI_ENDPOINT, getUserKey, setUserKey } from '../ai/config'
 import { buildDailyMessages, enableNotifications, notificationsSupported, scheduleMessages, testNotification } from '../lib/notifications'
 import type { Settings } from '../lib/profiles'
+import { BILLING } from '../billing/api'
 
 interface Props {
   natal: Chart | null
@@ -92,7 +93,9 @@ export function SettingsPage({ natal, settings, setSettings }: Props) {
 
       <section className="glass pad settings-card">
         <h2>✦ Análise completa</h2>
-        {AI_ENDPOINT ? (
+        {BILLING ? (
+          <p>As análises completas fazem parte da sua conta. Veja seu saldo e as opções em <a href="#/planos">Planos</a>.</p>
+        ) : AI_ENDPOINT ? (
           <p>A análise completa está ativada. Gere análises nas páginas Mapa Natal, Sinastria, Revolução Solar e Previsões.</p>
         ) : (
           <>

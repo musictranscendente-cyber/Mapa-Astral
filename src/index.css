@@ -595,3 +595,46 @@ p { margin: 0 0 0.8em; }
   .wheel { max-width: 520px; }
   .report-card { break-inside: avoid; }
 }
+
+/* ── Acesso pago: bloqueios, planos e compras ── */
+.locked { text-align: center; display: flex; flex-direction: column; align-items: center; gap: 0.6rem; margin: 1.2rem 0; padding: 2rem 1.4rem; border-style: dashed; }
+.locked h3 { font-family: var(--display); font-weight: 500; margin: 0; text-wrap: balance; }
+.locked p { margin: 0; max-width: 52ch; }
+.locked-icon { font-size: 1.6rem; color: var(--gold); text-shadow: 0 0 18px rgba(255, 232, 163, 0.6); }
+.locked-actions { display: flex; flex-direction: column; align-items: center; gap: 0.6rem; margin-top: 0.4rem; }
+.notice { margin: 0 0 1rem; cursor: pointer; border-color: rgba(255, 232, 163, 0.35); }
+.notice.good { border-color: rgba(74, 222, 128, 0.5); color: #c6f6d5; }
+.notice.bad { border-color: rgba(255, 93, 115, 0.5); color: #ffc2cc; }
+.plans { display: flex; flex-direction: column; gap: 1.2rem; }
+.plan-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr)); gap: 1rem; }
+.plan-card { display: flex; flex-direction: column; gap: 0.7rem; position: relative; }
+.plan-card h2 { margin: 0; font-family: var(--display); font-weight: 500; }
+.plan-card > p { margin: 0; }
+.plan-card.featured { border-color: var(--violet); box-shadow: 0 0 0 1px var(--violet), 0 20px 60px -30px var(--violet); }
+.plan-price { font-family: var(--display); font-size: 2rem; color: var(--gold); font-variant-numeric: tabular-nums; }
+.plan-price small { font-family: var(--sans); font-size: 0.9rem; color: var(--muted); margin-left: 0.2rem; }
+.plan-features { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 0.45rem; color: var(--ink-2); font-size: 0.92rem; }
+.plan-buttons { margin-top: auto; display: flex; flex-direction: column; gap: 0.5rem; align-items: stretch; text-align: center; padding-top: 0.6rem; }
+.badge { display: inline-block; font-size: 0.68rem; letter-spacing: 0.12em; text-transform: uppercase; font-weight: 700; padding: 0.2rem 0.6rem; border-radius: 999px; border: 1px solid var(--violet); color: var(--violet); margin-left: 0.5rem; vertical-align: middle; }
+.single-list { display: flex; flex-direction: column; gap: 0.6rem; margin-top: 0.8rem; }
+.single { display: grid; grid-template-columns: auto 1fr auto; gap: 0.9rem; align-items: center; padding: 0.8rem 1rem; border: 1px solid var(--line); border-radius: 16px; background: var(--glass-2); }
+.single.featured { border-color: rgba(255, 232, 163, 0.5); }
+.single h3 { margin: 0; font-size: 1rem; }
+.single p { margin: 0.15rem 0 0; }
+.single > div { min-width: 0; }
+.single-icon { font-size: 1.4rem; color: var(--gold); width: 1.6rem; text-align: center; }
+.single .ghost { white-space: nowrap; font-variant-numeric: tabular-nums; }
+.current-plan h2 { margin: 0.2rem 0; }
+.purchase-list { list-style: none; padding: 0; margin: 0.6rem 0; display: flex; flex-direction: column; gap: 0.4rem; }
+.purchase-list li { display: flex; justify-content: space-between; gap: 0.8rem; flex-wrap: wrap; border-bottom: 1px solid var(--line); padding-bottom: 0.4rem; }
+.ghost.inline { display: inline-block; text-decoration: none; margin-top: 0.4rem; }
+.plans-btn { font-size: 1rem; }
+@media (max-width: 520px) {
+  .single { grid-template-columns: auto 1fr; }
+  .single .ghost { grid-column: 1 / -1; }
+}
+.plan-card > .badge { position: absolute; top: 1rem; right: 1rem; }
+@media (max-width: 440px) {
+  .brand-name { display: none; }
+  .profile-switch { max-width: 110px; }
+}

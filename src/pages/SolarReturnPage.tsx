@@ -12,6 +12,10 @@ import { SR_ASC, SR_MOON_HOUSE, SR_SUN_HOUSE } from '../interpret/solarReturn'
 import { PlacePicker, type Where } from '../components/PlacePicker'
 import { SR_GOALS, evaluateLocation, type SrEvaluation, type SrGoal } from '../astro/srCompare'
 import type { Route } from '../App'
+import { useAccess } from '../billing/context'
+import { birthKey } from '../billing/keys'
+import { solarKey } from '../billing/rules'
+import { Locked } from '../components/Locked'
 
 interface Props {
   natal: Chart | null
@@ -25,6 +29,7 @@ export function SolarReturnPage({ natal, houseSystem, go }: Props) {
     natal?.birth ? { latitude: natal.latitude, longitude: natal.longitude, label: natal.birth.place, mode: 'natal' } : null
   const [where, setWhere] = useState<Where | null>(natalWhere)
   const [tab, setTab] = useState<'ano' | 'comparar'>('ano')
+  const access = useAccess()
 
   const sr = useMemo(() => (natal && where ? solarReturnChart(natal, year, where, houseSystem) : null), [natal, where, year, houseSystem])
 
@@ -49,6 +54,11 @@ export function SolarReturnPage({ natal, houseSystem, go }: Props) {
       .map(([ang]) => ({ k, ang })))
   const when = sr.date.toLocaleString('pt-BR', { dateStyle: 'long', timeStyle: 'short' })
   const thisYear = currentReturnYear(natal)
+  const bk = birthKey(natal.birth)
+  const key = solarKey(bk, year)
+  const full = access.full(key)
+  const needsLogin = access.enabled && !access.loggedIn
+  const offer = { product: 'revolucao' as const, scope: { birth: bk, year }, label: `${natal.birth.name} · ${year}` }
 
   return (
     <div className="solar-return">
@@ -69,8 +79,21 @@ export function SolarReturnPage({ natal, houseSystem, go }: Props) {
         </div>
       </header>
 
-      {tab === 'comparar' ? (
-        <CompareCities natal={natal} year={year} houseSystem={houseSystem} />
+      {needsLogin ? (
+        <Locked
+          title={`O mapa do seu ano ${year}`}
+          text="Entre grátis para ver o Ascendente do ano e onde estão o Sol e a Lua: as áreas da vida em destaque até o próximo aniversário."
+          go={go}
+        />
+      ) : tab === 'comparar' ? (
+        full ? <CompareCities natal={natal} year={year} houseSystem={houseSystem} /> : (
+          <Locked
+            title="Onde passar o aniversário"
+            text="Compare cidades e descubra qual local favorece mais o seu ano, conforme o seu objetivo."
+            offer={offer}
+            go={go}
+          />
+        )
       ) : (
       <>
       <section className="glass pad sr-where">
@@ -121,7 +144,7 @@ export function SolarReturnPage({ natal, houseSystem, go }: Props) {
             <p>{SR_MOON_HOUSE[moonHouse - 1]}</p>
           </div>
         </article>
-        <article className="glass report-card" style={{ ['--accent' as string]: '#ffe8a3' }}>
+        {full && <article className="glass report-card" style={{ ['--accent' as string]: '#ffe8a3' }}>
           <div className="report-glyph">✶</div>
           <div>
             <h3>Planetas em destaque</h3>
@@ -130,10 +153,19 @@ export function SolarReturnPage({ natal, houseSystem, go }: Props) {
               ? <p>Nenhum planeta angular: a energia do ano se distribui de forma equilibrada entre as casas.</p>
               : angular.map(({ k, ang }, i) => <p key={i}><b style={{ color: POINTS[k].color }}>{POINTS[k].glyph} {POINTS[k].name}</b> junto ao {ang}: {ANGLE_TEXT[ang]}</p>)}
           </div>
-        </article>
+        </article>}
       </section>
 
-      <section className="sky-grid">
+      {!full && (
+        <Locked
+          title="Revolução Solar completa"
+          text="Planetas em destaque no ano, todas as posições e aspectos, o comparador de cidades para o aniversário e a análise completa."
+          offer={offer}
+          go={go}
+        />
+      )}
+
+      {full && <section className="sky-grid">
         <div className="glass pad">
           <h2>Posições do ano</h2>
           <ul className="planet-rows">
@@ -165,13 +197,15 @@ export function SolarReturnPage({ natal, houseSystem, go }: Props) {
             ))}
           </ul>
         </div>
-      </section>
+      </section>}
 
       <AiReading
         kind="revolucao"
         cacheKey={`${natal.birth.name}|${natal.date.toISOString()}|${year}|${where.latitude.toFixed(2)},${where.longitude.toFixed(2)}|${houseSystem}`}
+        accessKey={key}
+        offer={offer}
         getSummary={() => solarReturnSummary(natal, sr, year, where.label)}
-        onOpenSettings={() => go('ajustes')}
+        go={go}
       />
       </>
       )}

@@ -11,6 +11,10 @@ import { ChartWheel } from '../components/ChartWheel'
 import { overlayText, synAspectText, synSummary } from '../interpret/synastry'
 import type { Profile } from '../lib/profiles'
 import type { Route } from '../App'
+import { useAccess } from '../billing/context'
+import { birthKey } from '../billing/keys'
+import { pairKey } from '../billing/rules'
+import { Locked } from '../components/Locked'
 
 interface Props {
   profiles: Profile[]
@@ -26,6 +30,7 @@ export function SynastryPage({ profiles, activeId, houseSystem, onSave, go }: Pr
   const [aId, setAId] = useState<string | null>(activeId ?? profiles[0]?.id ?? null)
   const [bId, setBId] = useState<string | null>(() => profiles.find((p) => p.id !== (activeId ?? profiles[0]?.id))?.id ?? null)
   const [adding, setAdding] = useState(false)
+  const access = useAccess()
 
   const A = profiles.find((p) => p.id === aId) ?? null
   const B = profiles.find((p) => p.id === bId) ?? null
@@ -63,8 +68,14 @@ export function SynastryPage({ profiles, activeId, houseSystem, onSave, go }: Pr
           transitLon: data.cb.points[s.b].lon, transitRetro: false, house: 0, strength: s.weight,
         }))
     : []
-  const flow = data?.aspects.filter((s) => s.type.nature !== 'tenso').slice(0, 6) ?? []
-  const tense = data?.aspects.filter((s) => s.type.nature === 'tenso').slice(0, 6) ?? []
+  const bkA = A ? birthKey(A) : ''
+  const bkB = B ? birthKey(B) : ''
+  const key = pairKey(bkA, bkB)
+  const full = access.full(key)
+  const needsLogin = access.enabled && !access.loggedIn
+  const offer = A && B ? { product: 'sinastria' as const, scope: { birth: bkA, other: bkB }, label: `${nameA} e ${nameB}` } : undefined
+  const flow = data?.aspects.filter((s) => s.type.nature !== 'tenso').slice(0, full ? 6 : 2) ?? []
+  const tense = data?.aspects.filter((s) => s.type.nature === 'tenso').slice(0, full ? 6 : 1) ?? []
   const summary = data ? synSummary(data.score.total) : null
 
   return (
@@ -95,7 +106,7 @@ export function SynastryPage({ profiles, activeId, houseSystem, onSave, go }: Pr
       {(adding || (!B && profiles.length < 2)) && (
         <section className="edit-box">
           <p className="muted">Dados de nascimento da outra pessoa:</p>
-          <BirthForm submitLabel="Adicionar e comparar" onSubmit={(d) => { const id = onSave(d); setBId(id); setAdding(false) }} />
+          <BirthForm submitLabel="Adicionar e comparar" onSubmit={(d) => { const id = onSave(d); if (id) { setBId(id); setAdding(false) } }} />
         </section>
       )}
 
@@ -121,6 +132,15 @@ export function SynastryPage({ profiles, activeId, houseSystem, onSave, go }: Pr
             <p className="syn-summary">{summary.text}</p>
           </section>
 
+          {needsLogin && (
+            <Locked
+              title="Dimensões da relação e os principais contatos"
+              text="Entre grátis para ver a nota de cada área (amor, comunicação, convivência…) e os aspectos mais fortes entre vocês."
+              go={go}
+            />
+          )}
+
+          {!needsLogin && <>
           <section className="wheel-layout">
             <div className="wheel-box">
               <ChartWheel chart={data.ca} outer={data.cb} outerHits={hits} showAspects={false} />
@@ -176,7 +196,16 @@ export function SynastryPage({ profiles, activeId, houseSystem, onSave, go }: Pr
             </div>
           </section>
 
-          {(data.ca.hasHouses || data.cb.hasHouses) && (
+          {!full && (
+            <Locked
+              title="Sinastria completa"
+              text="Todos os contatos entre os mapas, a sobreposição de casas e a análise completa do casal."
+              offer={offer}
+              go={go}
+            />
+          )}
+
+          {full && (data.ca.hasHouses || data.cb.hasHouses) && (
             <section className="glass pad">
               <h2>Sobreposição de casas</h2>
               <p className="muted">Em que áreas da vida um ativa o outro.</p>
@@ -202,9 +231,12 @@ export function SynastryPage({ profiles, activeId, houseSystem, onSave, go }: Pr
           <AiReading
             kind="sinastria"
             cacheKey={`${A.id}|${B.id}|${houseSystem}`}
+            accessKey={key}
+            offer={offer}
             getSummary={() => synastrySummary(data.ca, data.cb, data.aspects, data.score.total)}
-            onOpenSettings={() => go('ajustes')}
+            go={go}
           />
+          </>}
         </>
       )}
     </div>

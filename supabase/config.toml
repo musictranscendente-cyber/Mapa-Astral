@@ -1,0 +1,13 @@
+# Configuração mínima para publicar as Edge Functions com a Supabase CLI.
+project_id = "mapa-astral"
+
+# As funções conferem o login por conta própria (compatível com as novas chaves do Supabase);
+# o webhook do Mercado Pago é chamado sem login.
+[functions.analysis]
+verify_jwt = false
+
+[functions.checkout]
+verify_jwt = false
+
+[functions.mp-webhook]
+verify_jwt = false

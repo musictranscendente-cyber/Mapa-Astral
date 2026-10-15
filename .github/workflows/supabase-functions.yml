@@ -1,0 +1,58 @@
+name: Supabase Functions
+
+# Publishes the Edge Functions (análises, pagamento e webhook do Mercado Pago)
+# and copies their secrets from GitHub to Supabase. See docs/configurar-pagamentos.md.
+on:
+  push:
+    branches: [main]
+    paths: ['supabase/functions/**', 'supabase/config.toml', '.github/workflows/supabase-functions.yml']
+  workflow_dispatch:
+
+concurrency:
+  group: supabase-functions
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    env:
+      SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check configuration
+        id: cfg
+        env:
+          URL: ${{ vars.VITE_SUPABASE_URL }}
+        run: |
+          if [ -z "$SUPABASE_ACCESS_TOKEN" ] || [ -z "$URL" ]; then
+            echo "::notice::Falta o secret SUPABASE_ACCESS_TOKEN ou a variável VITE_SUPABASE_URL — nada a publicar."
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          ref=$(echo "$URL" | sed -E 's#^https?://([a-z0-9]+)\.supabase\.co.*#\1#')
+          echo "ref=$ref" >> "$GITHUB_OUTPUT"
+      - uses: supabase/setup-cli@v1
+        if: steps.cfg.outputs.skip != 'true'
+        with:
+          version: latest
+      - name: Copy secrets to Supabase
+        if: steps.cfg.outputs.skip != 'true'
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          MP_ACCESS_TOKEN: ${{ secrets.MP_ACCESS_TOKEN }}
+          MP_WEBHOOK_SECRET: ${{ secrets.MP_WEBHOOK_SECRET }}
+          APP_URL: ${{ vars.APP_URL }}
+        run: |
+          args=()
+          for name in ANTHROPIC_API_KEY MP_ACCESS_TOKEN MP_WEBHOOK_SECRET APP_URL; do
+            if [ -n "${!name}" ]; then args+=("$name=${!name}"); fi
+          done
+          if [ ${#args[@]} -gt 0 ]; then
+            supabase secrets set --project-ref "${{ steps.cfg.outputs.ref }}" "${args[@]}"
+          fi
+      - name: Deploy functions
+        if: steps.cfg.outputs.skip != 'true'
+        run: |
+          for fn in analysis checkout mp-webhook; do
+            supabase functions deploy "$fn" --project-ref "${{ steps.cfg.outputs.ref }}" --no-verify-jwt --use-api
+          done

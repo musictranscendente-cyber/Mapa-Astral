@@ -12,10 +12,14 @@ import { SynastryPage } from './pages/SynastryPage'
 import { SolarReturnPage } from './pages/SolarReturnPage'
 import { SettingsPage } from './pages/SettingsPage'
 import { AccountPage } from './pages/AccountPage'
-import { useAuth } from './lib/auth'
+import { PlansPage } from './pages/PlansPage'
+import { rememberReturn, takeReturn, useAuth, type AuthState } from './lib/auth'
+import { AccessProvider } from './billing/access'
+import { useAccess } from './billing/context'
+import type { BirthData } from './astro/chart'
 import { armInAppTimer, registerServiceWorker, scheduleMessages } from './lib/notifications'
 
-export type Route = 'inicio' | 'mapa' | 'ceu' | 'previsoes' | 'sinastria' | 'revolucao' | 'perfis' | 'ajustes' | 'conta'
+export type Route = 'inicio' | 'mapa' | 'ceu' | 'previsoes' | 'sinastria' | 'revolucao' | 'perfis' | 'ajustes' | 'conta' | 'planos'
 
 const NAV: { key: Route; label: string; icon: string }[] = [
   { key: 'inicio', label: 'Início', icon: '✦' },
@@ -27,18 +31,37 @@ const NAV: { key: Route; label: string; icon: string }[] = [
   { key: 'perfis', label: 'Perfis', icon: '☷' },
 ]
 
-const ROUTES: Route[] = [...NAV.map((n) => n.key), 'ajustes', 'conta']
+const ROUTES: Route[] = [...NAV.map((n) => n.key), 'ajustes', 'conta', 'planos']
 
 const readRoute = (): Route => {
-  const h = window.location.hash.replace(/^#\/?/, '') as Route
+  // Payment providers append `?status=…` after the hash route.
+  const h = window.location.hash.replace(/^#\/?/, '').split('?')[0] as Route
   return ROUTES.includes(h) ? h : 'inicio'
 }
 
 export default function App() {
-  const [route, setRoute] = useState<Route>(readRoute)
   const auth = useAuth()
-  const { profiles, active, setActiveId, save, remove, clearLocal, sync } = useProfiles(auth.user?.id ?? null)
+  return (
+    <AccessProvider userId={auth.user?.id ?? null}>
+      <Main auth={auth} />
+    </AccessProvider>
+  )
+}
+
+function Main({ auth }: { auth: AuthState }) {
+  const [route, setRoute] = useState<Route>(readRoute)
+  const { profiles, active, setActiveId, save: saveProfile, remove, clearLocal, sync } = useProfiles(auth.user?.id ?? null)
   const [settings, setSettings] = useSettings()
+  const access = useAccess()
+  const [notice, setNotice] = useState('')
+
+  // Back from a login started on a locked screen: return to that screen.
+  const userId = auth.user?.id
+  useEffect(() => {
+    if (!userId) return
+    const back = takeReturn()
+    if (back && back !== window.location.hash) window.location.hash = back
+  }, [userId])
 
   useEffect(() => {
     const on = () => setRoute(readRoute())
@@ -49,6 +72,23 @@ export default function App() {
   const go = (r: Route) => {
     window.location.hash = '/' + r
     window.scrollTo({ top: 0, behavior: 'smooth' })
+  }
+
+  /** Saves a chart, respecting how many charts the person's access allows. Returns '' when blocked. */
+  const save = (data: BirthData, id?: string, activate = true): string => {
+    if (!id && profiles.length >= access.profileLimit) {
+      if (!access.loggedIn) {
+        setNotice(`Sem conta, dá para guardar até ${access.profileLimit} mapas. Entre grátis para salvar mais.`)
+        rememberReturn()
+        go('conta')
+      } else {
+        setNotice(`Seu acesso permite até ${access.profileLimit} mapas. Escolha um plano para salvar mais.`)
+        go('planos')
+      }
+      return ''
+    }
+    setNotice('')
+    return saveProfile(data, id, activate)
   }
 
   const natal: Chart | null = useMemo(() => {
@@ -87,6 +127,8 @@ export default function App() {
         return <SolarReturnPage key={active?.id} natal={natal} houseSystem={settings.houseSystem} go={go} />
       case 'conta':
         return <AccountPage user={auth.user} loading={auth.loading} sync={sync} profileCount={profiles.length} onClearLocal={clearLocal} />
+      case 'planos':
+        return <PlansPage natal={natal} go={go} />
       case 'ajustes':
         return <SettingsPage natal={natal} settings={settings} setSettings={setSettings} />
       case 'perfis':
@@ -125,6 +167,11 @@ export default function App() {
               {profiles.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}
             </select>
           )}
+          {access.enabled && (
+            <button className={`icon-btn plans-btn ${route === 'planos' ? 'on' : ''}`} title="Planos" aria-label="Planos" onClick={() => go('planos')}>
+              {access.plan ? '✦' : '💎'}
+            </button>
+          )}
           <button className={`icon-btn account-btn ${route === 'conta' ? 'on' : ''}`} title={auth.user ? 'Minha conta' : 'Entrar'} aria-label="Conta" onClick={() => go('conta')}>
             {auth.user?.user_metadata?.avatar_url
               ? <img src={auth.user.user_metadata.avatar_url as string} alt="" referrerPolicy="no-referrer" />
@@ -136,7 +183,10 @@ export default function App() {
           </button>
         </div>
       </header>
-      <main key={route} className="page">{page}</main>
+      <main key={route} className="page">
+        {notice && <p className="glass pad notice" onClick={() => setNotice('')}>{notice}</p>}
+        {page}
+      </main>
       <footer className="footer">
         <p>Efemérides calculadas com Astronomy Engine (precisão &lt; 1′) · Zodíaco tropical · Casas {HOUSE_SYSTEMS.find((h) => h.key === settings.houseSystem)?.name}</p>
         <p className="muted">Feito com ✦ para quem busca conexão com as estrelas</p>

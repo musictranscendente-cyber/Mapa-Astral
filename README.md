@@ -23,6 +23,9 @@ céu do dia e projeção de trânsitos pessoais para os dias e meses seguintes.
   revolução solar e previsões, a partir das posições já calculadas.
 - **Conta e sincronização** — entrar com Google ou com código enviado por e-mail (sem senha); os mapas sobem para a nuvem
   (Supabase) e aparecem em qualquer aparelho; exclusão de conta pelo próprio usuário. Configuração em `docs/configurar-login.md`.
+- **Planos e avulsos** — acesso aberto, grátis com login, compras avulsas e planos Estrela/Cosmos pagos por Pix ou
+  cartão (Mercado Pago), com saldo de análises controlado no servidor (Supabase Edge Functions). Desligado até
+  configurar: veja `docs/configurar-pagamentos.md`.
 - **Perfis** — vários mapas salvos localmente no dispositivo; impressão/PDF do relatório; instalável (manifest PWA).
 
 ## Precisão
@@ -40,7 +43,8 @@ o MC no meridiano, que as cúspides de Placidus trissecam os semi-arcos, o horá
 
 ## Leitura por IA — configuração
 
-Dois modos:
+Com o sistema pago ligado (`VITE_BILLING=on`), as análises passam pela função `supabase/functions/analysis`, que
+cobra do plano, da compra avulsa ou do presente de boas-vindas. Sem ele, há dois modos:
 
 1. **Chave pessoal (teste/uso próprio):** em *Ajustes → Leitura por IA*, informe uma chave da API da Anthropic. Ela fica
    apenas no aparelho e a chamada vai direto do navegador para a API.
