@@ -25,7 +25,13 @@ export function Locked({ title, text, offer, go }: Props) {
     if (!offer) return
     setBusy(true)
     setError('')
-    try { await access.buy(offer) } catch (e) { setError(e instanceof Error ? e.message : String(e)); setBusy(false) }
+    try {
+      await access.buy(offer)
+      if (access.simulated) setBusy(false)
+    } catch (e) {
+      setError(e instanceof Error ? e.message : String(e))
+      setBusy(false)
+    }
   }
 
   return (
@@ -35,7 +41,7 @@ export function Locked({ title, text, offer, go }: Props) {
       {text && <p className="muted">{text}</p>}
       {!access.loggedIn ? (
         <div className="locked-actions">
-          <button className="cta" onClick={() => { rememberReturn(); go('conta') }}><span>Entrar grátis para ver</span></button>
+          <button className="cta" onClick={() => { rememberReturn(); go(access.simulated ? 'ajustes' : 'conta') }}><span>Entrar grátis para ver</span></button>
           <p className="muted small">Com Google ou e-mail, sem senha.</p>
         </div>
       ) : (
@@ -46,7 +52,7 @@ export function Locked({ title, text, offer, go }: Props) {
             </button>
           )}
           <button className="ghost" onClick={() => go('planos')}>Ver planos · a partir de {formatBRL(PRODUCTS.estrela_mensal.price)}/mês</button>
-          {offer && <p className="muted small">Pagamento único por Pix ou cartão · {PRODUCTS[offer.product].name}{offer.label ? ` · ${offer.label}` : ''}</p>}
+          {offer && <p className="muted small">{access.simulated ? '🧪 Simulação · ' : ''}Pagamento único por Pix ou cartão · {PRODUCTS[offer.product].name}{offer.label ? ` · ${offer.label}` : ''}</p>}
         </div>
       )}
       {error && <p className="error">{error}</p>}

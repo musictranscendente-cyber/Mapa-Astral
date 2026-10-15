@@ -5,14 +5,19 @@ import { AI_ENDPOINT, getUserKey, setUserKey } from '../ai/config'
 import { buildDailyMessages, enableNotifications, notificationsSupported, scheduleMessages, testNotification } from '../lib/notifications'
 import type { Settings } from '../lib/profiles'
 import { BILLING } from '../billing/api'
+import { useAccess } from '../billing/context'
+import { SimulatorCard } from '../components/SimulatorCard'
+import type { Route } from '../App'
 
 interface Props {
   natal: Chart | null
   settings: Settings
   setSettings: (fn: (s: Settings) => Settings) => void
+  go: (r: Route) => void
 }
 
-export function SettingsPage({ natal, settings, setSettings }: Props) {
+export function SettingsPage({ natal, settings, setSettings, go }: Props) {
+  const access = useAccess()
   const [notifStatus, setNotifStatus] = useState(() =>
     notificationsSupported() ? Notification.permission : 'unsupported')
   const [key, setKey] = useState(getUserKey)
@@ -41,6 +46,8 @@ export function SettingsPage({ natal, settings, setSettings }: Props) {
         <p className="eyebrow">Preferências</p>
         <h1 className="title-glow">Ajustes</h1>
       </header>
+
+      {access.owner && <SimulatorCard go={go} />}
 
       <section className="glass pad settings-card">
         <h2>☽ Notificação diária</h2>
@@ -93,15 +100,17 @@ export function SettingsPage({ natal, settings, setSettings }: Props) {
 
       <section className="glass pad settings-card">
         <h2>✦ Análise completa</h2>
-        {BILLING ? (
+        {BILLING && !access.owner ? (
           <p>As análises completas fazem parte da sua conta. Veja seu saldo e as opções em <a href="#/planos">Planos</a>.</p>
         ) : AI_ENDPOINT ? (
           <p>A análise completa está ativada. Gere análises nas páginas Mapa Natal, Sinastria, Revolução Solar e Previsões.</p>
         ) : (
           <>
             <p className="muted">
-              Para ativar a análise completa neste aparelho, informe a chave de ativação do serviço.
-              Ela fica salva somente neste aparelho.
+              {access.owner
+                ? 'Só você vê este campo. Com a chave salva, as análises do simulador são geradas de verdade (custo na sua conta do serviço).'
+                : 'Para ativar a análise completa neste aparelho, informe a chave de ativação do serviço.'}
+              {' '}Ela fica salva somente neste aparelho.
             </p>
             <label className="field">
               <span>Chave de ativação</span>
