@@ -1,0 +1,274 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<title>Mapa Astral · Monetização</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700&family=Manrope:wght@400;500;700&display=swap">
+<style>
+/* Layout: céu noturno; uma escada de 4 níveis (do aberto ao Cosmos), depois os planos frente a frente e o roteiro. */
+:root {
+  --bg: #0b0a1a; --bg2: #13112a; --line: #2c2850; --fg: #ece8ff; --muted: #a49fc6;
+  --gold: #e6c27a; --violet: #9b8cff; --rose: #e66767; --green: #3fc79a; --blue: #6aa8f0;
+  --display: "Cinzel", "Trajan Pro", Georgia, serif;
+  --body: "Manrope", "Segoe UI", system-ui, sans-serif;
+  color-scheme: dark;
+}
+@media (prefers-color-scheme: light) { :root:not([data-theme="dark"]) {
+  --bg: #f6f4fd; --bg2: #ffffff; --line: #ddd8f1; --fg: #1d1838; --muted: #5e5880;
+  --gold: #9a6a12; --violet: #5a48d6; --rose: #c0393b; --green: #12805b; --blue: #2f6fc0; color-scheme: light } }
+:root[data-theme="light"] {
+  --bg: #f6f4fd; --bg2: #ffffff; --line: #ddd8f1; --fg: #1d1838; --muted: #5e5880;
+  --gold: #9a6a12; --violet: #5a48d6; --rose: #c0393b; --green: #12805b; --blue: #2f6fc0; color-scheme: light }
+
+* { box-sizing: border-box }
+html, body { margin: 0 }
+body { background: var(--bg); color: var(--fg); font: 15px/1.6 var(--body); }
+canvas#sky { position: fixed; inset: 0; width: 100%; height: 100%; z-index: 0; pointer-events: none; opacity: .8 }
+main { position: relative; z-index: 1; max-width: 1120px; margin: 0 auto;
+  padding-block: 48px 72px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
+  display: flex; flex-direction: column; gap: 64px }
+h1, h2, h3 { font-family: var(--display); font-weight: 500; text-wrap: balance; margin: 0; letter-spacing: .02em }
+h1 { font-size: clamp(2rem, 5vw, 3.2rem); line-height: 1.1 }
+h2 { font-size: clamp(1.4rem, 3vw, 1.9rem) }
+h3 { font-size: 1.15rem }
+p { margin: 0 }
+.eyebrow { font-size: .72rem; text-transform: uppercase; letter-spacing: .16em; color: var(--gold); font-weight: 700 }
+.lead { color: var(--muted); max-width: 62ch; font-size: 1.05rem }
+header { display: flex; flex-direction: column; gap: 16px }
+.rule { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; margin-top: 8px }
+.rule div { border-top: 1px solid var(--line); padding-top: 12px }
+.rule b { display: block; font-family: var(--display); color: var(--fg); font-weight: 500 }
+.rule span { color: var(--muted); font-size: .9rem }
+.thesis { font-family: var(--display); font-size: 1.2rem; color: var(--gold); border-left: 2px solid var(--gold); padding-left: 16px; max-width: 60ch }
+
+section { display: flex; flex-direction: column; gap: 20px }
+.ladder { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px }
+.tier { background: color-mix(in srgb, var(--bg2) 88%, transparent); border: 1px solid var(--line); border-radius: 14px; padding: 20px; display: flex; flex-direction: column; gap: 12px; min-width: 0 }
+.tier .glyph { font-family: var(--display); font-size: 1.6rem; line-height: 1 }
+.tier .who { color: var(--muted); font-size: .88rem }
+.tier ul { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 8px; font-size: .92rem }
+.tier li { padding-left: 18px; position: relative }
+.tier li::before { content: "✦"; position: absolute; left: 0; top: 0; font-size: .7rem; color: var(--c) }
+.tier .limit { margin-top: auto; font-size: .82rem; color: var(--muted); border-top: 1px dashed var(--line); padding-top: 10px }
+.t1 { --c: var(--blue) } .t2 { --c: var(--green) } .t3 { --c: var(--rose) } .t4 { --c: var(--gold) }
+.tier .glyph { color: var(--c) }
+
+.table-wrap { overflow-x: auto; border: 1px solid var(--line); border-radius: 14px; background: color-mix(in srgb, var(--bg2) 88%, transparent) }
+table { width: 100%; border-collapse: collapse; font-size: .92rem; min-width: 560px }
+th, td { text-align: left; padding: 12px 16px; border-bottom: 1px solid var(--line); vertical-align: top }
+tr:last-child td { border-bottom: 0 }
+th { font-family: var(--display); font-weight: 500; font-size: .95rem }
+td.price { font-variant-numeric: tabular-nums; white-space: nowrap; color: var(--gold); font-weight: 700 }
+tr.star td { background: color-mix(in srgb, var(--gold) 9%, transparent) }
+.note { color: var(--muted); font-size: .9rem; max-width: 70ch }
+
+.plans { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px }
+.plan { border: 1px solid var(--line); border-radius: 18px; padding: 24px; display: flex; flex-direction: column; gap: 14px; background: color-mix(in srgb, var(--bg2) 90%, transparent); min-width: 0 }
+.plan.cosmos { border-color: var(--violet); box-shadow: 0 0 0 1px var(--violet), 0 18px 60px -30px var(--violet) }
+.plan .price { font-family: var(--display); font-size: 2rem; font-variant-numeric: tabular-nums }
+.plan .price small { font-family: var(--body); font-size: .9rem; color: var(--muted) }
+.plan .yr { color: var(--muted); font-size: .88rem }
+.plan dl { margin: 0; display: grid; grid-template-columns: minmax(90px, auto) 1fr; gap: 8px 14px; font-size: .9rem }
+.plan dt { color: var(--muted) }
+.plan dd { margin: 0 }
+.badge { align-self: flex-start; font-size: .7rem; letter-spacing: .12em; text-transform: uppercase; font-weight: 700; padding: 4px 10px; border-radius: 99px; border: 1px solid currentColor; color: var(--violet) }
+
+.cols { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 32px }
+ol.road { margin: 0; padding: 0; list-style: none; counter-reset: s; display: flex; flex-direction: column; gap: 14px }
+ol.road li { counter-increment: s; display: grid; grid-template-columns: 36px 1fr; gap: 12px; align-items: start }
+ol.road li::before { content: counter(s); font-family: var(--display); width: 32px; height: 32px; border-radius: 50%; border: 1px solid var(--gold); color: var(--gold); display: grid; place-items: center }
+ul.care { margin: 0; padding-left: 18px; display: flex; flex-direction: column; gap: 10px }
+ul.care b, ol.road b { color: var(--fg) }
+.muted { color: var(--muted) }
+footer { color: var(--muted); font-size: .82rem; border-top: 1px solid var(--line); padding-top: 16px }
+@media (prefers-reduced-motion: reduce) { canvas#sky { display: none } }
+</style>
+</head>
+<body>
+
+<canvas id="sky" aria-hidden="true"></canvas>
+<main>
+  <header>
+    <p class="eyebrow">Mapa Astral · Plano de monetização</p>
+    <h1>Do primeiro olhar ao céu inteiro</h1>
+    <p class="lead">Como o app se sustenta sem perder a magia: quatro níveis de acesso, serviços avulsos para os momentos especiais e dois planos para quem vive a astrologia todo dia.</p>
+    <p class="thesis">O cálculo é sempre gratuito. Cobramos pela profundidade: análises completas, horizonte longo e comparações.</p>
+    <div class="rule">
+      <div><b>Aberto</b><span>Atrai: cria o encanto e se compartilha sozinho.</span></div>
+      <div><b>Grátis com login</b><span>Retém: salva os mapas e cria o hábito diário.</span></div>
+      <div><b>Avulsos</b><span>Monetiza momentos: aniversário, relação, decisão.</span></div>
+      <div><b>Planos</b><span>Receita recorrente: uso contínuo, previsões e análises.</span></div>
+    </div>
+  </header>
+
+  <section>
+    <p class="eyebrow">A escada de acesso</p>
+    <h2>O que cada pessoa encontra</h2>
+    <div class="ladder">
+      <article class="tier t1">
+        <span class="glyph">☾</span>
+        <h3>Aberto</h3>
+        <p class="who">Sem cadastro, para qualquer visitante</p>
+        <ul>
+          <li>Mapa natal: roda completa animada, posições e Sol, Lua e Ascendente com texto curto</li>
+          <li>Céu do dia: fase da Lua, Lua no signo, planetas e retrógrados</li>
+          <li>Previsão de hoje: nota do dia e os 2 trânsitos principais</li>
+          <li>Revolução Solar: data e hora exatas do próximo aniversário solar</li>
+          <li>Sinastria: prévia com a % de compatibilidade geral</li>
+        </ul>
+        <p class="limit">1 mapa, guardado só no aparelho</p>
+      </article>
+      <article class="tier t2">
+        <span class="glyph">✧</span>
+        <h3>Grátis com login</h3>
+        <p class="who">Conta com Google ou e-mail</p>
+        <ul>
+          <li>Até 3 perfis salvos na nuvem, em todos os aparelhos</li>
+          <li>Relatório natal completo: planetas, casas, aspectos, elementos</li>
+          <li>Previsão de 7 dias com nota diária e áreas da vida</li>
+          <li>Notificação diária personalizada</li>
+          <li>Sinastria básica: nota por área e 3 aspectos principais</li>
+          <li>Revolução Solar básica: Ascendente do ano, casas do Sol e da Lua</li>
+          <li>1 análise completa de boas-vindas</li>
+        </ul>
+        <p class="limit">Objetivo: hábito diário e confiança</p>
+      </article>
+      <article class="tier t3">
+        <span class="glyph">✦</span>
+        <h3>Avulsos</h3>
+        <p class="who">Pagamento único, fica para sempre</p>
+        <ul>
+          <li>Análises completas com PDF</li>
+          <li>Sinastria e Revolução Solar completas</li>
+          <li>Comparador de cidades para o aniversário</li>
+          <li>Previsão de 12 meses</li>
+          <li>Opção de presentear outra pessoa</li>
+        </ul>
+        <p class="limit">Pix e cartão · ver preços abaixo</p>
+      </article>
+      <article class="tier t4">
+        <span class="glyph">✺</span>
+        <h3>Planos</h3>
+        <p class="who">Estrela e Cosmos, mensal ou anual</p>
+        <ul>
+          <li>Previsão de 12 meses e calendário de trânsitos</li>
+          <li>Sinastria e Revolução Solar ilimitadas</li>
+          <li>Análises completas todo mês</li>
+          <li>Desconto ou presente nos avulsos</li>
+        </ul>
+        <p class="limit">Receita recorrente e previsível</p>
+      </article>
+    </div>
+  </section>
+
+  <section>
+    <p class="eyebrow">Serviços avulsos</p>
+    <h2>Para os momentos que importam</h2>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Produto</th><th>O que inclui</th><th>Preço sugerido</th></tr></thead>
+        <tbody>
+          <tr><td>Análise completa do Mapa Natal</td><td>Análise profunda e PDF ilustrado</td><td class="price">R$ 29</td></tr>
+          <tr><td>Sinastria completa</td><td>Todas as áreas, sobreposição de casas, análise completa e PDF</td><td class="price">R$ 29</td></tr>
+          <tr><td>Revolução Solar do ano</td><td>Mapa completo, análise completa e PDF</td><td class="price">R$ 39</td></tr>
+          <tr><td>Onde passar o aniversário</td><td>Comparador de até 5 cidades, recomendação e análise completa</td><td class="price">R$ 49</td></tr>
+          <tr><td>Previsão de 12 meses</td><td>Calendário de trânsitos, meses-chave e análise mês a mês</td><td class="price">R$ 59</td></tr>
+          <tr class="star"><td><b>Pacote Aniversário</b></td><td>Revolução Solar, comparador de cidades e previsão de 12 meses (economia de cerca de R$ 60)</td><td class="price">R$ 89</td></tr>
+          <tr><td>Presente</td><td>Qualquer avulso enviado para outra pessoa por e-mail</td><td class="price">mesmo preço</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="note">O Pacote Aniversário é o produto principal: tem uma data natural de compra todo ano. Um lembrete 30 dias antes do aniversário de cada pessoa transforma isso em venda recorrente sem assinatura.</p>
+  </section>
+
+  <section>
+    <p class="eyebrow">Assinaturas</p>
+    <h2>Dois planos, dois perfis de pessoa</h2>
+    <div class="plans">
+      <article class="plan">
+        <h3>✦ Estrela</h3>
+        <p class="muted">Para quem acompanha o dia a dia</p>
+        <p class="price">R$ 14,90 <small>/mês</small></p>
+        <p class="yr">ou R$ 119 por ano (cerca de 2 meses grátis)</p>
+        <dl>
+          <dt>Perfis</dt><dd>Até 10</dd>
+          <dt>Previsão</dt><dd>12 meses e calendário de trânsitos</dd>
+          <dt>Sinastria</dt><dd>Completa e ilimitada</dd>
+          <dt>Rev. Solar</dt><dd>Completa, qualquer ano, comparador de 2 cidades</dd>
+          <dt>Análises</dt><dd>3 análises completas por mês</dd>
+          <dt>Notificações</dt><dd>Personalizadas, com horário e temas</dd>
+          <dt>Avulsos</dt><dd>20% de desconto</dd>
+        </dl>
+      </article>
+      <article class="plan cosmos">
+        <span class="badge">Mais completo</span>
+        <h3>🌌 Cosmos</h3>
+        <p class="muted">Para apaixonados e profissionais da astrologia</p>
+        <p class="price">R$ 29,90 <small>/mês</small></p>
+        <p class="yr">ou R$ 249 por ano (cerca de 2 meses grátis)</p>
+        <dl>
+          <dt>Perfis</dt><dd>Ilimitados</dd>
+          <dt>Previsão</dt><dd>12 meses, também para família e amigos</dd>
+          <dt>Sinastria</dt><dd>Completa e ilimitada</dd>
+          <dt>Rev. Solar</dt><dd>Comparador de até 5 cidades</dd>
+          <dt>Análises</dt><dd>Ilimitadas (uso justo de cerca de 30 por mês) e “pergunte ao seu mapa”</dd>
+          <dt>Exportar</dt><dd>PDFs premium</dd>
+          <dt>Notificações</dt><dd>Alertas de grandes trânsitos com antecedência</dd>
+          <dt>Avulsos</dt><dd>Pacote Aniversário grátis 1 vez por ano e 30% de desconto</dd>
+        </dl>
+      </article>
+    </div>
+  </section>
+
+  <section class="cols">
+    <div style="display:flex;flex-direction:column;gap:16px;min-width:0">
+      <p class="eyebrow">Cuidados</p>
+      <h2>O que protege o negócio</h2>
+      <ul class="care">
+        <li><b>Custo das análises.</b> Cada análise completa custa de centavos a cerca de R$ 1 para gerar. Por isso ela é limitada no grátis e no Estrela, e o Cosmos tem limite de uso justo.</li>
+        <li><b>Pagamento.</b> Mercado Pago (Pix e cartão) para o Brasil; Stripe para vender no exterior. Pix converte muito melhor nos avulsos.</li>
+        <li><b>Controle de acesso.</b> Uma tabela de direitos no Supabase (plano ativo e avulsos comprados), preenchida automaticamente pelo pagamento.</li>
+        <li><b>Transição justa.</b> Nada que hoje é grátis some de uma vez; quem já usa ganha um período de adaptação.</li>
+      </ul>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:16px;min-width:0">
+      <p class="eyebrow">Roteiro</p>
+      <h2>Ordem de implantação</h2>
+      <ol class="road">
+        <li><span><b>Base.</b> Tabela de direitos, análises pelo servidor com cota e telas com prévias bloqueadas, ainda sem cobrar.</span></li>
+        <li><span><b>Primeiras vendas.</b> Avulsos com Pix, começando pelo Pacote Aniversário e pela Leitura Natal.</span></li>
+        <li><span><b>Recorrência.</b> Planos Estrela e Cosmos, mensal e anual.</span></li>
+        <li><span><b>Crescimento.</b> Presentes, cupons e indicação (indique e ganhe 1 análise).</span></li>
+      </ol>
+    </div>
+  </section>
+
+  <footer>Preços sugeridos para o mercado brasileiro, sujeitos a ajuste após os primeiros testes. App: musictranscendente-cyber.github.io/Mapa-Astral</footer>
+</main>
+
+<script>
+(() => {
+  const c = document.getElementById('sky'); const x = c.getContext('2d');
+  let stars = [], w, h, dpr;
+  const size = () => {
+    dpr = window.devicePixelRatio || 1; w = c.clientWidth; h = c.clientHeight;
+    c.width = w * dpr; c.height = h * dpr; x.setTransform(dpr, 0, 0, dpr, 0, 0);
+    stars = Array.from({ length: Math.round(w * h / 5000) }, () => ({ x: Math.random() * w, y: Math.random() * h, r: Math.random() * 1.2 + .2, p: Math.random() * 6.28 }));
+  };
+  const still = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const draw = (t) => {
+    x.clearRect(0, 0, w, h);
+    const col = getComputedStyle(document.documentElement).getPropertyValue('--muted');
+    x.fillStyle = col;
+    for (const s of stars) { x.globalAlpha = .35 + .35 * Math.sin(s.p + t / 1400); x.beginPath(); x.arc(s.x, s.y, s.r, 0, 6.28); x.fill() }
+    if (!still) requestAnimationFrame(draw);
+  };
+  size(); addEventListener('resize', size); requestAnimationFrame(draw);
+})();
+</script>
+</body>
+</html>

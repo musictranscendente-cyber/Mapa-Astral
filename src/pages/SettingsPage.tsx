@@ -91,28 +91,27 @@ export function SettingsPage({ natal, settings, setSettings }: Props) {
       </section>
 
       <section className="glass pad settings-card">
-        <h2>✦ Leitura por IA</h2>
+        <h2>✦ Análise completa</h2>
         {AI_ENDPOINT ? (
-          <p>A leitura por IA está ativada neste app. Gere leituras nas páginas Mapa Natal, Sinastria, Revolução Solar e Previsões.</p>
+          <p>A análise completa está ativada. Gere análises nas páginas Mapa Natal, Sinastria, Revolução Solar e Previsões.</p>
         ) : (
           <>
             <p className="muted">
-              Para gerar leituras personalizadas, informe uma chave da API da Anthropic (Claude). Ela fica salva somente neste aparelho
-              e é usada para chamar a API diretamente. O custo de cada leitura é cobrado na sua conta da Anthropic.
+              Para ativar a análise completa neste aparelho, informe a chave de ativação do serviço.
+              Ela fica salva somente neste aparelho.
             </p>
             <label className="field">
-              <span>Chave da API</span>
-              <input type="password" value={key} onChange={(e) => { setKey(e.target.value); setSaved(false) }} placeholder="sk-ant-…" autoComplete="off" />
+              <span>Chave de ativação</span>
+              <input type="password" value={key} onChange={(e) => { setKey(e.target.value); setSaved(false) }} placeholder="Cole aqui a chave" autoComplete="off" />
             </label>
             <div className="head-tools left">
               <button className="ghost" onClick={() => { setUserKey(key.trim()); setSaved(true) }}>Salvar chave</button>
               {getUserKey() && <button className="ghost danger" onClick={() => { setUserKey(''); setKey(''); setSaved(false) }}>Remover</button>}
               {saved && <span className="place-info">✓ Salva</span>}
             </div>
-            <p className="muted small">Crie a chave em console.anthropic.com → API Keys. Para publicar o app com IA para todos, use o endpoint de servidor (veja o README).</p>
           </>
         )}
-        <button className="link" onClick={clearAiCache}>Apagar leituras salvas neste aparelho</button>
+        <button className="link" onClick={clearAiCache}>Apagar análises salvas neste aparelho</button>
       </section>
 
       <section className="glass pad settings-card">

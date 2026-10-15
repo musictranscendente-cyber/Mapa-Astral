@@ -14,7 +14,7 @@ export async function generateReading({ kind, summary, onText, signal }: Options
   const data = clampSummary(summary)
   if (AI_ENDPOINT) return viaEndpoint(kind, data, onText, signal)
   const key = getUserKey()
-  if (!key) throw new AiError('Configure a leitura por IA em Ajustes.')
+  if (!key) throw new AiError('Ative a análise completa em Ajustes.')
   return viaBrowser(key, kind, data, onText, signal)
 }
 
@@ -25,7 +25,7 @@ async function viaEndpoint(kind: ReadingKind, summary: string, onText: (d: strin
     body: JSON.stringify({ kind, summary }),
     signal,
   })
-  if (!res.ok || !res.body) throw new AiError(`O serviço de IA respondeu com erro (${res.status}).`)
+  if (!res.ok || !res.body) throw new AiError(`O serviço de análise respondeu com erro (${res.status}).`)
   const reader = res.body.getReader()
   const decoder = new TextDecoder()
   let full = ''
@@ -58,14 +58,14 @@ async function viaBrowser(apiKey: string, kind: ReadingKind, summary: string, on
     )
     stream.on('text', (delta) => onText(delta))
     const message = await stream.finalMessage()
-    if (message.stop_reason === 'refusal') throw new AiError('A IA não pôde gerar esta leitura. Tente novamente.')
+    if (message.stop_reason === 'refusal') throw new AiError('Não foi possível gerar esta análise. Tente novamente.')
     return message.content.map((b) => (b.type === 'text' ? b.text : '')).join('')
   } catch (e) {
     if (e instanceof AiError) throw e
-    if (e instanceof Anthropic.AuthenticationError) throw new AiError('Chave de API inválida. Verifique em Ajustes.')
+    if (e instanceof Anthropic.AuthenticationError) throw new AiError('Chave de ativação inválida. Verifique em Ajustes.')
     if (e instanceof Anthropic.RateLimitError) throw new AiError('Limite de uso atingido. Aguarde alguns instantes.')
     if (e instanceof Anthropic.APIUserAbortError) throw e
-    if (e instanceof Anthropic.APIError) throw new AiError(`Erro da API (${e.status ?? 'rede'}): ${e.message}`)
+    if (e instanceof Anthropic.APIError) throw new AiError(`Erro no serviço de análise (${e.status ?? 'rede'}).`)
     throw e
   }
 }

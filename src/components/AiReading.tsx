@@ -57,7 +57,7 @@ function AiReadingInner({ kind, getSummary, onOpenSettings, storageKey: key }: P
       setStatus('done')
     } catch (e) {
       if (ctl.signal.aborted) return
-      setError(e instanceof AiError ? e.message : 'Não foi possível gerar a leitura agora.')
+      setError(e instanceof AiError ? e.message : 'Não foi possível gerar a análise agora.')
       setStatus('error')
     }
   }
@@ -67,16 +67,16 @@ function AiReadingInner({ kind, getSummary, onOpenSettings, storageKey: key }: P
   return (
     <section className="glass ai-reading">
       <div className="section-title">
-        <h2><span className="ai-spark">✦</span> {READING_TITLES[kind]} com IA</h2>
+        <h2><span className="ai-spark">✦</span> {READING_TITLES[kind]}</h2>
         {status === 'done' && <button className="ghost" onClick={run}>↻ Gerar nova versão</button>}
       </div>
       {status === 'idle' && (
         <div className="ai-intro">
-          <p>Uma leitura escrita sob medida, que integra todos os fatores calculados num texto único e profundo.</p>
+          <p>Uma análise escrita sob medida, que integra todos os fatores calculados num texto único e profundo.</p>
           {available ? (
-            <button className="cta" onClick={run}><span>✧ Gerar leitura personalizada ✧</span></button>
+            <button className="cta" onClick={run}><span>✧ Gerar análise completa ✧</span></button>
           ) : (
-            <button className="ghost" onClick={onOpenSettings}>⚙ Ativar a leitura por IA em Ajustes</button>
+            <button className="ghost" onClick={onOpenSettings}>⚙ Ativar a análise completa em Ajustes</button>
           )}
         </div>
       )}
@@ -89,7 +89,7 @@ function AiReadingInner({ kind, getSummary, onOpenSettings, storageKey: key }: P
           <button className="ghost" onClick={run}>Tentar novamente</button>
         </div>
       )}
-      <p className="muted small ai-note">Texto gerado por inteligência artificial a partir do seu mapa calculado — use como reflexão, não como verdade absoluta.</p>
+      <p className="muted small ai-note">Análise interpretativa feita a partir do seu mapa calculado — use como reflexão, não como verdade absoluta.</p>
     </section>
   )
 }
