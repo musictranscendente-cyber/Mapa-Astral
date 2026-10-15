@@ -77,7 +77,7 @@ export function NatalPage({ natal, settings, setSettings, go }: Props) {
       <nav className="tabs">
         {([
           ['relatorio', 'Relatório'],
-          ['ia', '✦ Leitura IA'],
+          ['ia', '✦ Análise completa'],
           ['planetas', 'Planetas'],
           ['casas', 'Casas'],
           ['aspectos', 'Aspectos'],

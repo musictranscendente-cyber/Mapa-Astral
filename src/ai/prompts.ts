@@ -6,10 +6,10 @@ import type { DayScore, TransitEvent } from '../astro/transits'
 export type ReadingKind = 'natal' | 'sinastria' | 'revolucao' | 'previsao'
 
 export const READING_TITLES: Record<ReadingKind, string> = {
-  natal: 'Leitura do Mapa Natal',
-  sinastria: 'Leitura de Sinastria',
-  revolucao: 'Leitura da Revolução Solar',
-  previsao: 'Leitura das Previsões',
+  natal: 'Análise Completa do Mapa Natal',
+  sinastria: 'Análise Completa da Sinastria',
+  revolucao: 'Análise Completa da Revolução Solar',
+  previsao: 'Análise Completa das Previsões',
 }
 
 /** Kept stable (no dates, no per-user data) so it can be prompt-cached. */
