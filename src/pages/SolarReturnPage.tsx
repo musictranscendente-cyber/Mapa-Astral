@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useMemo, useState } from 'react'
 import type { Chart } from '../astro/chart'
 import { POINTS, SIGNS, ELEMENT_INFO, angDiff, formatDegree, type PointKey } from '../astro/constants'
 import { houseOf, type HouseSystem } from '../astro/houses'
@@ -9,7 +9,8 @@ import { ChartWheel } from '../components/ChartWheel'
 import { ElementBars } from '../components/Charts'
 import { HOUSE_TEXT } from '../interpret/planets'
 import { SR_ASC, SR_MOON_HOUSE, SR_SUN_HOUSE } from '../interpret/solarReturn'
-import { placeLabel, searchPlaces, type Place } from '../lib/geo'
+import { PlacePicker, type Where } from '../components/PlacePicker'
+import { SR_GOALS, evaluateLocation, type SrEvaluation, type SrGoal } from '../astro/srCompare'
 import type { Route } from '../App'
 
 interface Props {
@@ -18,12 +19,12 @@ interface Props {
   go: (r: Route) => void
 }
 
-interface Where { latitude: number; longitude: number; label: string }
-
 export function SolarReturnPage({ natal, houseSystem, go }: Props) {
   const [year, setYear] = useState(() => (natal ? currentReturnYear(natal) : new Date().getFullYear()))
-  const [where, setWhere] = useState<Where | null>(() =>
-    natal?.birth ? { latitude: natal.latitude, longitude: natal.longitude, label: natal.birth.place } : null)
+  const natalWhere = (): Where | null =>
+    natal?.birth ? { latitude: natal.latitude, longitude: natal.longitude, label: natal.birth.place, mode: 'natal' } : null
+  const [where, setWhere] = useState<Where | null>(natalWhere)
+  const [tab, setTab] = useState<'ano' | 'comparar'>('ano')
 
   const sr = useMemo(() => (natal && where ? solarReturnChart(natal, year, where, houseSystem) : null), [natal, where, year, houseSystem])
 
@@ -62,8 +63,25 @@ export function SolarReturnPage({ natal, houseSystem, go }: Props) {
           {year !== thisYear && <button className="ghost" onClick={() => setYear(thisYear)}>Ano atual</button>}
           <button className="ghost" onClick={() => setYear((y) => y + 1)}>{year + 1} ›</button>
         </div>
-        <LocationPicker where={where} natal={natal} onChange={setWhere} />
+        <div className="segmented">
+          <button className={tab === 'ano' ? 'active' : ''} onClick={() => setTab('ano')}>☼ Meu ano</button>
+          <button className={tab === 'comparar' ? 'active' : ''} onClick={() => setTab('comparar')}>⚖ Comparar cidades</button>
+        </div>
       </header>
+
+      {tab === 'comparar' ? (
+        <CompareCities natal={natal} year={year} houseSystem={houseSystem} />
+      ) : (
+      <>
+      <section className="glass pad sr-where">
+        <PlacePicker
+          title="Onde você vai passar o aniversário?"
+          value={where}
+          natal={{ latitude: natal.latitude, longitude: natal.longitude, place: natal.birth.place }}
+          onChange={setWhere}
+        />
+        <p className="muted small">As posições dos planetas são as mesmas em qualquer lugar; o que muda são as casas — ou seja, em que áreas da vida o ano acontece.</p>
+      </section>
 
       <section className="wheel-layout">
         <div className="wheel-box">
@@ -155,6 +173,8 @@ export function SolarReturnPage({ natal, houseSystem, go }: Props) {
         getSummary={() => solarReturnSummary(natal, sr, year, where.label)}
         onOpenSettings={() => go('ajustes')}
       />
+      </>
+      )}
     </div>
   )
 }
@@ -166,45 +186,122 @@ const ANGLE_TEXT: Record<string, string> = {
   IC: 'atua no lar, na família e nas bases emocionais.',
 }
 
-/** The return is cast for where you will be on your birthday. */
-function LocationPicker({ where, natal, onChange }: { where: Where; natal: Chart; onChange: (w: Where) => void }) {
-  const [q, setQ] = useState('')
-  const [results, setResults] = useState<Place[]>([])
-  const abort = useRef<AbortController | null>(null)
-
-  useEffect(() => {
-    if (q.trim().length < 2) return
-    const id = setTimeout(async () => {
-      abort.current?.abort()
-      const ctl = new AbortController()
-      abort.current = ctl
-      try { setResults(await searchPlaces(q, ctl.signal)) } catch { /* aborted */ }
-    }, 300)
-    return () => clearTimeout(id)
-  }, [q])
-
+function CompareCities({ natal, year, houseSystem }: { natal: Chart; year: number; houseSystem: HouseSystem }) {
   const birth = natal.birth!
+  const natalPlace = { latitude: natal.latitude, longitude: natal.longitude, place: birth.place }
+  const [a, setA] = useState<Where>({ latitude: natal.latitude, longitude: natal.longitude, label: birth.place, mode: 'natal' })
+  const [b, setB] = useState<Where | null>(null)
+  const [goal, setGoal] = useState<SrGoal>('geral')
+
+  const srA = useMemo(() => solarReturnChart(natal, year, a, houseSystem), [natal, year, a, houseSystem])
+  const srB = useMemo(() => (b ? solarReturnChart(natal, year, b, houseSystem) : null), [natal, year, b, houseSystem])
+  const evA = useMemo(() => evaluateLocation(srA, goal), [srA, goal])
+  const evB = useMemo(() => (srB ? evaluateLocation(srB, goal) : null), [srB, goal])
+
+  const winner = evB ? (evA.score === evB.score ? null : evA.score > evB.score ? 'a' : 'b') : null
+  const placeholderB: Where = { latitude: 0, longitude: 0, label: 'escolha um local', mode: 'cidade' }
+
   return (
-    <div className="sr-location">
-      <p className="muted small">Calcule para o lugar onde você estará no aniversário — isso muda as casas do ano.</p>
-      <div className="head-tools">
-        <button className={`ghost ${where.label === birth.place ? 'on' : ''}`} onClick={() => onChange({ latitude: natal.latitude, longitude: natal.longitude, label: birth.place })}>⌂ Cidade natal</button>
-        <button className="ghost" onClick={() => navigator.geolocation?.getCurrentPosition((p) => onChange({ latitude: p.coords.latitude, longitude: p.coords.longitude, label: 'Minha localização' }))}>⌖ Onde estou</button>
-        <div className="field city small-city">
-          <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Outra cidade…" />
-          {q.trim().length >= 2 && results.length > 0 && (
-            <ul className="dropdown glass">
-              {results.map((r, i) => (
-                <li key={i}>
-                  <button type="button" onClick={() => { onChange({ latitude: r.latitude, longitude: r.longitude, label: placeLabel(r) }); setQ(''); setResults([]) }}>
-                    <strong>{r.name}</strong><small>{[r.region, r.country].filter(Boolean).join(', ')}</small>
-                  </button>
-                </li>
-              ))}
-            </ul>
-          )}
+    <div className="sr-compare">
+      <section className="glass pad">
+        <p className="eyebrow">Qual é o seu objetivo para este ano?</p>
+        <div className="segmented small left">
+          {SR_GOALS.map((g) => (
+            <button key={g.key} className={goal === g.key ? 'active' : ''} onClick={() => setGoal(g.key)}>{g.icon} {g.name}</button>
+          ))}
         </div>
-      </div>
+      </section>
+
+      <section className="cmp-pickers">
+        <div className="glass pad"><PlacePicker title="Local A" value={a} natal={natalPlace} onChange={setA} /></div>
+        <div className="glass pad"><PlacePicker title="Local B" value={b ?? placeholderB} natal={natalPlace} onChange={setB} /></div>
+      </section>
+
+      {!srB || !evB ? (
+        <p className="glass pad center">Escolha o <b>Local B</b> para ver o comparativo.</p>
+      ) : (
+        <>
+          <section className={`glass pad cmp-verdict ${winner ?? 'tie'}`}>
+            <p className="eyebrow">Resultado para: {SR_GOALS.find((g) => g.key === goal)!.name}</p>
+            {winner ? (
+              <h2>🏆 Melhor local: {winner === 'a' ? a.label : b!.label}</h2>
+            ) : (
+              <h2>Empate — os dois locais têm força parecida</h2>
+            )}
+            <p className="muted">
+              {winner
+                ? `Diferença de ${Math.abs(evA.score - evB.score)} pontos. ${Math.abs(evA.score - evB.score) < 8 ? 'É uma vantagem pequena: considere também conforto, pessoas queridas e praticidade.' : 'Uma vantagem clara segundo os critérios clássicos da Revolução Solar.'}`
+                : 'Escolha pelo que for mais confortável para você — ou teste um terceiro local.'}
+            </p>
+          </section>
+
+          <section className="cmp-grid">
+            <CompareColumn tag="A" where={a} sr={srA} ev={evA} win={winner === 'a'} />
+            <CompareColumn tag="B" where={b!} sr={srB} ev={evB} win={winner === 'b'} />
+          </section>
+
+          <section className="glass pad">
+            <h2>Lado a lado</h2>
+            <div className="table-wrap">
+              <table className="astro-table cmp-table">
+                <thead><tr><th></th><th>A · {shortLabel(a.label)}</th><th>B · {shortLabel(b!.label)}</th></tr></thead>
+                <tbody>
+                  <tr><td>Ascendente do ano</td><td>{SIGNS[srA.points.asc.sign].glyph} {SIGNS[srA.points.asc.sign].name}</td><td>{SIGNS[srB.points.asc.sign].glyph} {SIGNS[srB.points.asc.sign].name}</td></tr>
+                  <tr><td>Meio do Céu</td><td>{SIGNS[srA.points.mc.sign].name}</td><td>{SIGNS[srB.points.mc.sign].name}</td></tr>
+                  {(['sun', 'moon', 'jupiter', 'venus', 'saturn', 'mars'] as PointKey[]).map((k) => (
+                    <tr key={k}>
+                      <td><span style={{ color: POINTS[k].color }}>{POINTS[k].glyph}</span> {POINTS[k].name}</td>
+                      <td>casa {srA.points[k].house} · {HOUSE_TEXT[srA.points[k].house - 1].theme.toLowerCase()}</td>
+                      <td>casa {srB.points[k].house} · {HOUSE_TEXT[srB.points[k].house - 1].theme.toLowerCase()}</td>
+                    </tr>
+                  ))}
+                  <tr className="cmp-score-row"><td>Pontuação</td><td>{evA.score}/100</td><td>{evB.score}/100</td></tr>
+                </tbody>
+              </table>
+            </div>
+            <p className="muted small">
+              Critérios clássicos de "relocação" da Revolução Solar: Júpiter e Vênus em casas fortes (1, 10, 7, 4) favorecem; Saturno e Marte nessas casas,
+              e o Sol na casa 12, pedem mais esforço. A pontuação é um guia de comparação, não uma regra absoluta.
+            </p>
+          </section>
+        </>
+      )}
     </div>
+  )
+}
+
+const shortLabel = (s: string) => s.split(',')[0]
+
+function CompareColumn({ tag, where, sr, ev, win }: { tag: string; where: Where; sr: Chart; ev: SrEvaluation; win: boolean }) {
+  const asc = SIGNS[sr.points.asc.sign]
+  return (
+    <article className={`glass pad cmp-col ${win ? 'win' : ''}`}>
+      <div className="cmp-head">
+        <span className="cmp-tag">{tag}</span>
+        <div>
+          <h3>{shortLabel(where.label)}</h3>
+          <p className="muted small">{where.label}</p>
+        </div>
+        {win && <span className="cmp-badge">🏆 Melhor</span>}
+      </div>
+      <div className="cmp-score">
+        <div className="meter-track"><span className="meter-fill" style={{ width: `${ev.score}%`, background: win ? 'linear-gradient(90deg,#ffe8a3,#4ade80)' : 'linear-gradient(90deg,#c4b5fd,#a78bfa)' }} /></div>
+        <b>{ev.score}</b>
+      </div>
+      <div className="cmp-wheel"><ChartWheel chart={sr} spin={false} showAspects={false} /></div>
+      <p><b style={{ color: ELEMENT_INFO[asc.element].color }}>{asc.glyph} Ascendente em {asc.name}</b> — {SR_ASC[sr.points.asc.sign].split(':')[1]?.trim()}</p>
+      {ev.pros.length > 0 && (
+        <>
+          <p className="eyebrow good">A favor</p>
+          <ul className="cmp-list good">{ev.pros.slice(0, 5).map((f, i) => <li key={i}>✓ {f.text}</li>)}</ul>
+        </>
+      )}
+      {ev.cons.length > 0 && (
+        <>
+          <p className="eyebrow bad">Pontos de atenção</p>
+          <ul className="cmp-list bad">{ev.cons.slice(0, 5).map((f, i) => <li key={i}>! {f.text}</li>)}</ul>
+        </>
+      )}
+    </article>
   )
 }
