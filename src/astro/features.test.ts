@@ -92,3 +92,23 @@ describe('notificações e IA', () => {
     expect(buildUserPrompt('natal', s)).toContain('<dados>')
   })
 })
+
+describe('comparar cidades na revolução solar', async () => {
+  const { evaluateLocation } = await import('./srCompare')
+  const natal = chartFromBirth(ana)
+  it('avalia locais diferentes com pontuação válida e justificativas', () => {
+    const sp = solarReturnChart(natal, 2026, { latitude: -23.55, longitude: -46.63 })
+    const tokyo = solarReturnChart(natal, 2026, { latitude: 35.68, longitude: 139.69 })
+    for (const goal of ['geral', 'carreira', 'amor', 'saude', 'espiritual'] as const) {
+      const a = evaluateLocation(sp, goal)
+      const b = evaluateLocation(tokyo, goal)
+      for (const e of [a, b]) {
+        expect(e.score).toBeGreaterThanOrEqual(0)
+        expect(e.score).toBeLessThanOrEqual(100)
+        expect(e.pros.length + e.cons.length).toBeGreaterThan(0)
+      }
+    }
+    // Different places put the planets in different houses.
+    expect(sp.points.jupiter.house).not.toBe(tokyo.points.jupiter.house)
+  })
+})
