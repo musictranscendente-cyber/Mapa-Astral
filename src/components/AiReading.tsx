@@ -1,6 +1,10 @@
 import { useEffect, useRef, useState, type ReactNode } from 'react'
 import { AiError, aiAvailable } from '../ai/config'
 import { READING_TITLES, type ReadingKind } from '../ai/prompts'
+import { useAccess, type Offer } from '../billing/context'
+import type { Allowance } from '../billing/rules'
+import { Locked } from './Locked'
+import type { Route } from '../App'
 
 interface Props {
   kind: ReadingKind
@@ -8,7 +12,11 @@ interface Props {
   getSummary: () => string
   /** Stable id of what is being read (profile + options) — used to cache the result. */
   cacheKey: string
-  onOpenSettings?: () => void
+  /** What is being analysed, for plan/purchase accounting (billing/rules keys). */
+  accessKey: string
+  /** Single purchase that unlocks this analysis. */
+  offer?: Offer
+  go: (r: Route) => void
 }
 
 const CACHE_PREFIX = 'mapa-astral:ai:'
@@ -28,7 +36,9 @@ export function AiReading(props: Props) {
   return <AiReadingInner key={key} storageKey={key} {...props} />
 }
 
-function AiReadingInner({ kind, getSummary, onOpenSettings, storageKey: key }: Props & { storageKey: string }) {
+function AiReadingInner({ kind, getSummary, accessKey, offer, go, storageKey: key }: Props & { storageKey: string }) {
+  const access = useAccess()
+  const allowance = access.allowance(accessKey)
   const [text, setText] = useState<string>(() => readCache(key) ?? '')
   const [status, setStatus] = useState<'idle' | 'loading' | 'done' | 'error'>(() => (readCache(key) ? 'done' : 'idle'))
   const [error, setError] = useState('')
@@ -50,34 +60,49 @@ function AiReadingInner({ kind, getSummary, onOpenSettings, storageKey: key }: P
       const full = await generateReading({
         kind,
         summary: getSummary(),
+        accessKey,
         signal: ctl.signal,
         onText: (d) => { acc += d; setText(acc) },
       })
       writeCache(key, full || acc)
       setStatus('done')
+      access.refresh()
     } catch (e) {
       if (ctl.signal.aborted) return
+      access.refresh()
       setError(e instanceof AiError ? e.message : 'Não foi possível gerar a análise agora.')
       setStatus('error')
     }
   }
 
-  const available = aiAvailable()
+  const available = access.enabled || aiAvailable()
+  const canRun = !access.enabled || (allowance.ok && !access.loading)
 
   return (
     <section className="glass ai-reading">
       <div className="section-title">
         <h2><span className="ai-spark">✦</span> {READING_TITLES[kind]}</h2>
-        {status === 'done' && <button className="ghost" onClick={run}>↻ Gerar nova versão</button>}
+        {status === 'done' && canRun && <button className="ghost" onClick={run}>↻ Gerar nova versão</button>}
       </div>
-      {status === 'idle' && (
+      {status === 'idle' && access.enabled && !canRun && (
+        <Locked
+          title={access.loggedIn ? 'Libere esta análise completa' : 'Entre para receber sua análise completa'}
+          text={access.loggedIn
+            ? 'Você já usou as análises disponíveis na sua conta. Libere esta análise ou escolha um plano com análises todo mês.'
+            : 'Ao criar sua conta grátis, sua primeira análise completa é por nossa conta.'}
+          offer={offer}
+          go={go}
+        />
+      )}
+      {status === 'idle' && canRun && (
         <div className="ai-intro">
           <p>Uma análise escrita sob medida, que integra todos os fatores calculados num texto único e profundo.</p>
           {available ? (
             <button className="cta" onClick={run}><span>✧ Gerar análise completa ✧</span></button>
           ) : (
-            <button className="ghost" onClick={onOpenSettings}>⚙ Ativar a análise completa em Ajustes</button>
+            <button className="ghost" onClick={() => go('ajustes')}>⚙ Ativar a análise completa em Ajustes</button>
           )}
+          {access.enabled && !access.loading && <p className="muted small">{allowanceNote(allowance)}</p>}
         </div>
       )}
       {status === 'loading' && !text && <div className="loader"><span /> Consultando as estrelas…</div>}
@@ -92,6 +117,13 @@ function AiReadingInner({ kind, getSummary, onOpenSettings, storageKey: key }: P
       <p className="muted small ai-note">Análise interpretativa feita a partir do seu mapa calculado — use como reflexão, não como verdade absoluta.</p>
     </section>
   )
+}
+
+function allowanceNote(a: Allowance): string {
+  if (a.source === 'grant') return `Incluída na sua compra${a.left ? ` · depois desta, você ainda pode gerar ${a.left} ${a.left === 1 ? 'nova versão' : 'novas versões'}` : ''}.`
+  if (a.source === 'plan') return `Do seu plano · depois desta, ${a.left === 1 ? 'resta 1 análise' : `restam ${a.left} análises`} neste mês.`
+  if (a.source === 'welcome') return 'Presente de boas-vindas: sua primeira análise completa é grátis.'
+  return ''
 }
 
 /** Minimal, safe Markdown: headings, bold/italic, lists, paragraphs (no HTML injection). */

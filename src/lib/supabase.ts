@@ -17,6 +17,10 @@ const ANON_KEY = (import.meta.env.VITE_SUPABASE_ANON_KEY as string | undefined)?
 /** Login and sync are enabled only when the Supabase project is configured at build time. */
 export const authConfigured = !!URL && !!ANON_KEY
 
+/** Project URL and public key, for direct calls to Edge Functions (streaming). */
+export const supabaseUrl = URL
+export const supabaseAnonKey = ANON_KEY
+
 export const supabase: SupabaseClient | null = authConfigured
   ? createClient(URL!, ANON_KEY!, {
       auth: {

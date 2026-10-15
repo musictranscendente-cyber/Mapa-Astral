@@ -12,6 +12,10 @@ import { MoonPhase } from '../components/MoonPhase'
 import { transitHeadline, transitText } from '../interpret/aspects'
 import { transitsAt } from '../astro/transits'
 import type { Route } from '../App'
+import { useAccess } from '../billing/context'
+import { birthKey } from '../billing/keys'
+import { forecastKey } from '../billing/rules'
+import { Locked } from '../components/Locked'
 
 const RANGES = [
   { days: 7, label: '7 dias' },
@@ -34,6 +38,8 @@ export function ForecastPage({ natal, go }: { natal: Chart | null; go: (r: Route
   const [day, setDay] = useState(0)
   const [ready, setReady] = useState(false)
   const [start] = useState(() => startOfDay(new Date()))
+  const [askRange, setAskRange] = useState<number | null>(null)
+  const access = useAccess()
 
   // Let the page paint its animation before heavy computation.
   useEffect(() => {
@@ -67,6 +73,11 @@ export function ForecastPage({ natal, go }: { natal: Chart | null; go: (r: Route
     )
   }
 
+  const bk = natal.birth ? birthKey(natal.birth) : ''
+  const fullForecast = access.full(forecastKey(bk))
+  const needsLogin = access.enabled && !access.loggedIn
+  const maxRange = !access.enabled || fullForecast ? 365 : 7
+  const offer = natal.birth ? { product: 'previsao12' as const, scope: { birth: bk }, label: natal.birth.name } : undefined
   const groups = groupByMonth(events)
   const best = [...days].sort((a, b) => b.flow - a.flow).slice(0, 3)
   const hard = [...days].sort((a, b) => a.flow - b.flow).slice(0, 3)
@@ -79,10 +90,28 @@ export function ForecastPage({ natal, go }: { natal: Chart | null; go: (r: Route
         <p className="muted">Trânsitos do céu sobre o mapa de {natal.birth?.name} · a partir de {fmt(start, { day: 'numeric', month: 'long' })}</p>
         <div className="segmented">
           {RANGES.map((r) => (
-            <button key={r.days} className={range === r.days ? 'active' : ''} onClick={() => { setRange(r.days); setDay(0) }}>{r.label}</button>
+            <button
+              key={r.days}
+              className={range === r.days ? 'active' : ''}
+              onClick={() => {
+                if (r.days > maxRange) { setAskRange(r.days); return }
+                setAskRange(null); setRange(r.days); setDay(0)
+              }}
+            >
+              {r.days > maxRange && '🔒 '}{r.label}
+            </button>
           ))}
         </div>
       </header>
+
+      {askRange && (
+        <Locked
+          title={`Previsão de ${RANGES.find((r) => r.days === askRange)?.label}`}
+          text="Veja os trânsitos de até 1 ano à frente, os meses-chave e a análise completa do período."
+          offer={offer}
+          go={go}
+        />
+      )}
 
       {!ready ? <div className="loader"><span /> Calculando trânsitos…</div> : (
         <>
@@ -134,6 +163,15 @@ export function ForecastPage({ natal, go }: { natal: Chart | null; go: (r: Route
             </aside>
           </section>
 
+          {needsLogin && (
+            <Locked
+              title="Linha do tempo e trânsitos da semana"
+              text="Entre grátis para ver os trânsitos dos próximos 7 dias com a interpretação de cada um."
+              go={go}
+            />
+          )}
+
+          {!needsLogin && <>
           <section className="glass pad">
             <div className="section-title">
               <h2>Linha do tempo dos trânsitos</h2>
@@ -186,10 +224,13 @@ export function ForecastPage({ natal, go }: { natal: Chart | null; go: (r: Route
             <AiReading
               kind="previsao"
               cacheKey={`${natal.birth?.name}|${natal.date.toISOString()}|${start.toISOString().slice(0, 10)}|${range}`}
+              accessKey={forecastKey(bk)}
+              offer={offer}
               getSummary={() => forecastSummary(natal, findTransitEvents(natal, start, range, [...FAST, ...SLOW]), days)}
-              onOpenSettings={() => go('ajustes')}
+              go={go}
             />
           )}
+          </>}
 
           <section className="glass pad">
             <h2>Ciclo lunar</h2>

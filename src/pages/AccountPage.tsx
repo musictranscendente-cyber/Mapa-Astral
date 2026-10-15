@@ -1,8 +1,11 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import type { User } from '@supabase/supabase-js'
 import { authErrorMessage, deleteAccount, sendEmailCode, signInWithGoogle, signOut, verifyEmailCode } from '../lib/auth'
 import type { SyncStatus } from '../lib/profiles'
 import { authConfigured } from '../lib/supabase'
+import { useAccess } from '../billing/context'
+import { fetchPurchases, type PurchaseSummary } from '../billing/api'
+import { PLAN_ANALYSES, PRODUCTS } from '../billing/rules'
 
 interface Props {
   user: User | null
@@ -136,6 +139,8 @@ function SignedIn({ user, sync, profileCount, onClearLocal }: { user: User; sync
         </div>
       </section>
 
+      <MyAccess />
+
       <section className="glass pad account-card danger-zone">
         <h2>Excluir conta</h2>
         <p className="muted">Apaga seu login e todos os mapas guardados na nuvem. Essa ação não pode ser desfeita.</p>
@@ -157,5 +162,47 @@ function SignedIn({ user, sync, profileCount, onClearLocal }: { user: User; sync
         {error && <p className="error">{error}</p>}
       </section>
     </>
+  )
+}
+
+function MyAccess() {
+  const access = useAccess()
+  const [purchases, setPurchases] = useState<PurchaseSummary[]>([])
+  useEffect(() => {
+    if (!access.enabled) return
+    fetchPurchases().then(setPurchases, () => {})
+  }, [access.enabled, access.data])
+  if (!access.enabled) return null
+
+  const plan = access.plan
+  const until = access.data.planUntil ? new Date(access.data.planUntil).toLocaleDateString('pt-BR', { dateStyle: 'long' }) : ''
+  return (
+    <section className="glass pad account-card">
+      <h2>Meu acesso</h2>
+      {plan ? (
+        <p>
+          Plano <b>{plan === 'cosmos' ? 'Cosmos' : 'Estrela'}</b> ativo até {until} ·{' '}
+          {Math.max(0, PLAN_ANALYSES[plan] - access.data.planUsedThisMonth)} de {PLAN_ANALYSES[plan]} análises disponíveis neste mês.
+        </p>
+      ) : (
+        <p className="muted">
+          Conta gratuita{access.data.welcomeUsed === 0 ? ' · sua primeira análise completa é um presente' : ''}.
+        </p>
+      )}
+      {purchases.length > 0 && (
+        <ul className="purchase-list">
+          {purchases.map((p) => (
+            <li key={p.id}>
+              <span>{PRODUCTS[p.product]?.name ?? p.product}{p.label ? ` · ${p.label}` : ''}</span>
+              <small className="muted">
+                {new Date(p.created_at).toLocaleDateString('pt-BR')}
+                {p.expires_at && !PRODUCTS[p.product]?.plan ? ` · válida até ${new Date(p.expires_at).toLocaleDateString('pt-BR')}` : ''}
+              </small>
+            </li>
+          ))}
+        </ul>
+      )}
+      <a className="ghost inline" href="#/planos">{plan ? 'Renovar ou mudar de plano' : 'Ver planos e análises'}</a>
+    </section>
   )
 }
