@@ -20,8 +20,8 @@ Como funciona:
   - Previsão de 12 meses: R$ 59
   - Pacote Aniversário: R$ 89
 - **Planos** (sem renovação automática; renovar soma o tempo):
-  - **Estrela:** R$ 14,90 por mês ou R$ 119 por ano. Inclui 3 análises por mês.
-  - **Cosmos:** R$ 29,90 por mês ou R$ 249 por ano. Inclui até 30 análises por mês.
+  - **Estrela:** R$ 29,90 por mês ou R$ 239 por ano. Inclui 3 análises por mês.
+  - **Cosmos:** R$ 49,90 por mês ou R$ 399 por ano. Inclui até 30 análises por mês.
 
 Os preços e limites ficam em `src/billing/rules.ts`. Depois de editar esse arquivo, rode `npm run sync:functions`.
 

@@ -75,7 +75,7 @@ describe('billing rules', () => {
   })
 
   it('checks the amount paid', () => {
-    expect(paidEnough('estrela_mensal', 14.9)).toBe(true)
-    expect(paidEnough('cosmos_anual', 24.9)).toBe(false)
+    expect(paidEnough('estrela_mensal', 29.9)).toBe(true)
+    expect(paidEnough('cosmos_anual', 39.9)).toBe(false)
   })
 })
