@@ -37,10 +37,10 @@ export const PRODUCTS: Record<ProductKey, Product> = {
   revolucao: { key: 'revolucao', name: 'Revolução Solar do ano', description: 'Mapa do ano completo, comparador de cidades e análise completa.', price: 39, scope: 'birthYear' },
   previsao12: { key: 'previsao12', name: 'Previsão de 12 meses', description: 'Trânsitos de 1 ano, meses-chave e análise completa.', price: 59, days: 365, scope: 'birth' },
   pacote: { key: 'pacote', name: 'Pacote Aniversário', description: 'Revolução Solar + comparador de cidades + previsão de 12 meses.', price: 89, days: 365, scope: 'birthYear' },
-  estrela_mensal: { key: 'estrela_mensal', name: 'Plano Estrela · 1 mês', description: 'Acesso Estrela por 30 dias.', price: 14.9, plan: 'estrela', days: 30 },
-  estrela_anual: { key: 'estrela_anual', name: 'Plano Estrela · 1 ano', description: 'Acesso Estrela por 365 dias.', price: 119, plan: 'estrela', days: 365 },
-  cosmos_mensal: { key: 'cosmos_mensal', name: 'Plano Cosmos · 1 mês', description: 'Acesso Cosmos por 30 dias.', price: 29.9, plan: 'cosmos', days: 30 },
-  cosmos_anual: { key: 'cosmos_anual', name: 'Plano Cosmos · 1 ano', description: 'Acesso Cosmos por 365 dias.', price: 249, plan: 'cosmos', days: 365 },
+  estrela_mensal: { key: 'estrela_mensal', name: 'Plano Estrela · 1 mês', description: 'Acesso Estrela por 30 dias.', price: 29.9, plan: 'estrela', days: 30 },
+  estrela_anual: { key: 'estrela_anual', name: 'Plano Estrela · 1 ano', description: 'Acesso Estrela por 365 dias.', price: 239, plan: 'estrela', days: 365 },
+  cosmos_mensal: { key: 'cosmos_mensal', name: 'Plano Cosmos · 1 mês', description: 'Acesso Cosmos por 30 dias.', price: 49.9, plan: 'cosmos', days: 30 },
+  cosmos_anual: { key: 'cosmos_anual', name: 'Plano Cosmos · 1 ano', description: 'Acesso Cosmos por 365 dias.', price: 399, plan: 'cosmos', days: 365 },
 }
 
 export const isProductKey = (k: unknown): k is ProductKey => typeof k === 'string' && k in PRODUCTS
