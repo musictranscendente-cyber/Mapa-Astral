@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react'
 import type { Aspect, Chart } from '../astro/chart'
 import { ELEMENT_INFO, POINTS, SIGNS, norm360, type PointKey } from '../astro/constants'
 import type { TransitHit } from '../astro/transits'
+import { OUTER_POINTS, WHEEL_POINTS, spread } from '../lib/wheelLayout'
 
 const C = 400
 const rad = Math.PI / 180
@@ -18,34 +19,6 @@ interface Props {
   spin?: boolean
 }
 
-const WHEEL_POINTS: PointKey[] = [
-  'sun', 'moon', 'mercury', 'venus', 'mars', 'jupiter', 'saturn',
-  'uranus', 'neptune', 'pluto', 'node', 'lilith', 'fortune',
-]
-
-const OUTER_POINTS: PointKey[] = ['sun', 'moon', 'mercury', 'venus', 'mars', 'jupiter', 'saturn', 'uranus', 'neptune', 'pluto', 'node']
-
-/** Spread labels apart so glyphs never overlap, keeping order. */
-function spread(items: { key: PointKey; lon: number }[], minGap: number) {
-  const sorted = [...items].sort((a, b) => a.lon - b.lon).map((p) => ({ ...p, pos: p.lon }))
-  for (let iter = 0; iter < 60; iter++) {
-    let moved = false
-    for (let i = 0; i < sorted.length; i++) {
-      const a = sorted[i]
-      const b = sorted[(i + 1) % sorted.length]
-      if (sorted.length < 2) break
-      const gap = norm360(b.pos - a.pos)
-      if (gap < minGap && !(i === sorted.length - 1 && gap > 180)) {
-        const push = (minGap - gap) / 2
-        a.pos = norm360(a.pos - push)
-        b.pos = norm360(b.pos + push)
-        moved = true
-      }
-    }
-    if (!moved) break
-  }
-  return sorted
-}
 
 export function ChartWheel({ chart, outer, outerHits, selected, onSelect, showAspects = true, size = '100%', spin = true }: Props) {
   const [hover, setHover] = useState<PointKey | null>(null)

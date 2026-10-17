@@ -7,6 +7,7 @@ import type { Settings } from '../lib/profiles'
 import { BILLING } from '../billing/api'
 import { useAccess } from '../billing/context'
 import { SimulatorCard } from '../components/SimulatorCard'
+import { StatsCard } from '../components/StatsCard'
 import type { Route } from '../App'
 
 interface Props {
@@ -47,6 +48,7 @@ export function SettingsPage({ natal, settings, setSettings, go }: Props) {
         <h1 className="title-glow">Ajustes</h1>
       </header>
 
+      {access.owner && <StatsCard />}
       {access.owner && <SimulatorCard go={go} />}
 
       <section className="glass pad settings-card">

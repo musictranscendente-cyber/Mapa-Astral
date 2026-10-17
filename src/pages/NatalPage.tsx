@@ -17,6 +17,7 @@ import { useAccess } from '../billing/context'
 import { birthKey } from '../billing/keys'
 import { natalKey } from '../billing/rules'
 import { Locked } from '../components/Locked'
+import { ShareDialog } from '../components/ShareDialog'
 import type { Route } from '../App'
 
 type Tab = 'relatorio' | 'ia' | 'planetas' | 'casas' | 'aspectos' | 'elementos'
@@ -33,6 +34,7 @@ export function NatalPage({ natal, settings, setSettings, go }: Props) {
   const [tab, setTab] = useState<Tab>('relatorio')
   const report = useMemo(() => (natal ? buildNatalReport(natal) : []), [natal])
   const access = useAccess()
+  const [sharing, setSharing] = useState(false)
 
   if (!natal || !natal.birth) {
     return (
@@ -67,10 +69,13 @@ export function NatalPage({ natal, settings, setSettings, go }: Props) {
               {HOUSE_SYSTEMS.map((h) => <option key={h.key} value={h.key}>{h.name}</option>)}
             </select>
           </label>
+          <button className="ghost share-btn" onClick={() => setSharing(true)}>✦ Compartilhar meu mapa</button>
           <button className="ghost" onClick={() => window.print()}>⎙ Imprimir / PDF</button>
         </div>
         {natal.houseFallback && <p className="warn">Latitude polar: o sistema escolhido não é definido aqui — usando Porfírio.</p>}
       </header>
+
+      {sharing && <ShareDialog chart={natal} onClose={() => setSharing(false)} />}
 
       <section className="wheel-layout">
         <div className="wheel-box">

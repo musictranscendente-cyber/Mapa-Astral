@@ -26,6 +26,10 @@ céu do dia e projeção de trânsitos pessoais para os dias e meses seguintes.
 - **Planos e avulsos** — acesso aberto, grátis com login, compras avulsas e planos Estrela/Cosmos pagos por Pix ou
   cartão (Mercado Pago), com saldo de análises controlado no servidor (Supabase Edge Functions). Simulador de planos
   para o dono do app em Ajustes. Configuração em `docs/configurar-pagamentos.md`.
+- **Compartilhar meu mapa** — gera uma imagem (Stories ou Feed) com a roda, Sol, Lua e Ascendente e o link do app,
+  para postar no Instagram e no WhatsApp. Nunca inclui data, hora ou local de nascimento.
+- **Acessos** — contagem anônima (visitantes por dia, mapas criados, compartilhamentos e origem das visitas), visível
+  só para o dono em Ajustes. Ative rodando `supabase/migrations/0003_acessos.sql` no SQL Editor do Supabase.
 - **Perfis** — vários mapas salvos localmente no dispositivo; impressão/PDF do relatório; instalável (manifest PWA).
 
 ## Precisão
