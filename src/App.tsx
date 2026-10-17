@@ -19,6 +19,7 @@ import { useAccess } from './billing/context'
 import { getSim } from './billing/sim'
 import { formatBRL } from './billing/rules'
 import type { BirthData } from './astro/chart'
+import { track, trackVisit } from './lib/analytics'
 import { armInAppTimer, registerServiceWorker, scheduleMessages } from './lib/notifications'
 
 export type Route = 'inicio' | 'mapa' | 'ceu' | 'previsoes' | 'sinastria' | 'revolucao' | 'perfis' | 'ajustes' | 'conta' | 'planos'
@@ -57,6 +58,8 @@ function Main({ auth }: { auth: AuthState }) {
   const access = useAccess()
   const [notice, setNotice] = useState('')
 
+  useEffect(() => { trackVisit() }, [])
+
   // Back from a login started on a locked screen: return to that screen.
   const userId = auth.user?.id
   useEffect(() => {
@@ -90,6 +93,7 @@ function Main({ auth }: { auth: AuthState }) {
       return ''
     }
     setNotice('')
+    if (!id) track('mapa')
     return saveProfile(data, id, activate)
   }
 

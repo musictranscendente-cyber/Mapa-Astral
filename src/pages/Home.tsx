@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react'
+import { ShareDialog } from '../components/ShareDialog'
 import type { BirthData, Chart } from '../astro/chart'
 import { POINTS, SIGNS, ELEMENT_INFO } from '../astro/constants'
 import { bodyLongitude, moonPhaseInfo, toTime } from '../astro/ephemeris'
@@ -19,6 +20,7 @@ interface Props {
 
 export function Home({ natal, profile, onCreate, go }: Props) {
   const [now] = useState(() => new Date())
+  const [sharing, setSharing] = useState(false)
   const moon = useMemo(() => moonPhaseInfo(now), [now])
   const t = toTime(now)
   const moonSign = Math.floor(bodyLongitude('moon', t) / 30)
@@ -42,8 +44,10 @@ export function Home({ natal, profile, onCreate, go }: Props) {
             <div className="hero-actions">
               <button className="cta" onClick={() => go('mapa')}><span>✦ Ver mapa de {profile.name.split(' ')[0]}</span></button>
               <button className="ghost" onClick={() => go('ceu')}>☽ Céu de hoje</button>
+              <button className="ghost share-btn" onClick={() => setSharing(true)}>✦ Compartilhar</button>
             </div>
           )}
+          {sharing && natal && <ShareDialog chart={natal} onClose={() => setSharing(false)} />}
         </div>
       </section>
 
