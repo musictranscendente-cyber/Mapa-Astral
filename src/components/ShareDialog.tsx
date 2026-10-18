@@ -90,7 +90,15 @@ export function ShareDialog({ chart, onClose }: Props) {
         </div>
 
         <div className={`share-preview ${format}`}>
-          {ready ? <img src={ready.url} alt="Prévia da imagem do seu mapa astral" /> : <div className="loader"><span /> Desenhando seu céu…</div>}
+          {ready ? (
+            <img
+              src={ready.url}
+              width={SHARE_SIZES[format].w}
+              height={SHARE_SIZES[format].h}
+              style={{ aspectRatio: `${SHARE_SIZES[format].w} / ${SHARE_SIZES[format].h}` }}
+              alt="Prévia da imagem do seu mapa astral"
+            />
+          ) : <div className="loader"><span /> Desenhando seu céu…</div>}
         </div>
 
         <div className="share-actions">

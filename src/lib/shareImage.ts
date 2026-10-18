@@ -186,14 +186,24 @@ function wheel(ctx: CanvasRenderingContext2D, chart: Chart, cx: number, cy: numb
   ctx.beginPath(); ctx.arc(cx, cy, R * 0.07, 0, Math.PI * 2); ctx.fill()
 }
 
+/** Rounded rectangle path (ctx.roundRect is missing on older iPhones). */
+function roundRect(ctx: CanvasRenderingContext2D, x: number, y: number, w: number, h: number, r: number) {
+  ctx.beginPath()
+  ctx.moveTo(x + r, y)
+  ctx.arcTo(x + w, y, x + w, y + h, r)
+  ctx.arcTo(x + w, y + h, x, y + h, r)
+  ctx.arcTo(x, y + h, x, y, r)
+  ctx.arcTo(x, y, x + w, y, r)
+  ctx.closePath()
+}
+
 function bigThreeCard(ctx: CanvasRenderingContext2D, x: number, y: number, w: number, h: number, label: string, sign: number) {
   const s = SIGNS[sign]
   const color = ELEMENT_INFO[s.element].color
   ctx.fillStyle = 'rgba(22,18,58,0.72)'
   ctx.strokeStyle = 'rgba(255,232,163,0.28)'
   ctx.lineWidth = 2
-  ctx.beginPath()
-  ctx.roundRect(x, y, w, h, 28)
+  roundRect(ctx, x, y, w, h, 28)
   ctx.fill(); ctx.stroke()
   const cx = x + w / 2
   ctx.fillStyle = 'rgba(201,195,230,0.9)'
