@@ -657,8 +657,8 @@ p { margin: 0 0 0.8em; }
 .share-head { display: flex; align-items: center; justify-content: space-between; gap: 1rem; }
 .share-head h2 { margin: 0; font-family: var(--display); font-weight: 500; font-size: 1.2rem; }
 .share-options { display: flex; flex-wrap: wrap; gap: 0.6rem 1rem; align-items: center; justify-content: space-between; }
-.share-preview { display: grid; place-items: center; min-height: 260px; }
-.share-preview img { border-radius: 16px; box-shadow: 0 20px 60px -20px rgba(167, 139, 250, 0.6); max-height: 52vh; width: auto; max-width: 100%; }
+.share-preview { display: flex; justify-content: center; align-items: center; min-height: 260px; min-width: 0; }
+.share-preview img { display: block; flex: 0 0 auto; border-radius: 16px; box-shadow: 0 20px 60px -20px rgba(167, 139, 250, 0.6); width: auto; height: auto; max-width: 100%; max-height: 52vh; object-fit: contain; }
 .share-actions { display: flex; flex-wrap: wrap; gap: 0.5rem; justify-content: center; align-items: center; }
 .share-actions a.ghost { text-decoration: none; display: inline-flex; align-items: center; }
 .share-btn { border-color: rgba(255, 232, 163, 0.5); }
