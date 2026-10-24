@@ -19,6 +19,7 @@ import { LunationsPage } from './pages/LunationsPage'
 import { LunarReturnPage } from './pages/LunarReturnPage'
 import { ProgressionsPage } from './pages/ProgressionsPage'
 import { CalendarPage } from './pages/CalendarPage'
+import { SintoniaPage } from './pages/SintoniaPage'
 
 // World map data is large: load the astrocartography page only when opened.
 const AstroMapPage = lazy(() => import('./pages/AstroMapPage').then((m) => ({ default: m.AstroMapPage })))
@@ -31,7 +32,7 @@ import type { BirthData } from './astro/chart'
 import { track, trackVisit } from './lib/analytics'
 import { armInAppTimer, registerServiceWorker, scheduleMessages } from './lib/notifications'
 
-export type Route = 'inicio' | 'mapa' | 'ceu' | 'previsoes' | 'sinastria' | 'revolucao' | 'perfis' | 'ajustes' | 'conta' | 'planos' | 'horoscopo' | 'termos' | 'privacidade' | 'lunacoes' | 'retorno-lunar' | 'progressoes' | 'astrocartografia' | 'calendario'
+export type Route = 'inicio' | 'mapa' | 'ceu' | 'previsoes' | 'sinastria' | 'revolucao' | 'perfis' | 'ajustes' | 'conta' | 'planos' | 'horoscopo' | 'termos' | 'privacidade' | 'lunacoes' | 'retorno-lunar' | 'progressoes' | 'astrocartografia' | 'calendario' | 'sintonia'
 
 const NAV: { key: Route; label: string; icon: string }[] = [
   { key: 'inicio', label: 'Início', icon: '✦' },
@@ -43,7 +44,7 @@ const NAV: { key: Route; label: string; icon: string }[] = [
   { key: 'perfis', label: 'Perfis', icon: '☷' },
 ]
 
-const ROUTES: Route[] = [...NAV.map((n) => n.key), 'ajustes', 'conta', 'planos', 'horoscopo', 'termos', 'privacidade', 'lunacoes', 'retorno-lunar', 'progressoes', 'astrocartografia', 'calendario']
+const ROUTES: Route[] = [...NAV.map((n) => n.key), 'ajustes', 'conta', 'planos', 'horoscopo', 'termos', 'privacidade', 'lunacoes', 'retorno-lunar', 'progressoes', 'astrocartografia', 'calendario', 'sintonia']
 
 const readRoute = (): Route => {
   // Payment providers append `?status=…` after the hash route.
@@ -145,6 +146,8 @@ function Main({ auth }: { auth: AuthState }) {
         return <SolarReturnPage key={active?.id} natal={natal} houseSystem={settings.houseSystem} go={go} />
       case 'conta':
         return <AccountPage user={auth.user} loading={auth.loading} sync={sync} profileCount={profiles.length} onClearLocal={clearLocal} />
+      case 'sintonia':
+        return <SintoniaPage go={go} onSave={(d) => save(d, undefined, false)} />
       case 'calendario':
         return <CalendarPage />
       case 'astrocartografia':
@@ -245,6 +248,7 @@ const MENU: { key: Route; label: string; icon: string; hint: string }[] = [
   { key: 'progressoes', label: 'Progressões', icon: '➶', hint: 'Seu mapa amadurecido e arcos solares' },
   { key: 'calendario', label: 'Calendário astral', icon: '▦', hint: 'Fases, retrógrados, eclipses e Lua fora de curso' },
   { key: 'lunacoes', label: 'Eclipses e Lunações', icon: '◐', hint: 'Luas novas, cheias e eclipses no seu mapa' },
+  { key: 'sintonia', label: 'Teste de sintonia', icon: '♥', hint: 'Só com as datas — e imagem para os Stories' },
   { key: 'sinastria', label: 'Sinastria', icon: '♡', hint: 'Compatibilidade entre duas pessoas' },
   { key: 'revolucao', label: 'Revolução Solar', icon: '☼', hint: 'Seu ano pessoal e onde passar o aniversário' },
   { key: 'retorno-lunar', label: 'Retorno Lunar', icon: '☾', hint: 'O mapa do seu mês' },

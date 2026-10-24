@@ -15,11 +15,11 @@ export const shareUrl = () => `${window.location.origin}${window.location.pathna
 export const shareUrlLabel = () => `${window.location.host}${window.location.pathname}`.replace(/\/$/, '')
 
 const rad = Math.PI / 180
-const GOLD = '#ffe8a3'
-const SYMBOLS = '"Noto Sans Symbols 2", "Noto Sans Symbols", "Segoe UI Symbol", "Apple Symbols", sans-serif'
-const DISPLAY = 'Cinzel, "Cormorant Garamond", Georgia, serif'
-const SERIF = '"Cormorant Garamond", Georgia, serif'
-const SANS = 'Inter, system-ui, sans-serif'
+export const GOLD = '#ffe8a3'
+export const SYMBOLS = '"Noto Sans Symbols 2", "Noto Sans Symbols", "Segoe UI Symbol", "Apple Symbols", sans-serif'
+export const DISPLAY = 'Cinzel, "Cormorant Garamond", Georgia, serif'
+export const SERIF = '"Cormorant Garamond", Georgia, serif'
+export const SANS = 'Inter, system-ui, sans-serif'
 
 /** Deterministic pseudo-random numbers, so the same chart always gets the same sky. */
 function rng(seed: number) {
@@ -27,7 +27,7 @@ function rng(seed: number) {
   return () => ((s = (Math.imul(s, 1664525) + 1013904223) >>> 0) / 4294967296)
 }
 
-async function loadFonts() {
+export async function loadFonts() {
   if (!('fonts' in document)) return
   await Promise.all([
     document.fonts.load(`600 64px ${DISPLAY}`),
@@ -38,7 +38,7 @@ async function loadFonts() {
   ]).catch(() => {})
 }
 
-function background(ctx: CanvasRenderingContext2D, w: number, h: number, seed: number) {
+export function background(ctx: CanvasRenderingContext2D, w: number, h: number, seed: number) {
   ctx.fillStyle = '#07061a'
   ctx.fillRect(0, 0, w, h)
   const glow = (x: number, y: number, r: number, color: string) => {
@@ -63,14 +63,14 @@ function background(ctx: CanvasRenderingContext2D, w: number, h: number, seed: n
   ctx.globalAlpha = 1
 }
 
-function centerText(ctx: CanvasRenderingContext2D, text: string, x: number, y: number, maxWidth: number) {
+export function centerText(ctx: CanvasRenderingContext2D, text: string, x: number, y: number, maxWidth: number) {
   ctx.textAlign = 'center'
   ctx.textBaseline = 'middle'
   ctx.fillText(text, x, y, maxWidth)
 }
 
 /** Letter-spaced uppercase label (canvas letterSpacing isn't available everywhere). */
-function spaced(ctx: CanvasRenderingContext2D, text: string, x: number, y: number, spacing: number) {
+export function spaced(ctx: CanvasRenderingContext2D, text: string, x: number, y: number, spacing: number) {
   const chars = [...text]
   const widths = chars.map((c) => ctx.measureText(c).width)
   const total = widths.reduce((a, b) => a + b, 0) + spacing * (chars.length - 1)
@@ -187,7 +187,7 @@ function wheel(ctx: CanvasRenderingContext2D, chart: Chart, cx: number, cy: numb
 }
 
 /** Rounded rectangle path (ctx.roundRect is missing on older iPhones). */
-function roundRect(ctx: CanvasRenderingContext2D, x: number, y: number, w: number, h: number, r: number) {
+export function roundRect(ctx: CanvasRenderingContext2D, x: number, y: number, w: number, h: number, r: number) {
   ctx.beginPath()
   ctx.moveTo(x + r, y)
   ctx.arcTo(x + w, y, x + w, y + h, r)
