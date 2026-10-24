@@ -4,6 +4,9 @@ import { bodyLongitude, moonPhaseInfo, toTime } from '../astro/ephemeris'
 import { scoreDay, transitsAt } from '../astro/transits'
 import { transitHeadline } from '../interpret/aspects'
 import { moonSignOfDayText } from '../interpret/report'
+import { calendarEvents, type CalEvent } from '../astro/calendar'
+import { eventTime, eventTitle } from '../interpret/calendar'
+import { DEFAULT_TOPICS, type NotifyTopics } from './profiles'
 
 const FAST = ['moon', 'sun', 'mercury', 'venus', 'mars']
 
@@ -19,27 +22,51 @@ export const notificationsSupported = () =>
 const localDay = (d: Date) =>
   `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
 
-/** Personal message for each of the next `days` days, at the chosen local hour. */
-export function buildDailyMessages(natal: Chart, hour: number, days = 21): DailyMessage[] {
+const time = (d: Date) => d.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })
+const ICON: Partial<Record<CalEvent['kind'], string>> = { eclipse: '🌘', estacao: '℞', ingresso: '✦', 'lua-signo': '☽', 'fora-de-curso': '∅' }
+
+/** Personal message for each of the next `days` days, at the chosen local hour, following the chosen topics. */
+export function buildDailyMessages(natal: Chart, hour: number, days = 21, topics: NotifyTopics = DEFAULT_TOPICS): DailyMessage[] {
   const out: DailyMessage[] = []
   const now = new Date()
+  const start = new Date(now.getFullYear(), now.getMonth(), now.getDate())
+  const end = new Date(start.getTime() + days * 86400000)
+  const events = topics.lunacoes || topics.planetas || topics.luaSigno || topics.foraDeCurso
+    ? calendarEvents(start, end, { voc: topics.foraDeCurso, moonSigns: topics.luaSigno })
+    : []
   let previous = ''
   for (let i = 0; i < days; i++) {
     const d = new Date(now.getFullYear(), now.getMonth(), now.getDate() + i, hour, 0)
-    const score = scoreDay(natal, d)
+    const key = localDay(d)
     const moonSign = Math.floor(bodyLongitude('moon', toTime(d)) / 30)
     const phase = moonPhaseInfo(d)
-    // Fast movers change daily; slow transits would repeat for weeks. Never repeat yesterday's headline.
-    const hits = transitsAt(natal, d)
-    const candidates = [...hits.filter((h) => FAST.includes(h.transit)), ...hits]
-    const top = candidates.find((h) => transitHeadline(h.transit, h.natal, h.type.key) !== previous)
-    previous = top ? transitHeadline(top.transit, top.natal, top.type.key) : ''
-    const mood = score.flow > 25 ? 'dia de fluxo ✦' : score.flow < -25 ? 'dia de atenção ⚠' : 'dia de equilíbrio ☯'
-    const title = top
-      ? `${transitHeadline(top.transit, top.natal, top.type.key)} · ${mood}`
-      : `${phase.name} em ${SIGNS[moonSign].name} · ${mood}`
-    const body = `${phase.emoji} ${moonSignOfDayText(moonSign)}`
-    out.push({ date: localDay(d), title, body })
+    const today = events.filter((e) => localDay(e.date) === key || (e.kind === 'fora-de-curso' && localDay(e.end!) === key))
+    const pick = (kinds: CalEvent['kind'][]) => today.filter((e) => kinds.includes(e.kind))
+    const featured = [
+      ...(topics.lunacoes ? pick(['eclipse']) : []),
+      ...(topics.lunacoes ? pick(['fase']).filter((e) => e.quarter === 0 || e.quarter === 2) : []),
+      ...(topics.planetas ? pick(['estacao', 'ingresso']) : []),
+    ]
+    const extras = [...(topics.luaSigno ? pick(['lua-signo']) : []), ...(topics.foraDeCurso ? pick(['fora-de-curso']) : [])]
+
+    let title: string
+    if (featured.length) {
+      const f = featured[0]
+      title = `${f.kind === 'fase' ? (f.quarter === 0 ? '🌑' : '🌕') : ICON[f.kind] ?? '✦'} ${eventTitle(f)} · ${time(f.date)}`
+    } else if (topics.transitos) {
+      // Fast movers change daily; slow transits would repeat for weeks. Never repeat yesterday's headline.
+      const score = scoreDay(natal, d)
+      const hits = transitsAt(natal, d)
+      const top = [...hits.filter((h) => FAST.includes(h.transit)), ...hits].find((h) => transitHeadline(h.transit, h.natal, h.type.key) !== previous)
+      previous = top ? transitHeadline(top.transit, top.natal, top.type.key) : ''
+      const mood = score.flow > 25 ? 'dia de fluxo ✦' : score.flow < -25 ? 'dia de atenção ⚠' : 'dia de equilíbrio ☯'
+      title = top ? `${previous} · ${mood}` : `${phase.name} em ${SIGNS[moonSign].name} · ${mood}`
+    } else {
+      title = `${phase.emoji} ${phase.name} em ${SIGNS[moonSign].name}`
+    }
+    const lines = [`${phase.emoji} ${moonSignOfDayText(moonSign)}`]
+    for (const e of [...featured.slice(1), ...extras]) lines.push(`${ICON[e.kind] ?? '✦'} ${eventTitle(e)} · ${eventTime(e)}`)
+    out.push({ date: key, title, body: lines.join('\n') })
   }
   return out
 }
@@ -71,9 +98,9 @@ export async function enableNotifications(): Promise<'granted' | 'denied' | 'uns
   return 'granted'
 }
 
-export async function scheduleMessages(natal: Chart | null, enabled: boolean, hour: number) {
+export async function scheduleMessages(natal: Chart | null, enabled: boolean, hour: number, topics: NotifyTopics = DEFAULT_TOPICS) {
   if (!notificationsSupported() || Notification.permission !== 'granted') return
-  const messages = enabled && natal ? buildDailyMessages(natal, hour) : []
+  const messages = enabled && natal ? buildDailyMessages(natal, hour, 21, topics) : []
   await post({ type: 'schedule', payload: { enabled: enabled && !!natal, hour, messages } })
   if (enabled) await post({ type: 'check' })
 }

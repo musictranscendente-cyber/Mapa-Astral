@@ -102,15 +102,34 @@ export function useProfiles(userId: string | null = null) {
   return { profiles, active, setActiveId, save, remove, clearLocal, sync }
 }
 
+export interface NotifyTopics {
+  /** Personal transits to the chart (the main daily message). */
+  transitos: boolean
+  /** New/full moons and eclipses. */
+  lunacoes: boolean
+  /** Planets turning retrograde/direct and changing sign. */
+  planetas: boolean
+  /** The Moon changing sign. */
+  luaSigno: boolean
+  /** Moon void of course periods. */
+  foraDeCurso: boolean
+}
+
+export const DEFAULT_TOPICS: NotifyTopics = { transitos: true, lunacoes: true, planetas: true, luaSigno: false, foraDeCurso: false }
+
 export interface Settings {
   houseSystem: HouseSystem
   motion: boolean
   notify: boolean
   notifyHour: number
+  notifyTopics: NotifyTopics
 }
 
 export function useSettings() {
-  const [settings, setSettings] = useState<Settings>(() => ({ houseSystem: 'placidus', motion: true, notify: false, notifyHour: 8, ...read<Partial<Settings>>(SETTINGS, {}) }))
+  const [settings, setSettings] = useState<Settings>(() => {
+    const saved = read<Partial<Settings>>(SETTINGS, {})
+    return { houseSystem: 'placidus', motion: true, notify: false, notifyHour: 8, ...saved, notifyTopics: { ...DEFAULT_TOPICS, ...saved.notifyTopics } }
+  })
   useEffect(() => write(SETTINGS, settings), [settings])
   return [settings, setSettings] as const
 }
