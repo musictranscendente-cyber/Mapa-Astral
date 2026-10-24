@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { Suspense, lazy, useEffect, useMemo, useState } from 'react'
 import { chartFromBirth, type Chart } from './astro/chart'
 import { HOUSE_SYSTEMS } from './astro/houses'
 import { Starfield } from './components/Starfield'
@@ -18,6 +18,9 @@ import { LegalPage } from './pages/LegalPage'
 import { LunationsPage } from './pages/LunationsPage'
 import { LunarReturnPage } from './pages/LunarReturnPage'
 import { ProgressionsPage } from './pages/ProgressionsPage'
+
+// World map data is large: load the astrocartography page only when opened.
+const AstroMapPage = lazy(() => import('./pages/AstroMapPage').then((m) => ({ default: m.AstroMapPage })))
 import { rememberReturn, takeReturn, useAuth, type AuthState } from './lib/auth'
 import { AccessProvider } from './billing/access'
 import { useAccess } from './billing/context'
@@ -27,7 +30,7 @@ import type { BirthData } from './astro/chart'
 import { track, trackVisit } from './lib/analytics'
 import { armInAppTimer, registerServiceWorker, scheduleMessages } from './lib/notifications'
 
-export type Route = 'inicio' | 'mapa' | 'ceu' | 'previsoes' | 'sinastria' | 'revolucao' | 'perfis' | 'ajustes' | 'conta' | 'planos' | 'horoscopo' | 'termos' | 'privacidade' | 'lunacoes' | 'retorno-lunar' | 'progressoes'
+export type Route = 'inicio' | 'mapa' | 'ceu' | 'previsoes' | 'sinastria' | 'revolucao' | 'perfis' | 'ajustes' | 'conta' | 'planos' | 'horoscopo' | 'termos' | 'privacidade' | 'lunacoes' | 'retorno-lunar' | 'progressoes' | 'astrocartografia'
 
 const NAV: { key: Route; label: string; icon: string }[] = [
   { key: 'inicio', label: 'Início', icon: '✦' },
@@ -39,7 +42,7 @@ const NAV: { key: Route; label: string; icon: string }[] = [
   { key: 'perfis', label: 'Perfis', icon: '☷' },
 ]
 
-const ROUTES: Route[] = [...NAV.map((n) => n.key), 'ajustes', 'conta', 'planos', 'horoscopo', 'termos', 'privacidade', 'lunacoes', 'retorno-lunar', 'progressoes']
+const ROUTES: Route[] = [...NAV.map((n) => n.key), 'ajustes', 'conta', 'planos', 'horoscopo', 'termos', 'privacidade', 'lunacoes', 'retorno-lunar', 'progressoes', 'astrocartografia']
 
 const readRoute = (): Route => {
   // Payment providers append `?status=…` after the hash route.
@@ -139,6 +142,8 @@ function Main({ auth }: { auth: AuthState }) {
         return <SolarReturnPage key={active?.id} natal={natal} houseSystem={settings.houseSystem} go={go} />
       case 'conta':
         return <AccountPage user={auth.user} loading={auth.loading} sync={sync} profileCount={profiles.length} onClearLocal={clearLocal} />
+      case 'astrocartografia':
+        return <Suspense fallback={<div className="loader"><span /> Abrindo o mapa-múndi…</div>}><AstroMapPage natal={natal} go={go} /></Suspense>
       case 'progressoes':
         return <ProgressionsPage natal={natal} go={go} />
       case 'retorno-lunar':
@@ -237,6 +242,7 @@ const MENU: { key: Route; label: string; icon: string; hint: string }[] = [
   { key: 'sinastria', label: 'Sinastria', icon: '♡', hint: 'Compatibilidade entre duas pessoas' },
   { key: 'revolucao', label: 'Revolução Solar', icon: '☼', hint: 'Seu ano pessoal e onde passar o aniversário' },
   { key: 'retorno-lunar', label: 'Retorno Lunar', icon: '☾', hint: 'O mapa do seu mês' },
+  { key: 'astrocartografia', label: 'Astrocartografia', icon: '⌖', hint: 'Onde no mundo cada planeta brilha' },
   { key: 'perfis', label: 'Perfis', icon: '☷', hint: 'Seus mapas salvos' },
   { key: 'planos', label: 'Planos', icon: '💎', hint: 'Planos e análises avulsas' },
   { key: 'conta', label: 'Minha conta', icon: '☺', hint: 'Entrar, sincronizar e compras' },
