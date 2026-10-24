@@ -68,7 +68,7 @@ p { margin: 0 0 0.8em; }
   border-bottom: 1px solid var(--line);
 }
 .brand { display: flex; align-items: center; gap: 0.55rem; background: none; border: 0; padding: 0; }
-.brand-logo { width: 34px; height: 34px; border-radius: 9px; box-shadow: 0 0 16px rgba(167, 139, 250, 0.55); flex: 0 0 auto; }
+.brand-mark { font-size: 1.6rem; color: var(--gold); text-shadow: 0 0 18px rgba(255, 232, 163, 0.8); animation: pulse 4s ease-in-out infinite; }
 .brand-name { font-family: var(--display); font-size: 1.2rem; letter-spacing: 0.14em; background: linear-gradient(90deg, var(--gold), #fff, var(--gold)); -webkit-background-clip: text; background-clip: text; color: transparent; }
 @keyframes pulse { 50% { text-shadow: 0 0 30px rgba(255, 232, 163, 1); transform: scale(1.08) rotate(20deg); } }
 .nav { display: flex; gap: 0.25rem; margin: 0 auto; }
@@ -678,3 +678,23 @@ p { margin: 0 0 0.8em; }
 .stat-readout { margin: 0; min-height: 1.3em; }
 .stats-card code { font-size: 0.85em; color: var(--ink-2); }
 .stat-label { overflow-wrap: anywhere; }
+
+/* ── Menu com todas as funções ── */
+.menu-btn { font-size: 1.05rem; flex: 0 0 auto; }
+.menu-backdrop { position: fixed; inset: 0; z-index: 90; background: rgba(4, 3, 16, 0.6); backdrop-filter: blur(4px); animation: menu-fade 0.2s ease-out; }
+.menu-panel { position: absolute; top: 0; bottom: 0; left: 0; width: min(330px, 86vw); border-radius: 0 22px 22px 0; padding: calc(14px + env(safe-area-inset-top, 0px)) 14px calc(14px + env(safe-area-inset-bottom, 0px)) max(14px, env(safe-area-inset-left, 0px)); display: flex; flex-direction: column; gap: 0.6rem; overflow-y: auto; animation: menu-in 0.25s ease-out; background: rgba(13, 11, 42, 0.96); }
+.menu-head { display: flex; align-items: center; gap: 0.55rem; padding: 0.2rem 0.3rem 0.6rem; border-bottom: 1px solid var(--line); }
+.menu-head .icon-btn { margin-left: auto; }
+.menu-panel ul { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 0.2rem; }
+.menu-panel li button { width: 100%; display: flex; align-items: center; gap: 0.8rem; text-align: left; background: none; border: 1px solid transparent; border-radius: 14px; padding: 0.6rem 0.7rem; color: var(--ink-2); }
+.menu-panel li button:hover { background: var(--glass-2); color: var(--ink); }
+.menu-panel li button.active { border-color: rgba(255, 232, 163, 0.45); background: rgba(255, 232, 163, 0.08); color: var(--ink); }
+.menu-icon { width: 1.8rem; text-align: center; font-family: var(--symbols); font-size: 1.15rem; color: var(--gold); flex: 0 0 auto; }
+.menu-text { display: flex; flex-direction: column; min-width: 0; }
+.menu-text b { font-weight: 500; color: inherit; }
+.menu-text small { color: var(--muted); font-size: 0.78rem; }
+@keyframes menu-in { from { transform: translateX(-100%); } to { transform: none; } }
+@keyframes menu-fade { from { opacity: 0; } to { opacity: 1; } }
+@media (prefers-reduced-motion: reduce) { .menu-panel, .menu-backdrop { animation: none; } }
+@media (max-width: 520px) { .hide-narrow { display: none; } }
+.menu-head .brand-name { display: inline; }

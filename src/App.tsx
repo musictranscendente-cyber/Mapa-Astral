@@ -57,6 +57,7 @@ function Main({ auth }: { auth: AuthState }) {
   const [settings, setSettings] = useSettings()
   const access = useAccess()
   const [notice, setNotice] = useState('')
+  const [menuOpen, setMenuOpen] = useState(false)
 
   useEffect(() => { trackVisit() }, [])
 
@@ -155,8 +156,9 @@ function Main({ auth }: { auth: AuthState }) {
     <>
       <Starfield motion={settings.motion} />
       <header className="topbar">
+        <button className="icon-btn menu-btn" aria-label="Abrir menu" aria-expanded={menuOpen} onClick={() => setMenuOpen(true)}>☰</button>
         <button className="brand" onClick={() => go('inicio')}>
-          <img className="brand-logo" src="./icons/logo-256.webp" alt="" width="34" height="34" />
+          <span className="brand-mark">✶</span>
           <span className="brand-name">Cosmic Sky</span>
         </button>
         <nav className="nav">
@@ -174,7 +176,7 @@ function Main({ auth }: { auth: AuthState }) {
             </select>
           )}
           {access.enabled && (
-            <button className={`icon-btn plans-btn ${route === 'planos' ? 'on' : ''}`} title="Planos" aria-label="Planos" onClick={() => go('planos')}>
+            <button className={`icon-btn plans-btn hide-narrow ${route === 'planos' ? 'on' : ''}`} title="Planos" aria-label="Planos" onClick={() => go('planos')}>
               {access.plan ? '✦' : '💎'}
             </button>
           )}
@@ -184,11 +186,12 @@ function Main({ auth }: { auth: AuthState }) {
               : auth.user ? (auth.user.email ?? '?').charAt(0).toUpperCase() : '☺'}
             {auth.user && <i className={`sync-dot ${sync}`} />}
           </button>
-          <button className={`icon-btn ${route === 'ajustes' ? 'on' : ''}`} title="Ajustes" aria-label="Ajustes" onClick={() => go('ajustes')}>
+          <button className={`icon-btn hide-narrow ${route === 'ajustes' ? 'on' : ''}`} title="Ajustes" aria-label="Ajustes" onClick={() => go('ajustes')}>
             ⚙
           </button>
         </div>
       </header>
+      {menuOpen && <MainMenu route={route} showPlans={access.enabled} onGo={(r) => { setMenuOpen(false); go(r) }} onClose={() => setMenuOpen(false)} />}
       {access.simulated && (
         <button className="sim-pill" onClick={() => go('ajustes')} title="Abrir o simulador em Ajustes">
           🧪 Simulação · {access.loggedIn ? (access.plan === 'cosmos' ? 'Cosmos' : access.plan === 'estrela' ? 'Estrela' : 'Grátis') : 'Sem login'} · {formatBRL(getSim().balance)}
@@ -203,5 +206,50 @@ function Main({ auth }: { auth: AuthState }) {
         <p className="muted">Feito com ✦ para quem busca conexão com as estrelas</p>
       </footer>
     </>
+  )
+}
+
+const MENU: { key: Route; label: string; icon: string; hint: string }[] = [
+  { key: 'inicio', label: 'Início', icon: '✦', hint: 'Seu céu em resumo' },
+  { key: 'mapa', label: 'Mapa Natal', icon: '☉', hint: 'Roda, relatório e análise completa' },
+  { key: 'ceu', label: 'Céu de Hoje', icon: '☽', hint: 'Lua, planetas e trânsitos do dia' },
+  { key: 'previsoes', label: 'Previsões', icon: '✧', hint: 'Dias de fluxo e trânsitos futuros' },
+  { key: 'sinastria', label: 'Sinastria', icon: '♡', hint: 'Compatibilidade entre duas pessoas' },
+  { key: 'revolucao', label: 'Revolução Solar', icon: '☼', hint: 'Seu ano pessoal e onde passar o aniversário' },
+  { key: 'perfis', label: 'Perfis', icon: '☷', hint: 'Seus mapas salvos' },
+  { key: 'planos', label: 'Planos', icon: '💎', hint: 'Planos e análises avulsas' },
+  { key: 'conta', label: 'Minha conta', icon: '☺', hint: 'Entrar, sincronizar e compras' },
+  { key: 'ajustes', label: 'Ajustes', icon: '⚙', hint: 'Notificações, casas e preferências' },
+]
+
+/** Side menu with every section of the app. */
+function MainMenu({ route, showPlans, onGo, onClose }: { route: Route; showPlans: boolean; onGo: (r: Route) => void; onClose: () => void }) {
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose() }
+    window.addEventListener('keydown', onKey)
+    const prev = document.body.style.overflow
+    document.body.style.overflow = 'hidden'
+    return () => { window.removeEventListener('keydown', onKey); document.body.style.overflow = prev }
+  }, [onClose])
+  return (
+    <div className="menu-backdrop" onClick={onClose}>
+      <nav className="menu-panel glass" aria-label="Menu" onClick={(e) => e.stopPropagation()}>
+        <div className="menu-head">
+          <span className="brand-mark">✶</span>
+          <span className="brand-name">Cosmic Sky</span>
+          <button className="icon-btn" aria-label="Fechar menu" autoFocus onClick={onClose}>✕</button>
+        </div>
+        <ul>
+          {MENU.filter((m) => showPlans || m.key !== 'planos').map((m) => (
+            <li key={m.key}>
+              <button className={route === m.key ? 'active' : ''} onClick={() => onGo(m.key)}>
+                <span className="menu-icon">{m.icon}</span>
+                <span className="menu-text"><b>{m.label}</b><small>{m.hint}</small></span>
+              </button>
+            </li>
+          ))}
+        </ul>
+      </nav>
+    </div>
   )
 }
