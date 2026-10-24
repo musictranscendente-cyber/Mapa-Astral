@@ -156,8 +156,8 @@ function Main({ auth }: { auth: AuthState }) {
       <Starfield motion={settings.motion} />
       <header className="topbar">
         <button className="brand" onClick={() => go('inicio')}>
-          <span className="brand-mark">✶</span>
-          <span className="brand-name">Mapa Astral</span>
+          <img className="brand-logo" src="./icons/logo-256.webp" alt="" width="34" height="34" />
+          <span className="brand-name">Cosmic Sky</span>
         </button>
         <nav className="nav">
           {NAV.map((n) => (

@@ -47,7 +47,7 @@ Deno.serve(async (req) => {
       notification_url: `${Deno.env.get('SUPABASE_URL')}/functions/v1/mp-webhook`,
       back_urls: { success: back, pending: back, failure: back },
       auto_return: 'approved',
-      statement_descriptor: 'MAPA ASTRAL',
+      statement_descriptor: 'COSMIC SKY',
     }),
   })
   const pref = await res.json().catch(() => ({}))

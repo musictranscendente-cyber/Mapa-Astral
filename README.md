@@ -1,4 +1,4 @@
-# ✶ Mapa Astral
+# Cosmic Sky — Mapa Astral
 
 Aplicativo web de astrologia com cálculos astronômicos precisos e visual imersivo: mapa natal completo,
 céu do dia e projeção de trânsitos pessoais para os dias e meses seguintes.

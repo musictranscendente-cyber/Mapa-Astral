@@ -1,4 +1,4 @@
-/* Mapa Astral service worker — daily sky notifications.
+/* Cosmic Sky service worker — daily sky notifications.
  * The page pre-computes the next days' personal messages (astro math runs in the app)
  * and hands them to this worker, which shows today's message at the chosen hour via
  * Periodic Background Sync (installed app on Chromium) or when the app is opened. */
@@ -33,8 +33,8 @@ async function showDue(force) {
   if (!msg) return
   await self.registration.showNotification(msg.title, {
     body: msg.body,
-    icon: './favicon.svg',
-    badge: './favicon.svg',
+    icon: './icons/icon-192.png',
+    badge: './icons/favicon-64.png',
     tag: 'daily-sky',
     data: { url: './#/ceu' },
   })
