@@ -37,7 +37,7 @@ export function ShareDialog({ chart, onClose }: Props) {
 
   const ready = image?.key === key ? image : null
   const link = shareUrl()
-  const text = `Olha o meu mapa astral ✦ Faça o seu grátis: ${link}`
+  const text = `Olha o meu mapa astral no Cosmic Sky ✦ Faça o seu grátis: ${link}`
   const fileName = `mapa-astral-${(chart.birth?.name ?? 'meu').split(' ')[0].toLowerCase()}.png`
   const file = ready ? new File([ready.blob], fileName, { type: 'image/png' }) : null
   const canShareFile = !!file && typeof navigator.canShare === 'function' && navigator.canShare({ files: [file] })

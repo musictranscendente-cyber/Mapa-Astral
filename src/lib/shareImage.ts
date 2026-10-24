@@ -239,7 +239,7 @@ export async function renderShareImage(chart: Chart, { format, showName }: Share
 
   ctx.fillStyle = GOLD
   ctx.font = `500 30px ${SANS}`
-  spaced(ctx, '✶  MAPA ASTRAL  ✶', w / 2, top, 6)
+  spaced(ctx, '✶  COSMIC SKY  ✶', w / 2, top, 6)
 
   const title = showName && name ? name : 'Meu mapa astral'
   const grad = ctx.createLinearGradient(w * 0.2, 0, w * 0.8, 0)
