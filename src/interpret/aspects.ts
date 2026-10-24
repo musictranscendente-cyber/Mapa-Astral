@@ -58,6 +58,7 @@ const DURATION: Partial<Record<PlanetKey, string>> = {
   uranus: 'um longo período (meses)',
   neptune: 'um longo período (meses a anos)',
   pluto: 'um período profundo e prolongado',
+  chiron: 'alguns meses',
   node: 'algumas semanas',
 }
 
@@ -72,6 +73,7 @@ const NATAL_TARGET: Partial<Record<PointKey, string>> = {
   uranus: 'sua necessidade de liberdade',
   neptune: 'sua sensibilidade e espiritualidade',
   pluto: 'seu poder pessoal e processos profundos',
+  chiron: 'sua ferida mais sensível e seu dom de cura',
   asc: 'sua forma de se apresentar e seu corpo',
   mc: 'sua carreira e direção de vida',
 }

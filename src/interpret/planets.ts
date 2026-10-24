@@ -80,6 +80,13 @@ export const PLANET_TEXT: Partial<Record<PointKey, PlanetText>> = {
     description: 'Plutão é a força de morte e renascimento: onde você vive transformações profundas.',
     transit: 'transforma profundamente e revela o oculto',
   },
+  chiron: {
+    principle: 'Ferida, cura e sabedoria',
+    keywords: ['ferida', 'cura', 'mestria', 'aceitação'],
+    verb: 'carrega uma ferida sensível que, acolhida, se transforma em dom de cura',
+    description: 'Quíron, o curador ferido, mostra onde você sentiu uma dor profunda — e onde, ao acolhê-la, desenvolve a sabedoria de ajudar os outros.',
+    transit: 'reabre feridas antigas para que possam, enfim, ser curadas',
+  },
   node: {
     principle: 'Destino e direção evolutiva',
     keywords: ['evoluir', 'crescer', 'propósito da alma'],

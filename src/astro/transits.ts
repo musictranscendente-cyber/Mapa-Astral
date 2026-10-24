@@ -4,7 +4,7 @@ import { houseOf } from './houses'
 import type { Chart } from './chart'
 
 export const TRANSIT_PLANETS: PlanetKey[] = [
-  'sun', 'moon', 'mercury', 'venus', 'mars', 'jupiter', 'saturn', 'uranus', 'neptune', 'pluto', 'node',
+  'sun', 'moon', 'mercury', 'venus', 'mars', 'jupiter', 'saturn', 'uranus', 'neptune', 'pluto', 'chiron', 'node',
 ]
 
 export const NATAL_TARGETS: PointKey[] = [
@@ -13,7 +13,7 @@ export const NATAL_TARGETS: PointKey[] = [
 
 /** How strongly a transiting body is felt (slow movers = deep, long-lasting). */
 export const TRANSIT_WEIGHT: Partial<Record<PlanetKey, number>> = {
-  pluto: 5, neptune: 4.5, uranus: 4.5, saturn: 4, jupiter: 3, node: 2,
+  pluto: 5, neptune: 4.5, uranus: 4.5, saturn: 4, jupiter: 3, chiron: 2.5, node: 2,
   mars: 2.5, sun: 2, venus: 1.6, mercury: 1.4, moon: 1,
 }
 
@@ -88,7 +88,7 @@ export interface TransitEvent {
 
 const STEP_DAYS: Partial<Record<PlanetKey, number>> = {
   moon: 0.125, mercury: 0.5, venus: 0.5, sun: 0.5, mars: 0.5,
-  jupiter: 1, saturn: 1, uranus: 2, neptune: 2, pluto: 2, node: 1,
+  jupiter: 1, saturn: 1, uranus: 2, neptune: 2, pluto: 2, chiron: 2, node: 1,
 }
 
 /**
@@ -193,7 +193,7 @@ const AREA_PLANETS: Record<LifeArea, PointKey[]> = {
   energia: ['mars', 'sun', 'asc'],
   mente: ['mercury', 'uranus'],
   emocoes: ['moon', 'neptune', 'pluto'],
-  espirito: ['neptune', 'jupiter', 'pluto', 'node'],
+  espirito: ['neptune', 'jupiter', 'pluto', 'node', 'chiron'],
 }
 
 const AREA_HOUSES: Record<LifeArea, number[]> = {
