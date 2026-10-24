@@ -1,14 +1,22 @@
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import type { Chart } from '../astro/chart'
 import { HOUSE_SYSTEMS } from '../astro/houses'
 import { AI_ENDPOINT, getUserKey, setUserKey } from '../ai/config'
 import { buildDailyMessages, enableNotifications, notificationsSupported, scheduleMessages, testNotification } from '../lib/notifications'
-import type { Settings } from '../lib/profiles'
+import type { NotifyTopics, Settings } from '../lib/profiles'
 import { BILLING } from '../billing/api'
 import { useAccess } from '../billing/context'
 import { SimulatorCard } from '../components/SimulatorCard'
 import { StatsCard } from '../components/StatsCard'
 import type { Route } from '../App'
+
+const TOPICS: [keyof NotifyTopics, string, string][] = [
+  ['transitos', 'Trânsitos sobre o seu mapa', 'a mensagem principal do dia'],
+  ['lunacoes', 'Lua Nova, Lua Cheia e eclipses', 'no dia em que acontecem'],
+  ['planetas', 'Retrógrados e mudanças de signo', 'quando um planeta para, volta ou muda de signo'],
+  ['luaSigno', 'Lua mudando de signo', 'a cada 2 ou 3 dias'],
+  ['foraDeCurso', 'Lua fora de curso', 'horários para evitar começos importantes'],
+]
 
 interface Props {
   natal: Chart | null
@@ -23,7 +31,7 @@ export function SettingsPage({ natal, settings, setSettings, go }: Props) {
     notificationsSupported() ? Notification.permission : 'unsupported')
   const [key, setKey] = useState(getUserKey)
   const [saved, setSaved] = useState(false)
-  const preview = natal ? buildDailyMessages(natal, settings.notifyHour, 3) : []
+  const preview = useMemo(() => (natal ? buildDailyMessages(natal, settings.notifyHour, 3, settings.notifyTopics) : []), [natal, settings.notifyHour, settings.notifyTopics])
 
   const toggleNotify = async (on: boolean) => {
     if (on) {
@@ -32,7 +40,7 @@ export function SettingsPage({ natal, settings, setSettings, go }: Props) {
       if (r !== 'granted') return
     }
     setSettings((s) => ({ ...s, notify: on }))
-    await scheduleMessages(natal, on, settings.notifyHour)
+    await scheduleMessages(natal, on, settings.notifyHour, settings.notifyTopics)
   }
 
   const clearAiCache = () => {
@@ -53,7 +61,7 @@ export function SettingsPage({ natal, settings, setSettings, go }: Props) {
 
       <section className="glass pad settings-card">
         <h2>☽ Notificação diária</h2>
-        <p className="muted">Receba todas as manhãs o principal trânsito do dia sobre o seu mapa e o clima da Lua.</p>
+        <p className="muted">Receba uma mensagem por dia com o céu do dia sobre o seu mapa. Escolha abaixo o que você quer acompanhar.</p>
         {notifStatus === 'unsupported' ? (
           <p className="warn">Este navegador não suporta notificações. No celular, instale o app pela opção "Adicionar à tela inicial".</p>
         ) : (
@@ -70,12 +78,21 @@ export function SettingsPage({ natal, settings, setSettings, go }: Props) {
                 onChange={async (e) => {
                   const h = Number(e.target.value)
                   setSettings((s) => ({ ...s, notifyHour: h }))
-                  await scheduleMessages(natal, settings.notify, h)
+                  await scheduleMessages(natal, settings.notify, h, settings.notifyTopics)
                 }}
               >
                 {Array.from({ length: 24 }, (_, h) => <option key={h} value={h}>{String(h).padStart(2, '0')}:00</option>)}
               </select>
             </label>
+            <fieldset className="notif-topics">
+              <legend className="eyebrow">O que avisar</legend>
+              {TOPICS.map(([k, label, hint]) => (
+                <label key={k} className="check">
+                  <input type="checkbox" checked={settings.notifyTopics[k]} onChange={(e) => setSettings((s) => ({ ...s, notifyTopics: { ...s.notifyTopics, [k]: e.target.checked } }))} />
+                  <span>{label} <small className="muted">· {hint}</small></span>
+                </label>
+              ))}
+            </fieldset>
             {settings.notify && notifStatus === 'granted' && <button className="ghost" onClick={() => testNotification()}>Enviar notificação de teste</button>}
             {preview.length > 0 && (
               <div className="notif-preview">
@@ -85,7 +102,7 @@ export function SettingsPage({ natal, settings, setSettings, go }: Props) {
                     <span className="nc-icon">✶</span>
                     <div>
                       <strong>{m.title}</strong>
-                      <p>{m.body}</p>
+                      {m.body.split('\n').map((l, i) => <p key={i}>{l}</p>)}
                       <small className="muted">{new Date(m.date + 'T12:00').toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'short' })}</small>
                     </div>
                   </div>
