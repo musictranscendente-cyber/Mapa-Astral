@@ -38,7 +38,7 @@ body {
   overflow-x: hidden;
 }
 button, input, select { font: inherit; color: inherit; }
-button { cursor: pointer; }
+button { cursor: pointer; -webkit-tap-highlight-color: transparent; }
 h1, h2, h3, h4 { font-family: var(--display); font-weight: 600; letter-spacing: 0.02em; margin: 0 0 0.4em; line-height: 1.2; }
 h2 { font-size: 1.35rem; color: var(--gold); }
 h3 { font-size: 1.15rem; }
@@ -72,7 +72,7 @@ p { margin: 0 0 0.8em; }
 .brand-name { font-family: var(--display); font-size: 1.2rem; letter-spacing: 0.14em; background: linear-gradient(90deg, var(--gold), #fff, var(--gold)); -webkit-background-clip: text; background-clip: text; color: transparent; }
 @keyframes pulse { 50% { text-shadow: 0 0 30px rgba(255, 232, 163, 1); transform: scale(1.08) rotate(20deg); } }
 .nav { display: flex; gap: 0.25rem; margin: 0 auto; }
-.nav button { display: flex; align-items: center; gap: 0.45rem; background: none; border: 1px solid transparent; border-radius: 999px; padding: 0.45rem 0.95rem; color: var(--ink-2); transition: all 0.25s; }
+.nav button { display: flex; align-items: center; gap: 0.45rem; background: none; border: 1px solid transparent; border-radius: 999px; padding: 0.45rem 0.95rem; color: var(--ink-2); transition: color 0.2s, box-shadow 0.2s; }
 .nav button:hover { color: var(--ink); background: var(--glass-2); }
 .nav button.active { color: var(--bg); background: linear-gradient(135deg, var(--gold), #f6c97a); box-shadow: 0 0 22px rgba(255, 232, 163, 0.45); }
 .nav-icon { font-family: var(--symbols); }
@@ -83,8 +83,8 @@ p { margin: 0 0 0.8em; }
 .icon-btn { background: var(--glass); border: 1px solid var(--line); border-radius: 50%; width: 36px; height: 36px; color: var(--gold); }
 
 /* ---------- Layout ---------- */
-.page { max-width: 1240px; margin: 0 auto; padding: clamp(1rem, 3vw, 2.4rem) clamp(1rem, 3vw, 2rem) 6rem; animation: pageIn 0.7s cubic-bezier(0.2, 0.8, 0.2, 1); }
-@keyframes pageIn { from { opacity: 0; transform: translateY(18px); filter: blur(6px); } to { opacity: 1; transform: none; filter: none; } }
+.page { max-width: 1240px; margin: 0 auto; padding: clamp(1rem, 3vw, 2.4rem) clamp(1rem, 3vw, 2rem) 6rem; animation: pageIn 0.28s ease-out; }
+@keyframes pageIn { from { opacity: 0.35; transform: translateY(6px); } to { opacity: 1; transform: none; } }
 .footer { text-align: center; padding: 2rem 1rem 6rem; color: var(--muted); font-size: 0.8rem; border-top: 1px solid var(--line); }
 
 .glass {
@@ -477,6 +477,7 @@ p { margin: 0 0 0.8em; }
 .settings-card { display: grid; gap: 0.9rem; margin-bottom: 1.4rem; }
 .settings-card .select { justify-content: flex-start; }
 .head-tools.left { justify-content: flex-start; margin: 0; }
+.page-head .head-tools + p { margin-top: 1rem; }
 .notif-preview { display: grid; gap: 0.6rem; }
 .notif-card { display: flex; gap: 0.8rem; padding: 0.8rem 1rem; }
 .notif-card p { margin: 0.2rem 0; color: var(--ink-2); font-size: 0.9rem; }
@@ -514,10 +515,16 @@ p { margin: 0 0 0.8em; }
   .nav button { padding: 0.38rem 0.55rem; font-size: 0.82rem; gap: 0.3rem; }
 }
 @media (min-width: 721px) and (max-width: 1440px) { .nav-icon { display: none; } }
-/* Fade the edges of the scrollable services bar so it reads as scrollable. */
-.nav.scroll-start { -webkit-mask-image: linear-gradient(90deg, transparent, #000 2.5rem); mask-image: linear-gradient(90deg, transparent, #000 2.5rem); }
-.nav.scroll-end { -webkit-mask-image: linear-gradient(90deg, #000 calc(100% - 2.5rem), transparent); mask-image: linear-gradient(90deg, #000 calc(100% - 2.5rem), transparent); }
-.nav.scroll-start.scroll-end { -webkit-mask-image: linear-gradient(90deg, transparent, #000 2.5rem, #000 calc(100% - 2.5rem), transparent); mask-image: linear-gradient(90deg, transparent, #000 2.5rem, #000 calc(100% - 2.5rem), transparent); }
+/* Fade the edges of the scrollable services bar so it reads as scrollable (eased, never switched abruptly). */
+@property --fade-start { syntax: '<length>'; inherits: false; initial-value: 0px; }
+@property --fade-end { syntax: '<length>'; inherits: false; initial-value: 0px; }
+.nav {
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 var(--fade-start), #000 calc(100% - var(--fade-end)), transparent);
+  mask-image: linear-gradient(90deg, transparent, #000 var(--fade-start), #000 calc(100% - var(--fade-end)), transparent);
+  transition: --fade-start 0.3s, --fade-end 0.3s;
+}
+.nav.scroll-start { --fade-start: 2.5rem; }
+.nav.scroll-end { --fade-end: 2.5rem; }
 @media (max-width: 400px) {
   .profile-switch { max-width: 84px; padding: 0.4rem 0.6rem; }
   .top-actions { gap: 0.35rem; }
@@ -764,7 +771,11 @@ p { margin: 0 0 0.8em; }
 .h-moon { display: flex; align-items: center; gap: 0.8rem; }
 .h-moon p { margin: 0; }
 .h-cta h3 { margin: 0 0 0.3rem; font-family: var(--display); font-weight: 500; }
-.home-signs { margin: 0 0 2rem; }
+.home-signs { margin: 2.6rem 0 2rem; }
+@media (max-width: 720px) {
+  .hero-actions .cta { flex: 1 1 100%; }
+  .hero-actions .ghost { flex: 1 1 0; min-width: 0; white-space: nowrap; }
+}
 .home-signs .section-title { display: flex; justify-content: space-between; align-items: baseline; gap: 1rem; flex-wrap: wrap; }
 
 /* ── Termos e privacidade ── */
@@ -820,7 +831,7 @@ p { margin: 0 0 0.8em; }
 .calendar { display: flex; flex-direction: column; gap: 1rem; }
 .cal-grid { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 0.3rem; }
 .cal-wd { text-align: center; font-size: 0.72rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; }
-.cal-day { aspect-ratio: 1; min-height: 44px; display: flex; flex-direction: column; align-items: center; justify-content: space-between; padding: 0.3rem 0.1rem; border-radius: 10px; border: 1px solid transparent; background: var(--glass-2); color: var(--ink-2); }
+.cal-day { aspect-ratio: 1; width: 100%; min-width: 0; min-height: 44px; overflow: hidden; display: flex; flex-direction: column; align-items: center; justify-content: space-between; padding: 0.3rem 0.1rem; border-radius: 10px; border: 1px solid transparent; background: var(--glass-2); color: var(--ink-2); }
 .cal-day .n { font-variant-numeric: tabular-nums; font-size: 0.85rem; }
 .cal-day .icons { display: flex; gap: 1px; font-family: var(--symbols); font-size: 0.7rem; color: var(--gold); min-height: 1em; }
 .cal-day .icons i { font-style: normal; }
