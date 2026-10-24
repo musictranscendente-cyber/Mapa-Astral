@@ -17,6 +17,7 @@ import { HoroscopePage } from './pages/HoroscopePage'
 import { LegalPage } from './pages/LegalPage'
 import { LunationsPage } from './pages/LunationsPage'
 import { LunarReturnPage } from './pages/LunarReturnPage'
+import { ProgressionsPage } from './pages/ProgressionsPage'
 import { rememberReturn, takeReturn, useAuth, type AuthState } from './lib/auth'
 import { AccessProvider } from './billing/access'
 import { useAccess } from './billing/context'
@@ -26,7 +27,7 @@ import type { BirthData } from './astro/chart'
 import { track, trackVisit } from './lib/analytics'
 import { armInAppTimer, registerServiceWorker, scheduleMessages } from './lib/notifications'
 
-export type Route = 'inicio' | 'mapa' | 'ceu' | 'previsoes' | 'sinastria' | 'revolucao' | 'perfis' | 'ajustes' | 'conta' | 'planos' | 'horoscopo' | 'termos' | 'privacidade' | 'lunacoes' | 'retorno-lunar'
+export type Route = 'inicio' | 'mapa' | 'ceu' | 'previsoes' | 'sinastria' | 'revolucao' | 'perfis' | 'ajustes' | 'conta' | 'planos' | 'horoscopo' | 'termos' | 'privacidade' | 'lunacoes' | 'retorno-lunar' | 'progressoes'
 
 const NAV: { key: Route; label: string; icon: string }[] = [
   { key: 'inicio', label: 'Início', icon: '✦' },
@@ -38,7 +39,7 @@ const NAV: { key: Route; label: string; icon: string }[] = [
   { key: 'perfis', label: 'Perfis', icon: '☷' },
 ]
 
-const ROUTES: Route[] = [...NAV.map((n) => n.key), 'ajustes', 'conta', 'planos', 'horoscopo', 'termos', 'privacidade', 'lunacoes', 'retorno-lunar']
+const ROUTES: Route[] = [...NAV.map((n) => n.key), 'ajustes', 'conta', 'planos', 'horoscopo', 'termos', 'privacidade', 'lunacoes', 'retorno-lunar', 'progressoes']
 
 const readRoute = (): Route => {
   // Payment providers append `?status=…` after the hash route.
@@ -138,6 +139,8 @@ function Main({ auth }: { auth: AuthState }) {
         return <SolarReturnPage key={active?.id} natal={natal} houseSystem={settings.houseSystem} go={go} />
       case 'conta':
         return <AccountPage user={auth.user} loading={auth.loading} sync={sync} profileCount={profiles.length} onClearLocal={clearLocal} />
+      case 'progressoes':
+        return <ProgressionsPage natal={natal} go={go} />
       case 'retorno-lunar':
         return <LunarReturnPage key={active?.id} natal={natal} houseSystem={settings.houseSystem} go={go} />
       case 'lunacoes':
@@ -229,6 +232,7 @@ const MENU: { key: Route; label: string; icon: string; hint: string }[] = [
   { key: 'mapa', label: 'Mapa Natal', icon: '☉', hint: 'Roda, relatório e análise completa' },
   { key: 'ceu', label: 'Céu de Hoje', icon: '☽', hint: 'Lua, planetas e trânsitos do dia' },
   { key: 'previsoes', label: 'Previsões', icon: '✧', hint: 'Dias de fluxo e trânsitos futuros' },
+  { key: 'progressoes', label: 'Progressões', icon: '➶', hint: 'Seu mapa amadurecido e arcos solares' },
   { key: 'lunacoes', label: 'Eclipses e Lunações', icon: '◐', hint: 'Luas novas, cheias e eclipses no seu mapa' },
   { key: 'sinastria', label: 'Sinastria', icon: '♡', hint: 'Compatibilidade entre duas pessoas' },
   { key: 'revolucao', label: 'Revolução Solar', icon: '☼', hint: 'Seu ano pessoal e onde passar o aniversário' },
