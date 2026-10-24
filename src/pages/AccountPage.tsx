@@ -110,6 +110,7 @@ function SignIn() {
       {busy && <div className="loader small"><span /></div>}
       {error && <p className="error">{error}</p>}
       <p className="muted small">Sem senha: você entra pelo Google ou por um código enviado ao seu e-mail. Os mapas deste aparelho são enviados para a sua conta ao entrar.</p>
+      <p className="muted small">Ao entrar, você concorda com os <a href="#/termos">Termos de Uso</a> e a <a href="#/privacidade">Política de Privacidade</a>.</p>
     </section>
   )
 }

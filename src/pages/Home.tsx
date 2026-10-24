@@ -51,6 +51,21 @@ export function Home({ natal, profile, onCreate, go }: Props) {
         </div>
       </section>
 
+      <section className="home-signs">
+        <div className="section-title">
+          <h2>☀ Horóscopo do dia</h2>
+          <span className="muted small">Escolha o seu signo</span>
+        </div>
+        <nav className="sign-picker" aria-label="Horóscopo por signo">
+          {SIGNS.map((x) => (
+            <button key={x.key} onClick={() => { window.location.hash = `/horoscopo?signo=${x.key}`; window.scrollTo({ top: 0 }) }} style={{ ['--el' as string]: ELEMENT_INFO[x.element].color }}>
+              <span className="sign-glyph">{x.glyph}</span>
+              <span>{x.name}</span>
+            </button>
+          ))}
+        </nav>
+      </section>
+
       <section className="today-strip">
         <div className="glass sky-card">
           <MoonPhase angle={moon.angle} size={96} south={(profile?.latitude ?? -23) < 0} />

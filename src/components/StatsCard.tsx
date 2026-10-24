@@ -140,6 +140,7 @@ function StatsBody({ stats, days }: { stats: AppStats; days: number }) {
 const SOURCE_LABEL: Record<string, string> = {
   direto: 'Acesso direto / app instalado',
   compartilhar: 'Imagem ou link compartilhado ✦',
+  horoscopo: 'Horóscopo compartilhado ☀',
   instagram: 'Instagram',
   whatsapp: 'WhatsApp',
   facebook: 'Facebook',
