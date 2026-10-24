@@ -1,4 +1,5 @@
 import type { Chart } from '../astro/chart'
+import { CHIRON_SIGN } from './chiron'
 import {
   ELEMENT_INFO, MODALITY_INFO, POINTS, SIGNS, formatDegree,
   type Element, type Modality, type PlanetKey, type PointKey,
@@ -149,6 +150,23 @@ export function buildNatalReport(chart: Chart): ReportSection[] {
     ],
   })
 
+  // Chiron
+  const ch = P.chiron
+  sections.push({
+    id: 'quiron',
+    title: `Quíron em ${SIGNS[ch.sign].name}`,
+    subtitle: `O curador ferido · ${formatDegree(ch.lon)}${chart.hasHouses ? ` · Casa ${ch.house}` : ''}${ch.retro ? ' · Retrógrado' : ''}`,
+    glyph: POINTS.chiron.glyph,
+    color: POINTS.chiron.color,
+    paragraphs: [
+      PLANET_TEXT.chiron!.description,
+      `Em ${SIGNS[ch.sign].name}, Quíron fala de ${CHIRON_SIGN[ch.sign].wound}. Não é um defeito: é um ponto sensível que pede consciência e gentileza.`,
+      `O dom que nasce dessa ferida: ${CHIRON_SIGN[ch.sign].gift}.`,
+      chart.hasHouses ? `Na ${HOUSE_TEXT[ch.house - 1].name} (${HOUSE_TEXT[ch.house - 1].theme.toLowerCase()}), é nos temas de ${HOUSE_TEXT[ch.house - 1].keywords.join(', ')} que a ferida aparece — e onde a cura acontece.` : '',
+    ],
+    tags: PLANET_TEXT.chiron!.keywords,
+  })
+
   // Lilith
   sections.push({
     id: 'lilith',
@@ -201,4 +219,5 @@ export const RETRO_TEXT: Partial<Record<PlanetKey, string>> = {
   uranus: 'Urano retrógrado: libertação interior e revisão de mudanças.',
   neptune: 'Netuno retrógrado: clareza sobre ilusões; espiritualidade introspectiva.',
   pluto: 'Plutão retrógrado: transformação silenciosa e profunda.',
+  chiron: 'Quíron retrógrado: tempo de olhar para feridas antigas com mais gentileza.',
 }

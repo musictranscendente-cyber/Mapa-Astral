@@ -169,7 +169,7 @@ export function SolarReturnPage({ natal, houseSystem, go }: Props) {
         <div className="glass pad">
           <h2>Posições do ano</h2>
           <ul className="planet-rows">
-            {(['sun', 'moon', 'mercury', 'venus', 'mars', 'jupiter', 'saturn', 'uranus', 'neptune', 'pluto', 'node'] as PointKey[]).map((k) => {
+            {(['sun', 'moon', 'mercury', 'venus', 'mars', 'jupiter', 'saturn', 'uranus', 'neptune', 'pluto', 'chiron', 'node'] as PointKey[]).map((k) => {
               const p = sr.points[k]
               return (
                 <li key={k}>

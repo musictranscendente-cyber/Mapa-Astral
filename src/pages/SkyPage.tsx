@@ -46,7 +46,7 @@ export function SkyPage({ natal, profile, settings, go }: Props) {
   const hits = useMemo(() => (natal ? transitsAt(natal, date) : []), [natal, date])
   const score = useMemo(() => (natal ? scoreDay(natal, date) : null), [natal, date])
 
-  const retros = (['mercury', 'venus', 'mars', 'jupiter', 'saturn', 'uranus', 'neptune', 'pluto'] as PlanetKey[]).filter((k) => sky.points[k].retro)
+  const retros = (['mercury', 'venus', 'mars', 'jupiter', 'saturn', 'uranus', 'neptune', 'pluto', 'chiron'] as PlanetKey[]).filter((k) => sky.points[k].retro)
 
   const useMyLocation = () => {
     navigator.geolocation?.getCurrentPosition((pos) => {
@@ -149,7 +149,7 @@ export function SkyPage({ natal, profile, settings, go }: Props) {
         <div className="glass pad">
           <h2>Planetas agora</h2>
           <ul className="planet-rows">
-            {(['sun', 'moon', 'mercury', 'venus', 'mars', 'jupiter', 'saturn', 'uranus', 'neptune', 'pluto', 'node'] as PlanetKey[]).map((k) => {
+            {(['sun', 'moon', 'mercury', 'venus', 'mars', 'jupiter', 'saturn', 'uranus', 'neptune', 'pluto', 'chiron', 'node'] as PlanetKey[]).map((k) => {
               const p = sky.points[k]
               const s = SIGNS[p.sign]
               return (

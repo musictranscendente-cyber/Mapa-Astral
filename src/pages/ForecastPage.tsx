@@ -25,7 +25,7 @@ const RANGES = [
 ]
 
 type Speed = 'todos' | 'lentos' | 'rapidos'
-const SLOW: PlanetKey[] = ['jupiter', 'saturn', 'uranus', 'neptune', 'pluto', 'node']
+const SLOW: PlanetKey[] = ['jupiter', 'saturn', 'uranus', 'neptune', 'pluto', 'chiron', 'node']
 const FAST: PlanetKey[] = ['sun', 'mercury', 'venus', 'mars']
 
 const startOfDay = (d: Date) => new Date(d.getFullYear(), d.getMonth(), d.getDate(), 12, 0, 0)

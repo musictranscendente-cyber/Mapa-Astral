@@ -5,7 +5,7 @@ import type { DayScore, TransitEvent } from '../astro/transits'
 
 export { READING_TITLES, SYSTEM_PROMPT, buildUserPrompt, clampSummary, type ReadingKind } from './promptCore'
 
-const LIST: PointKey[] = ['sun', 'moon', 'mercury', 'venus', 'mars', 'jupiter', 'saturn', 'uranus', 'neptune', 'pluto', 'node', 'lilith']
+const LIST: PointKey[] = ['sun', 'moon', 'mercury', 'venus', 'mars', 'jupiter', 'saturn', 'uranus', 'neptune', 'pluto', 'chiron', 'node', 'lilith']
 
 export function chartSummary(chart: Chart, label = 'Mapa'): string {
   const lines: string[] = []

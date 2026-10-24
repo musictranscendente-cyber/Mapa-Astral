@@ -36,6 +36,9 @@ céu do dia e projeção de trânsitos pessoais para os dias e meses seguintes.
 
 - Efemérides: [Astronomy Engine](https://github.com/cosinekitty/astronomy) (VSOP87/ELP, precisão melhor que 1′),
   posições aparentes geocêntricas na eclíptica e equinócio verdadeiros da data (zodíaco tropical).
+- Quíron: tabela heliocêntrica gerada do Swiss Ephemeris (`seas_18.se1`, 1800–2100, passo de 30 dias) combinada à
+  Terra do Astronomy Engine com tempo de luz e aberração; diferença máxima de 0,3″ frente ao Swiss Ephemeris
+  (`src/astro/chiron.test.ts`; gerador em `scripts/chiron-table.py`).
 - Nodo verdadeiro calculado pelo plano osculador da órbita lunar (validado contra a série de Meeus).
 - Ascendente/MC a partir do tempo sideral aparente e da obliquidade verdadeira.
 - Fuso horário histórico (incluindo horário de verão brasileiro) via base IANA do navegador; cidades por

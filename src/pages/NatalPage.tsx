@@ -207,7 +207,7 @@ function PointDetail({ chart, k }: { chart: Chart; k: PointKey }) {
 }
 
 function PlanetTable({ chart, onPick }: { chart: Chart; onPick: (k: PointKey) => void }) {
-  const keys: PointKey[] = ['sun', 'moon', 'mercury', 'venus', 'mars', 'jupiter', 'saturn', 'uranus', 'neptune', 'pluto', 'node', 'southNode', 'lilith']
+  const keys: PointKey[] = ['sun', 'moon', 'mercury', 'venus', 'mars', 'jupiter', 'saturn', 'uranus', 'neptune', 'pluto', 'chiron', 'node', 'southNode', 'lilith']
   if (chart.hasHouses) keys.push('fortune', 'asc', 'mc')
   return (
     <div className="glass table-wrap">

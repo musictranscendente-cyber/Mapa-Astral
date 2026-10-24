@@ -45,7 +45,7 @@ export const MODALITY_INFO: Record<Modality, { name: string; essence: string }> 
 
 export type PlanetKey =
   | 'sun' | 'moon' | 'mercury' | 'venus' | 'mars' | 'jupiter' | 'saturn'
-  | 'uranus' | 'neptune' | 'pluto' | 'node' | 'southNode' | 'lilith'
+  | 'uranus' | 'neptune' | 'pluto' | 'chiron' | 'node' | 'southNode' | 'lilith'
 
 export type PointKey = PlanetKey | 'asc' | 'mc' | 'dsc' | 'ic' | 'fortune'
 
@@ -70,6 +70,7 @@ export const POINTS: Record<PointKey, PointInfo> = {
   uranus: { key: 'uranus', name: 'Urano', glyph: '♅' + T, color: '#6ef0e0', weight: 1 },
   neptune: { key: 'neptune', name: 'Netuno', glyph: '♆' + T, color: '#7aa2ff', weight: 1 },
   pluto: { key: 'pluto', name: 'Plutão', glyph: '♇' + T, color: '#c77dff', weight: 1 },
+  chiron: { key: 'chiron', name: 'Quíron', glyph: '⚷' + T, color: '#e0a87a', weight: 0.5 },
   node: { key: 'node', name: 'Nodo Norte', glyph: '☊' + T, color: '#a0f0b0', weight: 0.5 },
   southNode: { key: 'southNode', name: 'Nodo Sul', glyph: '☋' + T, color: '#88a090', weight: 0 },
   lilith: { key: 'lilith', name: 'Lilith', glyph: '⚸' + T, color: '#d06aa0', weight: 0 },
@@ -82,7 +83,7 @@ export const POINTS: Record<PointKey, PointInfo> = {
 
 export const PLANET_ORDER: PlanetKey[] = [
   'sun', 'moon', 'mercury', 'venus', 'mars', 'jupiter', 'saturn',
-  'uranus', 'neptune', 'pluto', 'node', 'southNode', 'lilith',
+  'uranus', 'neptune', 'pluto', 'chiron', 'node', 'southNode', 'lilith',
 ]
 
 export type AspectKey = 'conjunction' | 'sextile' | 'square' | 'trine' | 'opposition' | 'quincunx' | 'semisextile'

@@ -1,5 +1,6 @@
 import * as A from 'astronomy-engine'
 import { norm360, type PlanetKey } from './constants'
+import { chironEcliptic } from './chiron'
 
 const BODY: Partial<Record<PlanetKey, A.Body>> = {
   sun: A.Body.Sun,
@@ -78,6 +79,7 @@ export function bodyEcliptic(key: PlanetKey, t: A.AstroTime): { lon: number; lat
   if (key === 'node') return { lon: trueNode(t), lat: 0 }
   if (key === 'southNode') return { lon: norm360(trueNode(t) + 180), lat: 0 }
   if (key === 'lilith') return { lon: meanLilith(t), lat: 0 }
+  if (key === 'chiron') return chironEcliptic(t)
   const body = BODY[key]!
   const vec = A.GeoVector(body, t, true)
   const ecl = A.Ecliptic(vec)

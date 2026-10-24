@@ -129,14 +129,14 @@ export function chartFromBirth(birth: BirthData, houseSystem: HouseSystem = 'pla
 /** Points that take part in natal aspects. */
 export const ASPECT_POINTS: PointKey[] = [
   'sun', 'moon', 'mercury', 'venus', 'mars', 'jupiter', 'saturn',
-  'uranus', 'neptune', 'pluto', 'node', 'lilith', 'asc', 'mc',
+  'uranus', 'neptune', 'pluto', 'chiron', 'node', 'lilith', 'asc', 'mc',
 ]
 
 function orbFor(type: AspectInfo, a: PointKey, b: PointKey): number {
   let orb = type.orb
   const lum = (k: PointKey) => k === 'sun' || k === 'moon'
   if (lum(a) || lum(b)) orb += type.major ? 2 : 0.5
-  const minor = (k: PointKey) => k === 'node' || k === 'lilith'
+  const minor = (k: PointKey) => k === 'node' || k === 'lilith' || k === 'chiron'
   if (minor(a) || minor(b)) orb = Math.min(orb, type.major ? 4 : 1.5)
   return orb
 }

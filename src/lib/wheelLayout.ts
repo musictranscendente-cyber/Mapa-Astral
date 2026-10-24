@@ -2,10 +2,10 @@ import { norm360, type PointKey } from '../astro/constants'
 
 export const WHEEL_POINTS: PointKey[] = [
   'sun', 'moon', 'mercury', 'venus', 'mars', 'jupiter', 'saturn',
-  'uranus', 'neptune', 'pluto', 'node', 'lilith', 'fortune',
+  'uranus', 'neptune', 'pluto', 'chiron', 'node', 'lilith', 'fortune',
 ]
 
-export const OUTER_POINTS: PointKey[] = ['sun', 'moon', 'mercury', 'venus', 'mars', 'jupiter', 'saturn', 'uranus', 'neptune', 'pluto', 'node']
+export const OUTER_POINTS: PointKey[] = ['sun', 'moon', 'mercury', 'venus', 'mars', 'jupiter', 'saturn', 'uranus', 'neptune', 'pluto', 'chiron', 'node']
 
 /** Spread labels apart so glyphs never overlap, keeping order. */
 export function spread(items: { key: PointKey; lon: number }[], minGap: number) {
