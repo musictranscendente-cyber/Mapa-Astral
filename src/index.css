@@ -83,7 +83,7 @@ p { margin: 0 0 0.8em; }
 .icon-btn { background: var(--glass); border: 1px solid var(--line); border-radius: 50%; width: 36px; height: 36px; color: var(--gold); }
 
 /* ---------- Layout ---------- */
-.page { max-width: 1240px; margin: 0 auto; padding: clamp(1rem, 3vw, 2.4rem) clamp(1rem, 3vw, 2rem) 6rem; animation: pageIn 0.28s ease-out; }
+.page { overflow-x: clip; max-width: 1240px; margin: 0 auto; padding: clamp(1rem, 3vw, 2.4rem) clamp(1rem, 3vw, 2rem) 6rem; animation: pageIn 0.28s ease-out; }
 @keyframes pageIn { from { opacity: 0.35; transform: translateY(6px); } to { opacity: 1; transform: none; } }
 .footer { text-align: center; padding: 2rem 1rem 6rem; color: var(--muted); font-size: 0.8rem; border-top: 1px solid var(--line); }
 
@@ -477,6 +477,9 @@ p { margin: 0 0 0.8em; }
 .settings-card { display: grid; gap: 0.9rem; margin-bottom: 1.4rem; }
 .settings-card .select { justify-content: flex-start; }
 .head-tools.left { justify-content: flex-start; margin: 0; }
+.sky-controls { display: flex; flex-direction: column; align-items: center; gap: 0.9rem; margin-top: 1rem; }
+.sky-controls .head-tools { margin: 0; }
+.sky-controls input[type='datetime-local'] { max-width: none; min-width: 13.5rem; }
 .page-head .head-tools + p { margin-top: 1rem; }
 .notif-preview { display: grid; gap: 0.6rem; }
 .notif-card { display: flex; gap: 0.8rem; padding: 0.8rem 1rem; }

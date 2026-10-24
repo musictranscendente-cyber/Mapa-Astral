@@ -68,31 +68,39 @@ export function SkyPage({ natal, profile, settings, go }: Props) {
           {date.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })} ({userTimeZone()}) · {loc.label}
           {live && <span className="live-dot"> ● ao vivo</span>}
         </p>
-        <div className="head-tools">
-          <button className="ghost" onClick={() => shift(-1)}>‹ Ontem</button>
-          <input
-            type="datetime-local"
-            value={toInput(date)}
-            onChange={(e) => { if (e.target.value) { setLive(false); setDate(new Date(e.target.value)) } }}
-          />
-          <button className="ghost" onClick={() => shift(1)}>Amanhã ›</button>
-          <button className="ghost" onClick={() => { setLive(true); setDate(new Date()) }}>Agora</button>
-          <button className="ghost" onClick={useMyLocation}>⌖ Minha localização</button>
-        </div>
-        {natal && (
-          <div className="segmented">
-            <button className={mode === 'pessoal' ? 'active' : ''} onClick={() => setMode('pessoal')}>Céu × Meu mapa</button>
-            <button className={mode === 'ceu' ? 'active' : ''} onClick={() => setMode('ceu')}>Céu do lugar</button>
-          </div>
-        )}
       </header>
 
       <section className="wheel-layout">
-        <div className="wheel-box">
-          {mode === 'pessoal' && natal
-            ? <ChartWheel chart={natal} outer={sky} outerHits={hits} showAspects={false} />
-            : <ChartWheel chart={sky} />}
-          <p className="hint">{mode === 'pessoal' && natal ? 'Anel externo (turquesa): planetas em trânsito agora · interno: seu mapa natal' : 'Posições dos planetas e casas para o local escolhido'}</p>
+        <div>
+          <div className="wheel-box">
+            {mode === 'pessoal' && natal
+              ? <ChartWheel chart={natal} outer={sky} outerHits={hits} showAspects={false} />
+              : <ChartWheel chart={sky} />}
+            <p className="hint">{mode === 'pessoal' && natal ? 'Anel externo (turquesa): planetas em trânsito agora · interno: seu mapa natal' : 'Posições dos planetas e casas para o local escolhido'}</p>
+          </div>
+          {/* controls sit under the wheel so the drawing shows whole on first view */}
+          <div className="sky-controls">
+            <div className="head-tools">
+              <button className="ghost" onClick={() => shift(-1)}>‹ Ontem</button>
+              <button className="ghost" onClick={() => { setLive(true); setDate(new Date()) }}>Agora</button>
+              <button className="ghost" onClick={() => shift(1)}>Amanhã ›</button>
+            </div>
+            <div className="head-tools">
+              <input
+                type="datetime-local"
+                aria-label="Data e hora"
+                value={toInput(date)}
+                onChange={(e) => { if (e.target.value) { setLive(false); setDate(new Date(e.target.value)) } }}
+              />
+              <button className="ghost" onClick={useMyLocation}>⌖ Minha localização</button>
+            </div>
+            {natal && (
+              <div className="segmented">
+                <button className={mode === 'pessoal' ? 'active' : ''} onClick={() => setMode('pessoal')}>Céu × Meu mapa</button>
+                <button className={mode === 'ceu' ? 'active' : ''} onClick={() => setMode('ceu')}>Céu do lugar</button>
+              </div>
+            )}
+          </div>
         </div>
         <aside className="glass detail moon-panel">
           <div className="moon-big">
