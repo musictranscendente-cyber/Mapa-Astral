@@ -503,9 +503,25 @@ p { margin: 0 0 0.8em; }
   .brand-name { font-size: 1rem; letter-spacing: 0.08em; }
   .profile-switch { max-width: 130px; }
 }
-@media (min-width: 721px) and (max-width: 1100px) {
-  .brand-name { display: none; }
-  .nav-icon { display: none; }
+/* Desktop: the services bar takes its own row under the brand and actions. */
+@media (min-width: 721px) {
+  .topbar { flex-wrap: wrap; row-gap: 0.5rem; justify-content: space-between; }
+  .nav { order: 3; flex: 1 0 100%; margin: 0; overflow-x: auto; scrollbar-width: none; padding-bottom: 0.1rem; }
+  .nav::-webkit-scrollbar { display: none; }
+  .nav button { flex: 0 0 auto; }
+  .nav button:first-child { margin-left: auto; }
+  .nav button:last-child { margin-right: auto; }
+  .nav button { padding: 0.38rem 0.55rem; font-size: 0.82rem; gap: 0.3rem; }
+}
+@media (min-width: 721px) and (max-width: 1440px) { .nav-icon { display: none; } }
+/* Fade the edges of the scrollable services bar so it reads as scrollable. */
+.nav.scroll-start { -webkit-mask-image: linear-gradient(90deg, transparent, #000 2.5rem); mask-image: linear-gradient(90deg, transparent, #000 2.5rem); }
+.nav.scroll-end { -webkit-mask-image: linear-gradient(90deg, #000 calc(100% - 2.5rem), transparent); mask-image: linear-gradient(90deg, #000 calc(100% - 2.5rem), transparent); }
+.nav.scroll-start.scroll-end { -webkit-mask-image: linear-gradient(90deg, transparent, #000 2.5rem, #000 calc(100% - 2.5rem), transparent); mask-image: linear-gradient(90deg, transparent, #000 2.5rem, #000 calc(100% - 2.5rem), transparent); }
+@media (max-width: 400px) {
+  .profile-switch { max-width: 84px; padding: 0.4rem 0.6rem; }
+  .top-actions { gap: 0.35rem; }
+  .topbar { gap: 0.5rem; }
 }
 
 /* ---------- Account ---------- */
@@ -723,7 +739,6 @@ p { margin: 0 0 0.8em; }
 @keyframes menu-in { from { transform: translateX(-100%); } to { transform: none; } }
 @keyframes menu-fade { from { opacity: 0; } to { opacity: 1; } }
 @media (prefers-reduced-motion: reduce) { .menu-panel, .menu-backdrop { animation: none; } }
-@media (max-width: 520px) { .hide-narrow { display: none; } }
 .menu-head .brand-name { display: inline; }
 
 /* ── Horóscopo do dia ── */

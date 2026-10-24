@@ -1,4 +1,4 @@
-import { Suspense, lazy, useEffect, useMemo, useState } from 'react'
+import { Suspense, lazy, useEffect, useMemo, useRef, useState } from 'react'
 import { chartFromBirth, type Chart } from './astro/chart'
 import { HOUSE_SYSTEMS } from './astro/houses'
 import { Starfield } from './components/Starfield'
@@ -34,17 +34,25 @@ import { armInAppTimer, registerServiceWorker, scheduleMessages } from './lib/no
 
 export type Route = 'inicio' | 'mapa' | 'ceu' | 'previsoes' | 'sinastria' | 'revolucao' | 'perfis' | 'ajustes' | 'conta' | 'planos' | 'horoscopo' | 'termos' | 'privacidade' | 'lunacoes' | 'retorno-lunar' | 'progressoes' | 'astrocartografia' | 'calendario' | 'sintonia'
 
+/** Bottom (mobile) / top (desktop) bar: every service of the app. */
 const NAV: { key: Route; label: string; icon: string }[] = [
   { key: 'inicio', label: 'Início', icon: '✦' },
+  { key: 'horoscopo', label: 'Horóscopo', icon: '☀' },
   { key: 'mapa', label: 'Mapa Natal', icon: '☉' },
   { key: 'ceu', label: 'Céu de Hoje', icon: '☽' },
   { key: 'previsoes', label: 'Previsões', icon: '✧' },
+  { key: 'calendario', label: 'Calendário', icon: '▦' },
+  { key: 'lunacoes', label: 'Lunações', icon: '◐' },
+  { key: 'progressoes', label: 'Progressões', icon: '➶' },
   { key: 'sinastria', label: 'Sinastria', icon: '♡' },
+  { key: 'sintonia', label: 'Sintonia', icon: '♥' },
   { key: 'revolucao', label: 'Rev. Solar', icon: '☼' },
+  { key: 'retorno-lunar', label: 'Ret. Lunar', icon: '☾' },
+  { key: 'astrocartografia', label: 'Astrocarto', icon: '⌖' },
   { key: 'perfis', label: 'Perfis', icon: '☷' },
 ]
 
-const ROUTES: Route[] = [...NAV.map((n) => n.key), 'ajustes', 'conta', 'planos', 'horoscopo', 'termos', 'privacidade', 'lunacoes', 'retorno-lunar', 'progressoes', 'astrocartografia', 'calendario', 'sintonia']
+const ROUTES: Route[] = [...NAV.map((n) => n.key), 'ajustes', 'conta', 'planos', 'termos', 'privacidade']
 
 const readRoute = (): Route => {
   // Payment providers append `?status=…` after the hash route.
@@ -68,6 +76,28 @@ function Main({ auth }: { auth: AuthState }) {
   const access = useAccess()
   const [notice, setNotice] = useState('')
   const [menuOpen, setMenuOpen] = useState(false)
+  const navRef = useRef<HTMLElement>(null)
+  // keep the current section visible in the scrollable bar
+  useEffect(() => {
+    const nav = navRef.current
+    const btn = nav?.querySelector<HTMLElement>('[aria-current="page"]')
+    if (!nav || !btn) return
+    const offset = btn.getBoundingClientRect().left - nav.getBoundingClientRect().left + nav.scrollLeft
+    nav.scrollTo({ left: offset - (nav.clientWidth - btn.offsetWidth) / 2, behavior: 'smooth' })
+  }, [route])
+  // mark which edges have more items, for the fade hint
+  useEffect(() => {
+    const nav = navRef.current
+    if (!nav) return
+    const update = () => {
+      nav.classList.toggle('scroll-start', nav.scrollLeft > 4)
+      nav.classList.toggle('scroll-end', nav.scrollLeft + nav.clientWidth < nav.scrollWidth - 4)
+    }
+    update()
+    nav.addEventListener('scroll', update, { passive: true })
+    window.addEventListener('resize', update)
+    return () => { nav.removeEventListener('scroll', update); window.removeEventListener('resize', update) }
+  }, [])
 
   useEffect(() => { trackVisit() }, [])
 
@@ -190,9 +220,9 @@ function Main({ auth }: { auth: AuthState }) {
           <span className="brand-mark">✶</span>
           <span className="brand-name">Cosmic Sky</span>
         </button>
-        <nav className="nav">
+        <nav className="nav" ref={navRef}>
           {NAV.map((n) => (
-            <button key={n.key} className={route === n.key ? 'active' : ''} onClick={() => go(n.key)}>
+            <button key={n.key} className={route === n.key ? 'active' : ''} aria-current={route === n.key ? 'page' : undefined} onClick={() => go(n.key)}>
               <span className="nav-icon">{n.icon}</span>
               <span className="nav-label">{n.label}</span>
             </button>
@@ -205,7 +235,7 @@ function Main({ auth }: { auth: AuthState }) {
             </select>
           )}
           {access.enabled && (
-            <button className={`icon-btn plans-btn hide-narrow ${route === 'planos' ? 'on' : ''}`} title="Planos" aria-label="Planos" onClick={() => go('planos')}>
+            <button className={`icon-btn plans-btn ${route === 'planos' ? 'on' : ''}`} title="Planos" aria-label="Planos" onClick={() => go('planos')}>
               {access.plan ? '✦' : '💎'}
             </button>
           )}
@@ -215,7 +245,7 @@ function Main({ auth }: { auth: AuthState }) {
               : auth.user ? (auth.user.email ?? '?').charAt(0).toUpperCase() : '☺'}
             {auth.user && <i className={`sync-dot ${sync}`} />}
           </button>
-          <button className={`icon-btn hide-narrow ${route === 'ajustes' ? 'on' : ''}`} title="Ajustes" aria-label="Ajustes" onClick={() => go('ajustes')}>
+          <button className={`icon-btn ${route === 'ajustes' ? 'on' : ''}`} title="Ajustes" aria-label="Ajustes" onClick={() => go('ajustes')}>
             ⚙
           </button>
         </div>
