@@ -20,6 +20,7 @@ const PLAN_FEATURES = {
     'Revolução Solar completa de qualquer ano + comparador de cidades',
     'Retorno Lunar completo: o mapa de todo mês',
     'Progressões e arcos solares com os marcos dos próximos anos',
+    'Astrocartografia com análise de qualquer cidade',
     `${PLAN_ANALYSES.estrela} análises completas por mês`,
   ],
   cosmos: [
