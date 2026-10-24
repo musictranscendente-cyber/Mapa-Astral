@@ -13,6 +13,8 @@ import { SolarReturnPage } from './pages/SolarReturnPage'
 import { SettingsPage } from './pages/SettingsPage'
 import { AccountPage } from './pages/AccountPage'
 import { PlansPage } from './pages/PlansPage'
+import { HoroscopePage } from './pages/HoroscopePage'
+import { LegalPage } from './pages/LegalPage'
 import { rememberReturn, takeReturn, useAuth, type AuthState } from './lib/auth'
 import { AccessProvider } from './billing/access'
 import { useAccess } from './billing/context'
@@ -22,7 +24,7 @@ import type { BirthData } from './astro/chart'
 import { track, trackVisit } from './lib/analytics'
 import { armInAppTimer, registerServiceWorker, scheduleMessages } from './lib/notifications'
 
-export type Route = 'inicio' | 'mapa' | 'ceu' | 'previsoes' | 'sinastria' | 'revolucao' | 'perfis' | 'ajustes' | 'conta' | 'planos'
+export type Route = 'inicio' | 'mapa' | 'ceu' | 'previsoes' | 'sinastria' | 'revolucao' | 'perfis' | 'ajustes' | 'conta' | 'planos' | 'horoscopo' | 'termos' | 'privacidade'
 
 const NAV: { key: Route; label: string; icon: string }[] = [
   { key: 'inicio', label: 'Início', icon: '✦' },
@@ -34,7 +36,7 @@ const NAV: { key: Route; label: string; icon: string }[] = [
   { key: 'perfis', label: 'Perfis', icon: '☷' },
 ]
 
-const ROUTES: Route[] = [...NAV.map((n) => n.key), 'ajustes', 'conta', 'planos']
+const ROUTES: Route[] = [...NAV.map((n) => n.key), 'ajustes', 'conta', 'planos', 'horoscopo', 'termos', 'privacidade']
 
 const readRoute = (): Route => {
   // Payment providers append `?status=…` after the hash route.
@@ -134,6 +136,11 @@ function Main({ auth }: { auth: AuthState }) {
         return <SolarReturnPage key={active?.id} natal={natal} houseSystem={settings.houseSystem} go={go} />
       case 'conta':
         return <AccountPage user={auth.user} loading={auth.loading} sync={sync} profileCount={profiles.length} onClearLocal={clearLocal} />
+      case 'termos':
+      case 'privacidade':
+        return <LegalPage doc={route} go={go} />
+      case 'horoscopo':
+        return <HoroscopePage natal={natal} go={go} />
       case 'planos':
         return <PlansPage natal={natal} go={go} />
       case 'ajustes':
@@ -204,6 +211,7 @@ function Main({ auth }: { auth: AuthState }) {
       <footer className="footer">
         <p>Efemérides calculadas com Astronomy Engine (precisão &lt; 1′) · Zodíaco tropical · Casas {HOUSE_SYSTEMS.find((h) => h.key === settings.houseSystem)?.name}</p>
         <p className="muted">Feito com ✦ para quem busca conexão com as estrelas</p>
+        <p className="footer-links"><a href="#/termos">Termos de Uso</a> · <a href="#/privacidade">Política de Privacidade</a></p>
       </footer>
     </>
   )
@@ -211,6 +219,7 @@ function Main({ auth }: { auth: AuthState }) {
 
 const MENU: { key: Route; label: string; icon: string; hint: string }[] = [
   { key: 'inicio', label: 'Início', icon: '✦', hint: 'Seu céu em resumo' },
+  { key: 'horoscopo', label: 'Horóscopo do dia', icon: '☀', hint: 'Previsão diária dos 12 signos' },
   { key: 'mapa', label: 'Mapa Natal', icon: '☉', hint: 'Roda, relatório e análise completa' },
   { key: 'ceu', label: 'Céu de Hoje', icon: '☽', hint: 'Lua, planetas e trânsitos do dia' },
   { key: 'previsoes', label: 'Previsões', icon: '✧', hint: 'Dias de fluxo e trânsitos futuros' },
@@ -249,6 +258,7 @@ function MainMenu({ route, showPlans, onGo, onClose }: { route: Route; showPlans
             </li>
           ))}
         </ul>
+        <p className="menu-legal"><a href="#/termos" onClick={onClose}>Termos de Uso</a> · <a href="#/privacidade" onClick={onClose}>Privacidade</a></p>
       </nav>
     </div>
   )

@@ -128,7 +128,7 @@ export function PlansPage({ natal, go }: Props) {
       </section>
       <p className="muted small center">
         Pagamento por Pix ou cartão pelo Mercado Pago. Sem renovação automática: você escolhe se quer continuar.
-        Trocar de plano começa um novo período a partir do dia da compra.
+        Trocar de plano começa um novo período a partir do dia da compra. Veja os <a href="#/termos">Termos de Uso</a>.
       </p>
 
       <section className="glass pad">
