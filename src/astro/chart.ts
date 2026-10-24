@@ -74,15 +74,36 @@ export function computeChart(
   opts: { birth?: BirthData; hasHouses?: boolean } = {},
 ): Chart {
   const t = toTime(date)
-  const eps = trueObliquity(t)
-  const r = computeRamc(t, longitude)
-  const h = computeHouses(houseSystem, r, eps, latitude)
-  const hasHouses = opts.hasHouses ?? true
-
-  const points = {} as Record<PointKey, ChartPoint>
+  const planets = {} as Record<PlanetKey, PlanetPosition>
   for (const key of CHART_PLANETS) {
     const { lon, lat } = bodyEcliptic(key, t)
-    const speed = key === 'southNode' ? bodySpeed('node', t) : bodySpeed(key, t)
+    planets[key] = { lon, lat, speed: key === 'southNode' ? bodySpeed('node', t) : bodySpeed(key, t) }
+  }
+  return chartFromPositions({
+    date, latitude, longitude, houseSystem, planets,
+    eps: trueObliquity(t), ramc: computeRamc(t, longitude), birth: opts.birth, hasHouses: opts.hasHouses,
+  })
+}
+
+export interface PlanetPosition { lon: number; lat: number; speed: number }
+
+/** Builds a chart from given planet positions and RAMC (used by real charts and by derived ones, e.g. composite). */
+export function chartFromPositions(p: {
+  date: Date
+  latitude: number
+  longitude: number
+  houseSystem: HouseSystem
+  planets: Record<PlanetKey, PlanetPosition>
+  eps: number
+  ramc: number
+  birth?: BirthData
+  hasHouses?: boolean
+}): Chart {
+  const h = computeHouses(p.houseSystem, p.ramc, p.eps, p.latitude)
+  const hasHouses = p.hasHouses ?? true
+  const points = {} as Record<PointKey, ChartPoint>
+  for (const key of CHART_PLANETS) {
+    const { lon, lat, speed } = p.planets[key]
     points[key] = {
       key, lon, lat, speed,
       retro: speed < 0 && key !== 'node' && key !== 'southNode' && key !== 'lilith',
@@ -107,9 +128,9 @@ export function computeChart(
   points.fortune = angle('fortune', norm360(fortune))
 
   const chart: Chart = {
-    date, birth: opts.birth, latitude, longitude, points,
+    date: p.date, birth: p.birth, latitude: p.latitude, longitude: p.longitude, points,
     cusps: h.cusps, houseSystem: h.system, houseFallback: h.fallback,
-    asc: h.asc, mc: h.mc, obliquity: eps, ramc: r,
+    asc: h.asc, mc: h.mc, obliquity: p.eps, ramc: p.ramc,
     isDayChart: sunAbove,
     aspects: [],
     balance: undefined as unknown as Balance,
