@@ -117,7 +117,8 @@ function Main({ auth }: { auth: AuthState }) {
 
   const go = (r: Route) => {
     window.location.hash = '/' + r
-    window.scrollTo({ top: 0, behavior: 'smooth' })
+    // jump (not smooth-scroll) to the top so the new page doesn't slide in under the old position
+    window.scrollTo({ top: 0, behavior: 'instant' })
   }
 
   /** Saves a chart, respecting how many charts the person's access allows. Returns '' when blocked. */
