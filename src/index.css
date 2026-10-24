@@ -732,3 +732,16 @@ p { margin: 0 0 0.8em; }
 .legal-body b { color: var(--ink); }
 .footer-links a, .menu-legal a { color: var(--ink-2); }
 .menu-legal { margin: auto 0 0; padding: 0.8rem 0.4rem 0; border-top: 1px solid var(--line); font-size: 0.8rem; color: var(--muted); }
+
+/* ── Eclipses e lunações ── */
+.lunations { display: flex; flex-direction: column; gap: 1.2rem; }
+.eclipse-hero { border-color: rgba(255, 232, 163, 0.5); background: radial-gradient(circle at 85% 0%, rgba(255, 232, 163, 0.12), transparent 60%), var(--glass); }
+.eclipse-hero h2 { margin: 0.2rem 0; font-family: var(--display); font-weight: 500; }
+.lunation-list { display: flex; flex-direction: column; gap: 0.7rem; }
+.lunation-card { display: flex; gap: 1rem; padding: 1rem 1.1rem; border-left: 3px solid var(--accent); }
+.lunation-card.is-eclipse { box-shadow: 0 0 0 1px rgba(255, 232, 163, 0.35), 0 10px 40px -20px var(--accent); }
+.lunation-card h3 { margin: 0; font-size: 1.02rem; font-weight: 500; display: flex; flex-wrap: wrap; gap: 0.3rem 0.6rem; align-items: baseline; }
+.lunation-card p { margin: 0.25rem 0 0; }
+.lc-body { min-width: 0; }
+.lc-house { font-size: 0.75rem; padding: 0.1rem 0.5rem; border-radius: 999px; border: 1px solid var(--line); color: var(--gold); }
+.lunations .personal { color: var(--ink); }

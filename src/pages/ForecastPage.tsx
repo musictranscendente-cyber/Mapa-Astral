@@ -233,7 +233,10 @@ export function ForecastPage({ natal, go }: { natal: Chart | null; go: (r: Route
           </>}
 
           <section className="glass pad">
-            <h2>Ciclo lunar</h2>
+            <div className="section-title">
+              <h2>Ciclo lunar</h2>
+              <button className="ghost" onClick={() => go('lunacoes')}>◐ Eclipses e lunações no seu mapa</button>
+            </div>
             <div className="lunar-row">
               {lunar.map((l, i) => (
                 <div key={i} className="lunar-item">
