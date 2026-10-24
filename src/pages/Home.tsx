@@ -64,6 +64,11 @@ export function Home({ natal, profile, onCreate, go }: Props) {
             </button>
           ))}
         </nav>
+        <button className="glass sint-teaser" onClick={() => go('sintonia')}>
+          <span className="sint-heart">♥</span>
+          <span><b>Qual é a sua sintonia com alguém?</b><small className="muted">Teste rápido só com as datas de nascimento — com imagem para os Stories</small></span>
+          <span className="sint-go">›</span>
+        </button>
       </section>
 
       <section className="today-strip">
