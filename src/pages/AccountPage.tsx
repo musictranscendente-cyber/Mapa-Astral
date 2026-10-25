@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import type { User } from '@supabase/supabase-js'
-import { authErrorMessage, deleteAccount, sendEmailCode, signInWithGoogle, signOut, verifyEmailCode } from '../lib/auth'
+import { authErrorMessage, deleteAccount, useLoginError, sendEmailCode, signInWithGoogle, signOut, verifyEmailCode } from '../lib/auth'
 import type { SyncStatus } from '../lib/profiles'
 import { authConfigured } from '../lib/supabase'
 import { useAccess } from '../billing/context'
@@ -64,15 +64,18 @@ function SignIn() {
   const [step, setStep] = useState<'email' | 'code'>('email')
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState('')
+  const [loginError, clearLoginError] = useLoginError()
 
   const run = async (fn: () => Promise<void>) => {
     setBusy(true)
     setError('')
+    clearLoginError()
     try { await fn() } catch (e) { setError(authErrorMessage(e)) } finally { setBusy(false) }
   }
 
   return (
     <section className="glass pad account-card sign-in">
+      {loginError && <p className="error">{loginError}</p>}
       <button className="google-btn" disabled={busy} onClick={() => run(signInWithGoogle)}>
         <svg viewBox="0 0 48 48" width="20" height="20" aria-hidden>
           <path fill="#EA4335" d="M24 9.5c3.5 0 6.6 1.2 9.1 3.6l6.8-6.8C35.8 2.4 30.3 0 24 0 14.6 0 6.6 5.4 2.7 13.3l7.9 6.1C12.5 13.6 17.8 9.5 24 9.5z" />
