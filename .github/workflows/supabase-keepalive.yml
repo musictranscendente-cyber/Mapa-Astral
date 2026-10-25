@@ -1,0 +1,33 @@
+name: Supabase keep-alive
+
+# Free Supabase projects pause after ~7 days without database activity, which takes
+# login and sync down. A small daily query keeps the project awake.
+on:
+  schedule:
+    - cron: '17 9 * * *'
+  workflow_dispatch:
+
+permissions: {}
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Query the database
+        env:
+          URL: ${{ vars.VITE_SUPABASE_URL }}
+          KEY: ${{ vars.VITE_SUPABASE_ANON_KEY }}
+        run: |
+          if [ -z "$URL" ] || [ -z "$KEY" ]; then
+            echo "::notice::VITE_SUPABASE_URL / VITE_SUPABASE_ANON_KEY não configuradas — nada a fazer."
+            exit 0
+          fi
+          base=$(echo "$URL" | sed -E 's#^(https?://[^/]+).*#\1#')
+          # Row-level security returns an empty list to the anon key, but the query still reaches Postgres.
+          code=$(curl -sS -o /dev/null -w '%{http_code}' "$base/rest/v1/birth_profiles?select=id&limit=1" \
+            -H "apikey: $KEY" -H "Authorization: Bearer $KEY")
+          echo "Supabase respondeu HTTP $code"
+          if [ "$code" -ge 500 ] || [ "$code" = "000" ]; then
+            echo "::error::O projeto Supabase não respondeu (HTTP $code). Se estiver pausado, clique em Resume project no painel."
+            exit 1
+          fi
