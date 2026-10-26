@@ -15,7 +15,7 @@ import { useAccess } from '../billing/context'
 import { birthKey } from '../billing/keys'
 import { pairKey } from '../billing/rules'
 import { Locked } from '../components/Locked'
-import { compositeChart, davisonChart } from '../astro/relationship'
+import { compositeChart } from '../astro/relationship'
 import { relationshipReading } from '../interpret/relationship'
 import type { Chart } from '../astro/chart'
 
@@ -33,7 +33,7 @@ export function SynastryPage({ profiles, activeId, houseSystem, onSave, go }: Pr
   const [aId, setAId] = useState<string | null>(activeId ?? profiles[0]?.id ?? null)
   const [bId, setBId] = useState<string | null>(() => profiles.find((p) => p.id !== (activeId ?? profiles[0]?.id))?.id ?? null)
   const [adding, setAdding] = useState(false)
-  const [tab, setTab] = useState<'sinastria' | 'composto' | 'davison'>('sinastria')
+  const [tab, setTab] = useState<'sinastria' | 'composto'>('sinastria')
   const access = useAccess()
 
   const A = profiles.find((p) => p.id === aId) ?? null
@@ -139,17 +139,16 @@ export function SynastryPage({ profiles, activeId, houseSystem, onSave, go }: Pr
           <div className="segmented">
             <button className={tab === 'sinastria' ? 'active' : ''} onClick={() => setTab('sinastria')}>♡ Sinastria</button>
             <button className={tab === 'composto' ? 'active' : ''} onClick={() => setTab('composto')}>⚭ Mapa Composto</button>
-            <button className={tab === 'davison' ? 'active' : ''} onClick={() => setTab('davison')}>✶ Davison</button>
           </div>
 
           {tab !== 'sinastria' && (
             needsLogin ? (
               <Locked title="O mapa do casal" text="Entre grátis para ver o mapa da relação." go={go} />
             ) : full ? (
-              <CoupleChart a={data.ca} b={data.cb} kind={tab} houseSystem={houseSystem} />
+              <CoupleChart a={data.ca} b={data.cb} houseSystem={houseSystem} />
             ) : (
               <Locked
-                title={tab === 'composto' ? 'Mapa Composto do casal' : 'Mapa Davison do casal'}
+                title="Mapa Composto do casal"
                 text="O mapa da própria relação: propósito, clima emocional e como o casal é visto — incluso na Sinastria completa e nos planos."
                 offer={offer}
                 go={go}
@@ -268,22 +267,18 @@ export function SynastryPage({ profiles, activeId, houseSystem, onSave, go }: Pr
   )
 }
 
-function CoupleChart({ a, b, kind, houseSystem }: { a: Chart; b: Chart; kind: 'composto' | 'davison'; houseSystem: HouseSystem }) {
-  const chart = useMemo(() => (kind === 'composto' ? compositeChart(a, b, houseSystem) : davisonChart(a, b, houseSystem)), [a, b, kind, houseSystem])
-  const reading = relationshipReading(chart, kind)
+function CoupleChart({ a, b, houseSystem }: { a: Chart; b: Chart; houseSystem: HouseSystem }) {
+  const chart = useMemo(() => compositeChart(a, b, houseSystem), [a, b, houseSystem])
+  const reading = relationshipReading(chart, 'composto')
   return (
     <>
       <section className="wheel-layout">
         <div className="wheel-box">
           <ChartWheel chart={chart} />
-          <p className="hint">
-            {kind === 'composto'
-              ? 'Mapa Composto: cada planeta no ponto médio entre os dois mapas — o retrato simbólico da relação.'
-              : `Mapa Davison: o céu real do momento e do lugar médios entre os nascimentos (${chart.date.toLocaleDateString('pt-BR')}).`}
-          </p>
+          <p className="hint">Mapa Composto: cada planeta no ponto médio entre os dois mapas — o retrato simbólico da relação.</p>
         </div>
         <aside className="glass detail">
-          <p className="eyebrow">{kind === 'composto' ? 'A relação como um ser' : 'O "nascimento" da relação'}</p>
+          <p className="eyebrow">A relação como um ser</p>
           {reading.map((r) => (
             <div key={r.title} className="couple-item">
               <h4>{r.title}</h4>

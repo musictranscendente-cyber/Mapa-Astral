@@ -48,10 +48,18 @@ export function SkyPage({ natal, profile, settings, go }: Props) {
 
   const retros = (['mercury', 'venus', 'mars', 'jupiter', 'saturn', 'uranus', 'neptune', 'pluto', 'chiron'] as PlanetKey[]).filter((k) => sky.points[k].retro)
 
+  const [locating, setLocating] = useState<'' | 'busy' | 'error'>('')
   const useMyLocation = () => {
-    navigator.geolocation?.getCurrentPosition((pos) => {
-      setLoc({ lat: pos.coords.latitude, lon: pos.coords.longitude, label: 'Minha localização' })
-    })
+    if (!navigator.geolocation) { setLocating('error'); return }
+    setLocating('busy')
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        setLoc({ lat: pos.coords.latitude, lon: pos.coords.longitude, label: 'sua localização atual' })
+        setLocating('')
+      },
+      () => setLocating('error'),
+      { timeout: 15000, maximumAge: 600000 },
+    )
   }
 
   const shift = (days: number) => {
@@ -85,20 +93,33 @@ export function SkyPage({ natal, profile, settings, go }: Props) {
               <button className="ghost" onClick={() => { setLive(true); setDate(new Date()) }}>Agora</button>
               <button className="ghost" onClick={() => shift(1)}>Amanhã ›</button>
             </div>
-            <div className="head-tools">
-              <input
-                type="datetime-local"
-                aria-label="Data e hora"
-                value={toInput(date)}
-                onChange={(e) => { if (e.target.value) { setLive(false); setDate(new Date(e.target.value)) } }}
-              />
-              <button className="ghost" onClick={useMyLocation}>⌖ Minha localização</button>
-            </div>
+            <input
+              type="datetime-local"
+              aria-label="Data e hora"
+              value={toInput(date)}
+              onChange={(e) => { if (e.target.value) { setLive(false); setDate(new Date(e.target.value)) } }}
+            />
             {natal && (
               <div className="segmented">
                 <button className={mode === 'pessoal' ? 'active' : ''} onClick={() => setMode('pessoal')}>Céu × Meu mapa</button>
                 <button className={mode === 'ceu' ? 'active' : ''} onClick={() => setMode('ceu')}>Céu do lugar</button>
               </div>
+            )}
+            {/* the place only changes the houses and angles, so it belongs to the "sky of a place" view */}
+            {mode === 'ceu' ? (
+              <p className="sky-place">
+                <span>📍 Céu visto de <b>{loc.label}</b></span>
+                {loc.label === 'sua localização atual' && profile ? (
+                  <button className="ghost" onClick={() => setLoc({ lat: profile.latitude, lon: profile.longitude, label: profile.place })}>⌂ Voltar para {profile.place.split(',')[0]}</button>
+                ) : (
+                  <button className="ghost" disabled={locating === 'busy'} onClick={useMyLocation}>
+                    {locating === 'busy' ? 'Localizando…' : '⌖ Usar minha localização'}
+                  </button>
+                )}
+                {locating === 'error' && <span className="muted small">Não foi possível obter sua localização. Libere a localização para este site e tente de novo.</span>}
+              </p>
+            ) : (
+              <p className="sky-place muted small">Seu mapa natal por dentro, os planetas de agora por fora.</p>
             )}
           </div>
         </div>

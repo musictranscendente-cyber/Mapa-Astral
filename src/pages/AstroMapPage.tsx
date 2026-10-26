@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import type { Chart } from '../astro/chart'
 import { POINTS, type PlanetKey } from '../astro/constants'
 import { ACG_PLANETS, astroLines, distanceToLine, type AcgLine } from '../astro/astrocarto'
@@ -6,7 +6,9 @@ import { useAccess } from '../billing/context'
 import { birthKey } from '../billing/keys'
 import { Locked } from '../components/Locked'
 import { PlacePicker, type Where } from '../components/PlacePicker'
-import { ANGLE_NAME, BENEFIC, lineMeaning } from '../interpret/astrocarto'
+import { ANGLE_GUIDE, ANGLE_NAME, BENEFIC, PLANET_GUIDE, lineMeaning, strengthLabel } from '../interpret/astrocarto'
+import { track } from '../lib/analytics'
+import { astroMapUrl, renderAstroMapImage } from '../lib/astroMapImage'
 import { WORLD_LAND_PATH } from '../lib/worldPath'
 import type { Route } from '../App'
 
@@ -19,6 +21,7 @@ export function AstroMapPage({ natal, go }: { natal: Chart | null; go: (r: Route
   const [shown, setShown] = useState<PlanetKey[]>(['sun', 'moon', 'venus', 'jupiter', 'mars', 'saturn'])
   const [place, setPlace] = useState<Where | null>(null)
   const lines = useMemo(() => (natal ? astroLines(natal) : []), [natal])
+  const [sharing, setSharing] = useState(false)
 
   if (!natal?.birth) {
     return (
@@ -83,8 +86,50 @@ export function AstroMapPage({ natal, go }: { natal: Chart | null; go: (r: Route
               <circle cx={natal.longitude + 180} cy={90 - natal.latitude} r="1.6" className="acg-birth" />
               {place && <circle cx={place.longitude + 180} cy={90 - place.latitude} r="1.8" className="acg-place" />}
             </svg>
-            <p className="muted small acg-legend">— AC/MC (linha cheia) · - - DC (tracejada) · ··· IC (pontilhada) · ● local de nascimento{full ? ' · toque no mapa para analisar um lugar' : ''}</p>
+            <div className="acg-legend">
+              <span><i className="acg-key" /> AC / MC</span>
+              <span><i className="acg-key dc" /> DC</span>
+              <span><i className="acg-key ic" /> IC</span>
+              <span><i className="acg-dot" /> seu nascimento</span>
+              {place && <span><i className="acg-dot place" /> lugar escolhido</span>}
+            </div>
+            {full && <p className="muted small acg-tip">Toque em qualquer ponto do mapa para ver quais linhas passam perto.</p>}
           </div>
+
+          <div className="acg-actions">
+            <button className="ghost" onClick={() => setSharing(true)}>✦ Compartilhar meu mapa-múndi</button>
+          </div>
+          {sharing && <AstroMapShare name={natal.birth.name.split(' ')[0]} lines={lines} planets={shown} birth={natal} onClose={() => setSharing(false)} />}
+
+          <details className="glass pad acg-guide">
+            <summary>Como ler o seu mapa-múndi</summary>
+            <p>
+              Cada planeta desenha <b>quatro linhas</b> no mundo: os lugares onde, no instante do seu nascimento, ele estava nascendo, no alto do céu,
+              se pondo ou embaixo da Terra. Morar, viajar ou passar o aniversário <b>perto de uma linha</b> deixa aquele planeta mais forte na sua vida ali —
+              quanto mais perto, mais forte (até uns 250 km é forte; até 700 km ainda se sente).
+            </p>
+            <div className="acg-angles">
+              {(['AC', 'MC', 'DC', 'IC'] as const).map((a) => (
+                <div key={a}>
+                  <h4><i className={`acg-key ${a === 'DC' ? 'dc' : a === 'IC' ? 'ic' : ''}`} /> {ANGLE_GUIDE[a].title}</h4>
+                  <p>{ANGLE_GUIDE[a].text}</p>
+                </div>
+              ))}
+            </div>
+            <h4>O que cada planeta traz</h4>
+            <ul className="acg-planets">
+              {ACG_PLANETS.map((k) => (
+                <li key={k}>
+                  <b style={{ color: POINTS[k].color }}><span className="g">{POINTS[k].glyph}</span> {POINTS[k].name}</b>
+                  <span>{PLANET_GUIDE[k]}</span>
+                </li>
+              ))}
+            </ul>
+            <p className="muted small">
+              Linhas de Vênus, Júpiter, Sol e Lua costumam ser as mais agradáveis; Marte, Saturno, Urano, Netuno e Plutão trazem crescimento,
+              mas pedem mais consciência. Nenhuma linha é "proibida": ela mostra o tema que fica em evidência naquele lugar.
+            </p>
+          </details>
 
           {full ? (
             <section className="glass pad">
@@ -98,8 +143,8 @@ export function AstroMapPage({ natal, go }: { natal: Chart | null; go: (r: Route
                     {near.map((l) => (
                       <li key={l.planet + l.angle} className={BENEFIC.includes(l.planet) ? 'good' : ''}>
                         <b style={{ color: POINTS[l.planet].color }}>{POINTS[l.planet].glyph} {POINTS[l.planet].name} no {ANGLE_NAME[l.angle]}</b>
-                        <small className="muted"> · a {Math.round(l.km)} km</small>
-                        <p>{lineMeaning(l.planet, l.angle)}{l.km < 250 ? ' Influência forte.' : ''}</p>
+                        <small className="muted"> · a {Math.round(l.km)} km · {strengthLabel(l.km)}</small>
+                        <p>{lineMeaning(l.planet, l.angle)}</p>
                       </li>
                     ))}
                   </ul>
@@ -111,6 +156,54 @@ export function AstroMapPage({ natal, go }: { natal: Chart | null; go: (r: Route
           )}
         </>
       )}
+    </div>
+  )
+}
+
+/** Preview + share/download of the world map image. */
+function AstroMapShare({ name, lines, planets, birth, onClose }: { name: string; lines: AcgLine[]; planets: PlanetKey[]; birth: Chart; onClose: () => void }) {
+  const [image, setImage] = useState<{ blob: Blob; url: string } | null>(null)
+  const [msg, setMsg] = useState('')
+  useEffect(() => {
+    let url = ''
+    let alive = true
+    renderAstroMapImage(name, lines, planets, birth)
+      .then((blob) => { if (!alive) return; url = URL.createObjectURL(blob); setImage({ blob, url }) })
+      .catch(() => setMsg('Não foi possível gerar a imagem.'))
+    return () => { alive = false; if (url) URL.revokeObjectURL(url) }
+  }, [name, lines, planets, birth])
+
+  const file = image ? new File([image.blob], 'meu-mapa-mundi-astral.png', { type: 'image/png' }) : null
+  const canShare = !!file && typeof navigator.canShare === 'function' && navigator.canShare({ files: [file] })
+  const text = `Onde no mundo o meu céu brilha ✦ Faça a sua astrocartografia: ${astroMapUrl()}`
+  const share = async () => {
+    if (!file) return
+    try { await navigator.share({ files: [file], text }); track('compartilhar', 'astrocartografia') } catch { /* cancelled */ }
+  }
+  const download = () => {
+    if (!image) return
+    const el = document.createElement('a')
+    el.href = image.url
+    el.download = 'meu-mapa-mundi-astral.png'
+    el.click()
+    track('compartilhar', 'astrocartografia-download')
+    setMsg('Imagem salva! Poste no feed, nos Stories ou no WhatsApp.')
+  }
+  return (
+    <div className="share-backdrop" role="dialog" aria-modal="true" aria-label="Compartilhar mapa-múndi" onClick={onClose}>
+      <div className="share-dialog glass" onClick={(e) => e.stopPropagation()}>
+        <div className="share-head">
+          <h2>✦ Compartilhar meu mapa-múndi</h2>
+          <button className="icon-btn" aria-label="Fechar" onClick={onClose}>✕</button>
+        </div>
+        <p className="muted small">A imagem mostra as linhas dos planetas selecionados no mapa.</p>
+        <div className="share-preview acg-preview">{image ? <img src={image.url} alt="Prévia da imagem" /> : <div className="loader"><span /> Gerando imagem…</div>}</div>
+        <div className="share-actions">
+          {canShare && <button className="cta" onClick={share}><span>Compartilhar</span></button>}
+          <button className={canShare ? 'ghost' : 'cta'} disabled={!image} onClick={download}>{canShare ? '⤓ Salvar imagem' : <span>⤓ Salvar imagem</span>}</button>
+        </div>
+        {msg && <p className="muted small center">{msg}</p>}
+      </div>
     </div>
   )
 }
