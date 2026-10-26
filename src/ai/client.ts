@@ -9,7 +9,7 @@ interface Options {
   summary: string
   /** What is being analysed (see billing/rules); the server charges the right allowance. */
   accessKey: string
-  /** Owner simulator: don't charge the account; use the personal key or a sample text. */
+  /** Owner simulator: real analysis through the server (the owner is never charged), else personal key or sample text. */
   simulated?: boolean
   onText: (delta: string) => void
   signal?: AbortSignal
@@ -19,6 +19,7 @@ interface Options {
 export async function generateReading({ kind, summary, accessKey, simulated, onText, signal }: Options): Promise<string> {
   const data = clampSummary(summary)
   if (simulated) {
+    if (BILLING) return viaAccount(kind, data, accessKey, onText, signal)
     const key = getUserKey()
     if (key) return viaBrowser(key, kind, data, onText, signal)
     if (AI_ENDPOINT) return viaEndpoint(kind, data, onText, signal)
