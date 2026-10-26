@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState, type ReactNode } from 'react'
+import { createPortal } from 'react-dom'
 import { AiError, aiAvailable } from '../ai/config'
 import { READING_TITLES, type ReadingKind } from '../ai/prompts'
 import { useAccess, type Offer } from '../billing/context'
@@ -8,6 +9,8 @@ import type { Route } from '../App'
 
 interface Props {
   kind: ReadingKind
+  /** Who the analysis is about — shown on the PDF. */
+  subject: string
   /** Lazily built so heavy summaries are only computed on demand. */
   getSummary: () => string
   /** Stable id of what is being read (profile + options) — used to cache the result. */
@@ -36,7 +39,7 @@ export function AiReading(props: Props) {
   return <AiReadingInner key={key} storageKey={key} {...props} />
 }
 
-function AiReadingInner({ kind, getSummary, accessKey, offer, go, storageKey: key }: Props & { storageKey: string }) {
+function AiReadingInner({ kind, subject, getSummary, accessKey, offer, go, storageKey: key }: Props & { storageKey: string }) {
   const access = useAccess()
   const allowance = access.allowance(accessKey)
   const [text, setText] = useState<string>(() => readCache(key) ?? '')
@@ -116,8 +119,56 @@ function AiReadingInner({ kind, getSummary, accessKey, offer, go, storageKey: ke
           <button className="ghost" onClick={run}>Tentar novamente</button>
         </div>
       )}
-      <p className="muted small ai-note">Análise interpretativa feita a partir do seu mapa calculado — use como reflexão, não como verdade absoluta.</p>
+      {status === 'done' && text && <ReadingActions kind={kind} subject={subject} text={text} />}
     </section>
+  )
+}
+
+/** Save as PDF, copy and share a finished analysis (it is also kept on this device). */
+function ReadingActions({ kind, subject, text }: { kind: ReadingKind; subject: string; text: string }) {
+  const [printing, setPrinting] = useState(false)
+  const [msg, setMsg] = useState('')
+  const [today] = useState(() => new Date().toLocaleDateString('pt-BR'))
+  const title = READING_TITLES[kind]
+  const plain = `${title} — ${subject}\n\n${text.replace(/[*_#]/g, '')}\n\nCosmic Sky · ${window.location.host}${window.location.pathname}`
+
+  useEffect(() => {
+    if (!printing) return
+    const done = () => { document.body.classList.remove('printing-ai'); setPrinting(false) }
+    document.body.classList.add('printing-ai')
+    window.addEventListener('afterprint', done, { once: true })
+    // let the print layout render before opening the dialog
+    const id = window.setTimeout(() => window.print(), 50)
+    return () => { window.clearTimeout(id); window.removeEventListener('afterprint', done); document.body.classList.remove('printing-ai') }
+  }, [printing])
+
+  const copy = async () => {
+    try { await navigator.clipboard.writeText(plain); setMsg('Texto copiado.') } catch { setMsg('Não foi possível copiar neste aparelho.') }
+  }
+  const share = async () => {
+    try { await navigator.share({ title, text: plain }) } catch { /* cancelled */ }
+  }
+  const canShare = typeof navigator.share === 'function'
+
+  return (
+    <>
+      <div className="ai-actions">
+        <button className="ghost" onClick={() => setPrinting(true)}>⎙ PDF da análise</button>
+        <button className="ghost" onClick={copy}>⧉ Copiar texto</button>
+        {canShare && <button className="ghost" onClick={share}>↗ Compartilhar</button>}
+      </div>
+      <p className="muted small ai-saved">✓ Esta análise fica salva neste aparelho: é só voltar a esta página para ler de novo.{msg && ` ${msg}`}</p>
+      {printing && createPortal(
+        <div id="ai-print">
+          <p className="pr-brand">✶ COSMIC SKY ✶</p>
+          <h1>{title}</h1>
+          <p className="ai-print-sub">{subject}</p>
+          <div className="ai-print-text">{renderMarkdown(text)}</div>
+          <p className="ai-print-end">Gerada pelo Cosmic Sky · {today}</p>
+        </div>,
+        document.body,
+      )}
+    </>
   )
 }
 

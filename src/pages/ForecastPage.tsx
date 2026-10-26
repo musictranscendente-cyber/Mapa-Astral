@@ -223,6 +223,7 @@ export function ForecastPage({ natal, go }: { natal: Chart | null; go: (r: Route
           {days.length > 0 && (
             <AiReading
               kind="previsao"
+              subject={`${natal.birth?.name ?? ''} · próximos ${RANGES.find((r) => r.days === range)?.label ?? ''}`}
               cacheKey={`${natal.birth?.name}|${natal.date.toISOString()}|${start.toISOString().slice(0, 10)}|${range}`}
               accessKey={forecastKey(bk)}
               offer={offer}

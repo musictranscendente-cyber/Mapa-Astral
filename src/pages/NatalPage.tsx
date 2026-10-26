@@ -122,6 +122,7 @@ export function NatalPage({ natal, settings, setSettings, go }: Props) {
         {tab === 'ia' && (
           <AiReading
             kind="natal"
+            subject={b.name}
             cacheKey={`${b.name}|${utc.toISOString()}|${b.latitude},${b.longitude}|${natal.houseSystem}`}
             accessKey={natalKey(bk)}
             offer={{ product: 'natal', scope: { birth: bk }, label: b.name }}

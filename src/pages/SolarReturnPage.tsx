@@ -201,6 +201,7 @@ export function SolarReturnPage({ natal, houseSystem, go }: Props) {
 
       <AiReading
         kind="revolucao"
+        subject={`${natal.birth.name} · ${year}`}
         cacheKey={`${natal.birth.name}|${natal.date.toISOString()}|${year}|${where.latitude.toFixed(2)},${where.longitude.toFixed(2)}|${houseSystem}`}
         accessKey={key}
         offer={offer}

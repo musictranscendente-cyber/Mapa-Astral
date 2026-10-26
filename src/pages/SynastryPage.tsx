@@ -254,6 +254,7 @@ export function SynastryPage({ profiles, activeId, houseSystem, onSave, go }: Pr
 
           <AiReading
             kind="sinastria"
+            subject={`${nameA} e ${nameB}`}
             cacheKey={`${A.id}|${B.id}|${houseSystem}`}
             accessKey={key}
             offer={offer}

@@ -472,7 +472,6 @@ p { margin: 0 0 0.8em; }
 .ai-text ul { padding-left: 1.2rem; }
 .ai-text li { margin-bottom: 0.3rem; }
 .ai-text.typing > :last-child::after { content: '▍'; color: var(--gold); animation: blink 1s infinite; margin-left: 2px; }
-.ai-note { margin-top: 1rem; }
 
 /* ---------- Settings ---------- */
 .settings { max-width: 760px; margin: 0 auto; }
@@ -622,6 +621,24 @@ p { margin: 0 0 0.8em; }
 
 /* ── PDF do relatório: layout próprio, escuro e ilustrado ── */
 .print-report { display: none; }
+/* Análise completa: PDF on its own (rendered into <body> only while printing) */
+#ai-print { display: none; }
+@media print {
+  body.printing-ai > #root { display: none !important; }
+  body.printing-ai > #ai-print {
+    display: block !important; color: #e9e5ff; font-family: var(--serif); padding: 20mm 18mm;
+    -webkit-box-decoration-break: clone; box-decoration-break: clone;
+    background: radial-gradient(ellipse at 20% 0%, #24185e 0%, transparent 45%), #0b0a24;
+  }
+  #ai-print .pr-brand { font-family: var(--sans); letter-spacing: 0.4em; font-size: 9pt; color: #ffe8a3; text-align: center; margin: 0; }
+  #ai-print h1 { font-family: var(--display); font-weight: 600; color: #ffe8a3; font-size: 22pt; text-align: center; margin: 6mm 0 1mm; }
+  .ai-print-sub { text-align: center; font-style: italic; font-size: 13pt; color: #c9c3e6; margin: 0 0 10mm; }
+  .ai-print-text h3, .ai-print-text h4 { font-family: var(--display); font-weight: 500; color: #ffe8a3; break-after: avoid; margin: 7mm 0 2mm; }
+  .ai-print-text h3 { font-size: 15pt; }
+  .ai-print-text h4 { font-size: 12.5pt; }
+  .ai-print-text p, .ai-print-text li { font-size: 11.5pt; line-height: 1.6; orphans: 3; widows: 3; }
+  .ai-print-end { margin-top: 10mm; text-align: center; font-family: var(--sans); font-size: 8pt; color: #9f98c9; }
+}
 @media print {
   @page { size: A4; margin: 0; }
   html, body { background: #0b0a24 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
@@ -894,3 +911,6 @@ p { margin: 0 0 0.8em; }
 .sint-people .energy-orb { order: 2; }
 .sint-preview { width: min(260px, 70%); height: auto; margin: 0 auto; border-radius: 16px; box-shadow: 0 20px 60px -20px rgba(255, 143, 199, 0.5); }
 .sint-teaser { margin-top: 0.8rem; width: 100%; display: flex; align-items: center; gap: 0.9rem; text-align: left; padding: 0.9rem 1.1rem; color: var(--ink); border-color: rgba(255, 143, 199, 0.4); } .sint-teaser span:nth-child(2) { display: flex; flex-direction: column; min-width: 0; } .sint-heart { font-size: 1.6rem; color: #ff8fc7; } .sint-go { margin-left: auto; color: var(--gold); font-size: 1.4rem; }
+
+.ai-actions { display: flex; flex-wrap: wrap; gap: 0.5rem; justify-content: center; margin-top: 1.2rem; }
+.ai-saved { text-align: center; margin: 0.6rem 0 0; }
