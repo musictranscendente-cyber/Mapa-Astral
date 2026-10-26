@@ -59,9 +59,10 @@ export function AccessProvider({ userId, email, children }: { userId: string | n
       loading: !!userId && state.uid !== userId,
       plan,
       data,
-      full: (key) => !!userId && unlocked(data, key),
-      allowance: (key) => (userId ? analysisAllowance(data, key) : { ok: false }),
-      profileLimit: !userId ? PROFILE_LIMIT.anon : plan ? PROFILE_LIMIT[plan] : PROFILE_LIMIT.free,
+      // the owner's real account sees everything and generates analyses freely (the server agrees)
+      full: (key) => owner || (!!userId && unlocked(data, key)),
+      allowance: (key) => (owner ? { ok: true } : userId ? analysisAllowance(data, key) : { ok: false }),
+      profileLimit: owner ? Infinity : !userId ? PROFILE_LIMIT.anon : plan ? PROFILE_LIMIT[plan] : PROFILE_LIMIT.free,
       refresh,
       buy: (offer) => (typeof offer === 'string' ? startCheckout(offer) : startCheckout(offer.product, offer.scope, offer.label)),
       owner,

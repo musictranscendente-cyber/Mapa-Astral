@@ -3,10 +3,17 @@
 // Secret: ANTHROPIC_API_KEY.
 import Anthropic from 'npm:@anthropic-ai/sdk@0.131.0'
 import { SYSTEM_PROMPT, buildUserPrompt, clampSummary, type ReadingKind } from '../_shared/promptCore.ts'
-import { analysisAllowance, validAnalysisKey } from '../_shared/rules.ts'
+import { OWNER_EMAIL_HASHES, analysisAllowance, validAnalysisKey } from '../_shared/rules.ts'
 import { adminClient, corsHeaders, json, loadAccess, requestUser } from '../_shared/server.ts'
 
 const KINDS: ReadingKind[] = ['natal', 'sinastria', 'revolucao', 'previsao']
+
+async function isOwner(email: string | undefined): Promise<boolean> {
+  if (!email) return false
+  const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(email.trim().toLowerCase()))
+  const hex = [...new Uint8Array(buf)].map((b) => b.toString(16).padStart(2, '0')).join('')
+  return OWNER_EMAIL_HASHES.includes(hex)
+}
 
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response(null, { status: 204, headers: corsHeaders })
@@ -24,17 +31,21 @@ Deno.serve(async (req) => {
     return json({ error: 'parâmetros inválidos' }, 400)
   }
 
-  const allowance = analysisAllowance(await loadAccess(admin, user.id), key)
-  if (!allowance.ok) return json({ error: 'sem saldo de análises' }, 402)
+  // The owner tests freely: no balance needed and nothing recorded.
+  let refund = async () => {}
+  if (!(await isOwner(user.email))) {
+    const allowance = analysisAllowance(await loadAccess(admin, user.id), key)
+    if (!allowance.ok) return json({ error: 'sem saldo de análises' }, 402)
 
-  // Record first, so two simultaneous requests can't both spend the last analysis.
-  const { data: logRow, error: logError } = await admin
-    .from('analysis_log')
-    .insert({ user_id: user.id, kind, access_key: key, source: allowance.source })
-    .select('id')
-    .single()
-  if (logError) return json({ error: 'falha ao registrar' }, 500)
-  const refund = () => admin.from('analysis_log').delete().eq('id', logRow.id)
+    // Record first, so two simultaneous requests can't both spend the last analysis.
+    const { data: logRow, error: logError } = await admin
+      .from('analysis_log')
+      .insert({ user_id: user.id, kind, access_key: key, source: allowance.source })
+      .select('id')
+      .single()
+    if (logError) return json({ error: 'falha ao registrar' }, 500)
+    refund = async () => { await admin.from('analysis_log').delete().eq('id', logRow.id) }
+  }
 
   const client = new Anthropic() // reads ANTHROPIC_API_KEY
   const stream = client.beta.messages.stream({

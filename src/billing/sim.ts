@@ -1,6 +1,6 @@
 import { useEffect, useState, useSyncExternalStore } from 'react'
 import {
-  PRODUCTS, buildAccess, extendPlan, grantKeys,
+  OWNER_EMAIL_HASHES, PRODUCTS, buildAccess, extendPlan, grantKeys,
   type AccessData, type AnalysisLogRow, type AnalysisSource, type PlanKey, type ProductKey, type Scope,
 } from './rules'
 
@@ -9,8 +9,6 @@ import {
  * Mercado Pago. Lives only in this device's storage and only applies to the owner's account.
  */
 
-/** SHA-256 of the owner e-mails allowed to use the simulator (not stored in plain text). */
-const ADMIN_HASHES = ['038af17a8e8b545e9547aaac6d35d608d98f92a05bb47142805ecb58e10f2510']
 
 export const SIM_START_BALANCE = 500
 
@@ -109,7 +107,7 @@ export function useIsOwner(email: string | null | undefined): boolean {
   useEffect(() => {
     if (!email || !crypto.subtle) return
     let cancelled = false
-    sha256(email.trim().toLowerCase()).then((h) => { if (!cancelled) setHit({ email, ok: ADMIN_HASHES.includes(h) }) })
+    sha256(email.trim().toLowerCase()).then((h) => { if (!cancelled) setHit({ email, ok: OWNER_EMAIL_HASHES.includes(h) }) })
     return () => { cancelled = true }
   }, [email])
   return !!email && hit?.email === email && hit.ok

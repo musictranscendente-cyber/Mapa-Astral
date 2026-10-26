@@ -46,6 +46,9 @@ export const PRODUCTS: Record<ProductKey, Product> = {
 export const isProductKey = (k: unknown): k is ProductKey => typeof k === 'string' && k in PRODUCTS
 
 /** Monthly analysis allowance per plan; free accounts get one welcome analysis. */
+/** SHA-256 of the owner's e-mail (lower-case): unlimited analyses and full access, never stored in plain text. */
+export const OWNER_EMAIL_HASHES = ['038af17a8e8b545e9547aaac6d35d608d98f92a05bb47142805ecb58e10f2510']
+
 export const PLAN_ANALYSES: Record<PlanKey, number> = { estrela: 3, cosmos: 30 }
 export const WELCOME_ANALYSES = 1
 /** Generations allowed for each analysis bought separately (first + 2 new versions). */
