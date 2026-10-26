@@ -31,3 +31,14 @@ jobs:
             echo "::error::O projeto Supabase não respondeu (HTTP $code). Se estiver pausado, clique em Resume project no painel."
             exit 1
           fi
+
+          # Tables created by each migration: a 404 means that migration still has to be run in the SQL Editor.
+          for pair in birth_profiles:0001 entitlements:0002 purchases:0002 analysis_log:0002 app_events:0003; do
+            table=${pair%%:*}; mig=${pair##*:}
+            c=$(curl -sS -o /dev/null -w '%{http_code}' "$base/rest/v1/$table?select=*&limit=0" -H "apikey: $KEY" -H "Authorization: Bearer $KEY")
+            if [ "$c" = "404" ]; then echo "::warning::Tabela $table não existe — rode a migração $mig no SQL Editor do Supabase."; else echo "Tabela $table: ok (HTTP $c)"; fi
+          done
+
+          # Edge Function for the full analysis: without login it must answer 401 (published and running).
+          c=$(curl -sS -o /dev/null -w '%{http_code}' -X POST "$base/functions/v1/analysis" -H "apikey: $KEY" -H "Content-Type: application/json" -d '{}')
+          if [ "$c" = "404" ]; then echo "::warning::Função analysis não publicada — rode Actions → Supabase Functions."; else echo "Função analysis: respondeu HTTP $c"; fi
