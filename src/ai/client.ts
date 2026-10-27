@@ -3,7 +3,7 @@ import { SYSTEM_PROMPT, buildUserPrompt, clampSummary, type ReadingKind } from '
 import { AI_ENDPOINT, AI_MODEL, AiError, getUserKey } from './config'
 import { BILLING } from '../billing/api'
 import { supabase, supabaseAnonKey, supabaseUrl } from '../lib/supabase'
-import { t } from '../i18n'
+import { getLang, t } from '../i18n'
 
 interface Options {
   kind: ReadingKind
@@ -41,7 +41,7 @@ async function viaAccount(kind: ReadingKind, summary: string, accessKey: string,
   const res = await fetch(`${supabaseUrl}/functions/v1/analysis`, {
     method: 'POST',
     headers: { 'content-type': 'application/json', authorization: `Bearer ${token}`, apikey: supabaseAnonKey! },
-    body: JSON.stringify({ kind, summary, key: accessKey }),
+    body: JSON.stringify({ kind, summary, key: accessKey, lang: getLang() }),
     signal,
   })
   if (res.status === 402) throw new AiError(t('Seu saldo de análises acabou. Libere esta análise ou escolha um plano.'))
@@ -52,7 +52,7 @@ async function viaEndpoint(kind: ReadingKind, summary: string, onText: (d: strin
   const res = await fetch(AI_ENDPOINT!, {
     method: 'POST',
     headers: { 'content-type': 'application/json' },
-    body: JSON.stringify({ kind, summary }),
+    body: JSON.stringify({ kind, summary, lang: getLang() }),
     signal,
   })
   return readStream(res, onText)
@@ -86,7 +86,7 @@ async function viaBrowser(apiKey: string, kind: ReadingKind, summary: string, on
         betas: ['server-side-fallback-2026-07-01'],
         fallbacks: 'default',
         system: [{ type: 'text', text: SYSTEM_PROMPT, cache_control: { type: 'ephemeral' } }],
-        messages: [{ role: 'user', content: buildUserPrompt(kind, summary) }],
+        messages: [{ role: 'user', content: buildUserPrompt(kind, summary, getLang()) }],
       },
       { signal },
     )

@@ -33,8 +33,18 @@ const KIND_INSTRUCTIONS: Record<ReadingKind, string> = {
   previsao: 'Escreva a leitura das previsões do período. Seções sugeridas: visão geral do período, os trânsitos mais importantes em ordem cronológica, melhores dias e dias de atenção, conselhos práticos por área da vida.',
 }
 
-export function buildUserPrompt(kind: ReadingKind, summary: string): string {
-  return `${KIND_INSTRUCTIONS[kind]}\n\nDados calculados:\n<dados>\n${summary}\n</dados>`
+export type ReadingLang = 'pt' | 'en' | 'es'
+export const READING_LANGS: ReadingLang[] = ['pt', 'en', 'es']
+
+/** Kept out of the system prompt so its cache is shared by every language. */
+const LANG_INSTRUCTION: Record<ReadingLang, string> = {
+  pt: '',
+  en: '\n\nIMPORTANTE: escreva a análise inteira em inglês (English), com o mesmo tom acolhedor e a mesma estrutura de títulos, adaptando os termos astrológicos ao uso habitual em inglês.',
+  es: '\n\nIMPORTANTE: escreva a análise inteira em espanhol (español neutro, tratando o leitor por "tú"), com o mesmo tom acolhedor e a mesma estrutura de títulos, adaptando os termos astrológicos ao uso habitual em espanhol.',
+}
+
+export function buildUserPrompt(kind: ReadingKind, summary: string, lang: ReadingLang = 'pt'): string {
+  return `${KIND_INSTRUCTIONS[kind]}${LANG_INSTRUCTION[lang] ?? ''}\n\nDados calculados:\n<dados>\n${summary}\n</dados>`
 }
 
 const MAX_SUMMARY = 14000
