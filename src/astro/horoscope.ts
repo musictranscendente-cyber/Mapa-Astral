@@ -1,6 +1,7 @@
 import type { PlanetKey } from './constants'
 import { ASPECTS, angDiff } from './constants'
 import { bodyLongitude, bodySpeed, moonPhaseInfo, toTime } from './ephemeris'
+import { byLang } from '../i18n'
 
 /**
  * Daily horoscope by Sun sign ("solar houses"): the sign is taken as the 1st house and
@@ -102,7 +103,13 @@ export function horoscope(sign: number, day: Date): Horoscope {
 }
 
 /** Traditional Sun-sign dates (they shift by a day in some years). */
-export const SIGN_DATES = [
+const SIGN_DATES_PT = [
   '21/3 a 19/4', '20/4 a 20/5', '21/5 a 20/6', '21/6 a 22/7', '23/7 a 22/8', '23/8 a 22/9',
   '23/9 a 22/10', '23/10 a 21/11', '22/11 a 21/12', '22/12 a 19/1', '20/1 a 18/2', '19/2 a 20/3',
 ]
+export const SIGN_DATES = byLang({
+  pt: SIGN_DATES_PT,
+  en: ['Mar 21 – Apr 19', 'Apr 20 – May 20', 'May 21 – Jun 20', 'Jun 21 – Jul 22', 'Jul 23 – Aug 22', 'Aug 23 – Sep 22',
+    'Sep 23 – Oct 22', 'Oct 23 – Nov 21', 'Nov 22 – Dec 21', 'Dec 22 – Jan 19', 'Jan 20 – Feb 18', 'Feb 19 – Mar 20'],
+  es: SIGN_DATES_PT.map((d) => d.replace(' a ', ' al ')),
+})
