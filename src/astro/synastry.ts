@@ -1,6 +1,7 @@
 import { aspectBetween, type Chart } from './chart'
 import { POINTS, type AspectInfo, type PointKey } from './constants'
 import { houseOf } from './houses'
+import { byLang } from '../i18n'
 
 /** Points compared between two charts. */
 export const SYN_POINTS: PointKey[] = [
@@ -57,7 +58,7 @@ export function houseOverlays(host: Chart, guest: Chart): HouseOverlay[] {
 
 export type SynArea = 'atracao' | 'emocional' | 'comunicacao' | 'romance' | 'estabilidade' | 'crescimento'
 
-export const SYN_AREAS: { key: SynArea; name: string; icon: string; color: string; desc: string }[] = [
+const SYN_AREAS_PT: { key: SynArea; name: string; icon: string; color: string; desc: string }[] = [
   { key: 'atracao', name: 'Atração & Química', icon: '♂', color: '#ff6b6b', desc: 'Magnetismo físico e desejo (Marte, Vênus, Plutão).' },
   { key: 'emocional', name: 'Sintonia Emocional', icon: '☽', color: '#c5b3ff', desc: 'Sentir-se em casa um com o outro (Lua, Sol, Netuno).' },
   { key: 'comunicacao', name: 'Comunicação', icon: '☿', color: '#7cc7ff', desc: 'Entendimento mental e diálogo (Mercúrio, Urano).' },
@@ -65,6 +66,29 @@ export const SYN_AREAS: { key: SynArea; name: string; icon: string; color: strin
   { key: 'estabilidade', name: 'Compromisso', icon: '♄', color: '#c9b37e', desc: 'Durabilidade e responsabilidade (Saturno, Ascendente).' },
   { key: 'crescimento', name: 'Crescimento Mútuo', icon: '♃', color: '#ffb86b', desc: 'Expansão, propósito e destino (Júpiter, Nodos, MC).' },
 ]
+const SYN_AREA_TEXT: Record<'en' | 'es', Record<SynArea, [string, string]>> = {
+  en: {
+    atracao: ['Attraction & Chemistry', 'Physical magnetism and desire (Mars, Venus, Pluto).'],
+    emocional: ['Emotional Harmony', 'Feeling at home with each other (Moon, Sun, Neptune).'],
+    comunicacao: ['Communication', 'Mental understanding and dialogue (Mercury, Uranus).'],
+    romance: ['Romance & Affection', 'Tenderness, pleasure and mutual admiration (Venus, Sun, Moon).'],
+    estabilidade: ['Commitment', 'Durability and responsibility (Saturn, Ascendant).'],
+    crescimento: ['Mutual Growth', 'Expansion, purpose and destiny (Jupiter, Nodes, MC).'],
+  },
+  es: {
+    atracao: ['Atracción y Química', 'Magnetismo físico y deseo (Marte, Venus, Plutón).'],
+    emocional: ['Sintonía Emocional', 'Sentirse en casa el uno con el otro (Luna, Sol, Neptuno).'],
+    comunicacao: ['Comunicación', 'Entendimiento mental y diálogo (Mercurio, Urano).'],
+    romance: ['Romance y Afecto', 'Cariño, placer y admiración mutua (Venus, Sol, Luna).'],
+    estabilidade: ['Compromiso', 'Durabilidad y responsabilidad (Saturno, Ascendente).'],
+    crescimento: ['Crecimiento Mutuo', 'Expansión, propósito y destino (Júpiter, Nodos, MC).'],
+  },
+}
+export const SYN_AREAS = byLang({
+  pt: SYN_AREAS_PT,
+  en: SYN_AREAS_PT.map((a) => ({ ...a, name: SYN_AREA_TEXT.en[a.key][0], desc: SYN_AREA_TEXT.en[a.key][1] })),
+  es: SYN_AREAS_PT.map((a) => ({ ...a, name: SYN_AREA_TEXT.es[a.key][0], desc: SYN_AREA_TEXT.es[a.key][1] })),
+})
 
 const AREA_PAIRS: Record<SynArea, [PointKey, PointKey][]> = {
   atracao: [['mars', 'venus'], ['mars', 'mars'], ['venus', 'pluto'], ['mars', 'pluto'], ['mars', 'asc'], ['sun', 'mars']],
