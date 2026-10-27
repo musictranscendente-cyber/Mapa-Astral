@@ -2,6 +2,7 @@ import type { Chart } from '../astro/chart'
 import { POINTS, SIGNS, formatDegree, type PointKey } from '../astro/constants'
 import type { SynAspect } from '../astro/synastry'
 import type { DayScore, TransitEvent } from '../astro/transits'
+import { housesSummary } from '../interpret/houses'
 
 export { READING_TITLES, SYSTEM_PROMPT, buildUserPrompt, clampSummary, type ReadingKind } from './promptCore'
 
@@ -24,6 +25,7 @@ export function chartSummary(chart: Chart, label = 'Mapa'): string {
     lines.push(`- Ascendente: ${formatDegree(chart.asc)}; Meio do Céu: ${formatDegree(chart.mc)}`)
     lines.push(`- Regente do mapa: ${POINTS[SIGNS[chart.points.asc.sign].ruler].name}`)
     lines.push(`- Cúspides: ${chart.cusps.map((c, i) => `C${i + 1} ${formatDegree(c)}`).join('; ')}`)
+    lines.push('Casas (signo na cúspide, regente e planetas):', ...housesSummary(chart))
   } else {
     lines.push('- Hora desconhecida: não use casas nem Ascendente.')
   }

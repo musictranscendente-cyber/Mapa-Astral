@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react'
 import type { Chart } from '../astro/chart'
 import { ASPECT_POINTS } from '../astro/chart'
-import { ELEMENT_INFO, POINTS, SIGNS, formatDegree, norm360, type PointKey } from '../astro/constants'
+import { ELEMENT_INFO, POINTS, SIGNS, formatDegree, type PointKey } from '../astro/constants'
 import { HOUSE_SYSTEMS } from '../astro/houses'
 import { formatInZone, localToUtc, offsetLabel } from '../astro/time'
 import { AiReading } from '../components/AiReading'
@@ -9,6 +9,7 @@ import { ChartWheel } from '../components/ChartWheel'
 import { chartSummary } from '../ai/prompts'
 import { ElementBars } from '../components/Charts'
 import { natalAspectText } from '../interpret/aspects'
+import { houseReading } from '../interpret/houses'
 import { HOUSE_TEXT, PLANET_TEXT, planetInHouse } from '../interpret/planets'
 import { buildNatalReport, planetInSign } from '../interpret/report'
 import { SIGN_TEXT } from '../interpret/signs'
@@ -242,24 +243,43 @@ function PlanetTable({ chart, onPick }: { chart: Chart; onPick: (k: PointKey) =>
 function HouseTable({ chart }: { chart: Chart }) {
   if (!chart.hasHouses) return <div className="glass pad"><p>Sem hora de nascimento não é possível calcular as casas.</p></div>
   return (
-    <div className="house-grid">
-      {chart.cusps.map((c, i) => {
-        const s = SIGNS[Math.floor(norm360(c) / 30)]
-        const inside = (Object.keys(chart.points) as PointKey[]).filter((k) =>
-          !['asc', 'mc', 'dsc', 'ic', 'southNode'].includes(k) && chart.points[k].house === i + 1)
-        return (
-          <article key={i} className="glass house-card" style={{ ['--el' as string]: ELEMENT_INFO[s.element].color }}>
-            <div className="house-num-big">{i + 1}</div>
-            <h4>{HOUSE_TEXT[i].theme}</h4>
-            <p className="muted mono">{formatDegree(c)}</p>
-            <p className="small">{HOUSE_TEXT[i].description}</p>
-            {inside.length > 0 && (
-              <p className="inside">{inside.map((k) => <span key={k} style={{ color: POINTS[k].color }} title={POINTS[k].name}>{POINTS[k].glyph}</span>)}</p>
-            )}
-          </article>
-        )
-      })}
-    </div>
+    <>
+      <p className="muted house-intro">
+        As 12 casas são as áreas da sua vida. O <b>signo na cúspide</b> mostra o jeito como você vive cada área, o <b>regente</b> mostra
+        com que outra área ela se conecta e os <b>planetas</b> dentro dela mostram onde está a sua energia. Toque em uma casa para ver tudo.
+      </p>
+      <div className="house-grid">
+        {chart.cusps.map((c, i) => {
+          const r = houseReading(chart, i)
+          const s = SIGNS[r.sign]
+          return (
+            <details key={i} className="glass house-card" style={{ ['--el' as string]: ELEMENT_INFO[s.element].color }}>
+              <summary>
+                <div className="house-num-big">{i + 1}</div>
+                <h4>{HOUSE_TEXT[i].theme}</h4>
+                <p className="muted mono">{s.glyph} {formatDegree(c)}</p>
+                <p className="small">{HOUSE_TEXT[i].description}</p>
+                {r.planets.length > 0 && (
+                  <p className="inside">{r.planets.map(({ planet }) => <span key={planet} style={{ color: POINTS[planet].color }} title={POINTS[planet].name}>{POINTS[planet].glyph}</span>)}</p>
+                )}
+                <span className="house-more">Ver interpretação</span>
+              </summary>
+              <div className="house-body">
+                <p>{r.detail}</p>
+                <h5>{s.glyph} Signo na cúspide: {s.name}</h5>
+                <p>{r.cusp}</p>
+                <h5><span style={{ color: POINTS[r.ruler.planet].color }}>{POINTS[r.ruler.planet].glyph}</span> Regente da casa</h5>
+                <p>{r.ruler.text}</p>
+                <h5>Planetas nesta casa</h5>
+                {r.empty ? <p className="muted">{r.empty}</p> : r.planets.map(({ planet, text }) => (
+                  <p key={planet}><b style={{ color: POINTS[planet].color }}>{POINTS[planet].glyph} {POINTS[planet].name}{chart.points[planet].retro ? ' ℞' : ''}:</b> {text}</p>
+                ))}
+              </div>
+            </details>
+          )
+        })}
+      </div>
+    </>
   )
 }
 
