@@ -134,7 +134,7 @@ export function ProgressionsPage({ natal, go }: { natal: Chart | null; go: (r: R
               </section>
             </>
           ) : (
-            <Locked title={t('Progressões completas')} text={t('Aspectos progredidos e de arco solar ativos, os marcos dos próximos 3 anos e todas as posições progredidas — incluso nos planos.')} go={go} />
+            <Locked title={t('Progressões completas')} text={t('Aspectos progredidos e de arco solar ativos, os marcos dos próximos 3 anos e todas as posições progredidas. Libere só este serviço ou tenha tudo num plano.')} offer={{ product: 'progressoes', scope: { birth: birthKey(natal.birth) }, label: natal.birth.name }} go={go} />
           )}
         </>
       )}
