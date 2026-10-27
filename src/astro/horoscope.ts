@@ -1,5 +1,5 @@
 import type { PlanetKey } from './constants'
-import { ASPECTS, angDiff } from './constants'
+import { ASPECTS, angDiff, type AspectKey } from './constants'
 import { bodyLongitude, bodySpeed, moonPhaseInfo, toTime } from './ephemeris'
 import { byLang } from '../i18n'
 
@@ -16,7 +16,7 @@ const RELATION_SCORE: Record<Relation, number> = { conjuncao: 1, sextil: 1, trig
 
 export interface PlanetInSign { key: PlanetKey; sign: number; house: number; relation: Relation; retro: boolean }
 
-export interface DayAspect { a: PlanetKey; b: PlanetKey; type: string; harmonious: boolean; houseA: number; houseB: number }
+export interface DayAspect { a: PlanetKey; b: PlanetKey; key: AspectKey; type: string; harmonious: boolean; houseA: number; houseB: number }
 
 export interface Horoscope {
   sign: number
@@ -65,7 +65,7 @@ function aspectOfDay(t: ReturnType<typeof toTime>, sign: number): DayAspect | nu
         const orb = Math.abs(sep - type.angle)
         if (orb <= 1.5 && (!best || orb < best.orb)) {
           best = {
-            a, b, type: type.name.toLowerCase(), harmonious: type.nature !== 'tenso', orb,
+            a, b, key: type.key, type: type.name.toLowerCase(), harmonious: type.nature !== 'tenso', orb,
             houseA: ((Math.floor(lon[a] / 30) - sign + 12) % 12) + 1,
             houseB: ((Math.floor(lon[b] / 30) - sign + 12) % 12) + 1,
           }

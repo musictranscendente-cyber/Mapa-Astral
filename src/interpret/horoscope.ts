@@ -1,9 +1,11 @@
 import { POINTS, SIGNS } from '../astro/constants'
 import type { Horoscope } from '../astro/horoscope'
-import { locale } from '../i18n'
+import { byLang, locale, t } from '../i18n'
+import { HEADLINE_EN, HOUSE_SHORT_EN, MARS_ACTION_EN, MERCURY_MIND_EN, MOON_DAY_EN, PHASE_TIP_EN, VENUS_LOVE_EN } from './en/horoscope'
+import { HEADLINE_ES, HOUSE_SHORT_ES, MARS_ACTION_ES, MERCURY_MIND_ES, MOON_DAY_ES, PHASE_TIP_ES, VENUS_LOVE_ES } from './es/horoscope'
 
 /** Moon in each solar house: the main theme of the day. */
-const MOON_DAY = [
+const MOON_DAY_PT = [
   'A Lua passa pelo seu signo e coloca você no centro: emoções à flor da pele, vontade de cuidar de si e de ser notado. Bom dia para começar algo que tenha a sua cara.',
   'Com a Lua na sua casa do dinheiro e dos valores, o foco vai para segurança e conforto. Organize as finanças, saboreie pequenos prazeres e evite compras por impulso.',
   'A Lua movimenta conversas, mensagens e pequenos deslocamentos. Dia ágil, de trocas e ideias — ótimo para estudar, escrever ou resolver pendências do bairro e da família.',
@@ -18,7 +20,7 @@ const MOON_DAY = [
   'A Lua recolhe-se na sua casa mais íntima: dia de descanso, intuição e silêncio. Menos agenda, mais escuta interior — sonhos podem trazer mensagens.',
 ]
 
-const VENUS_LOVE = [
+const VENUS_LOVE_PT = [
   'Vênus no seu signo deixa você magnético: charme, beleza e facilidade de atrair.',
   'No amor, valorize gestos concretos e conforto a dois; presentes e mimos funcionam.',
   'Conversas leves e mensagens carinhosas aproximam — o flerte está nas palavras.',
@@ -33,7 +35,7 @@ const VENUS_LOVE = [
   'Amores discretos ou do passado podem voltar à memória; cuide do seu coração em silêncio.',
 ]
 
-const MARS_ACTION = [
+const MARS_ACTION_PT = [
   'Marte no seu signo dá energia de sobra: comece, lidere, mas evite atropelar os outros.',
   'Use sua força para gerar recursos; trabalho duro rende, mas sem gastos impulsivos.',
   'Mente acelerada: defenda suas ideias com firmeza, sem transformar conversa em briga.',
@@ -48,7 +50,7 @@ const MARS_ACTION = [
   'Energia mais baixa e interior: descanse e aja nos bastidores.',
 ]
 
-const MERCURY_MIND = [
+const MERCURY_MIND_PT = [
   'Mercúrio no seu signo favorece se expressar e defender suas ideias.',
   'Bom momento para planejar finanças e negociar valores.',
   'Comunicação fluida: ótimo para estudos, contratos e mensagens importantes.',
@@ -63,7 +65,7 @@ const MERCURY_MIND = [
   'Reflexão silenciosa: escreva, medite e escute a intuição.',
 ]
 
-const PHASE_TIP: Record<string, string> = {
+const PHASE_TIP_PT: Record<string, string> = {
   'Lua Nova': 'Lua Nova: plante intenções e comece com calma.',
   'Lua Crescente': 'Lua Crescente: tempo de agir e dar os primeiros passos.',
   'Quarto Crescente': 'Quarto Crescente: supere obstáculos e ajuste a rota.',
@@ -74,7 +76,7 @@ const PHASE_TIP: Record<string, string> = {
   'Lua Minguante': 'Lua Minguante: descanse, limpe e encerre ciclos.',
 }
 
-const HOUSE_SHORT = ['você mesmo', 'dinheiro e valores', 'comunicação', 'lar e família', 'amor e criatividade', 'rotina e saúde',
+const HOUSE_SHORT_PT = ['você mesmo', 'dinheiro e valores', 'comunicação', 'lar e família', 'amor e criatividade', 'rotina e saúde',
   'parcerias', 'transformações', 'estudos e viagens', 'carreira', 'amigos e projetos', 'vida interior']
 
 export interface HoroscopeText {
@@ -87,13 +89,21 @@ export interface HoroscopeText {
   tip: string
 }
 
-const HEADLINE: Record<number, string[]> = {
+const HEADLINE_PT: Record<number, string[]> = {
   5: ['Dia luminoso: o céu joga a seu favor', 'Portas abertas e boa sorte no ar'],
   4: ['Dia de fluxo e boas conexões', 'Energia favorável para avançar'],
   3: ['Dia de equilíbrio: escolha suas prioridades', 'Constância traz bons resultados'],
   2: ['Dia de paciência e ajustes', 'Desafios pedem calma e estratégia'],
   1: ['Dia de recolhimento e cuidado', 'Vá devagar: o céu pede pausa'],
 }
+
+const MOON_DAY = byLang({ pt: MOON_DAY_PT, en: MOON_DAY_EN, es: MOON_DAY_ES })
+const VENUS_LOVE = byLang({ pt: VENUS_LOVE_PT, en: VENUS_LOVE_EN, es: VENUS_LOVE_ES })
+const MARS_ACTION = byLang({ pt: MARS_ACTION_PT, en: MARS_ACTION_EN, es: MARS_ACTION_ES })
+const MERCURY_MIND = byLang({ pt: MERCURY_MIND_PT, en: MERCURY_MIND_EN, es: MERCURY_MIND_ES })
+const PHASE_TIP = byLang({ pt: PHASE_TIP_PT, en: PHASE_TIP_EN, es: PHASE_TIP_ES })
+const HOUSE_SHORT = byLang({ pt: HOUSE_SHORT_PT, en: HOUSE_SHORT_EN, es: HOUSE_SHORT_ES })
+const HEADLINE = byLang({ pt: HEADLINE_PT, en: HEADLINE_EN, es: HEADLINE_ES })
 
 export function horoscopeText(h: Horoscope): HoroscopeText {
   const p = h.planets
@@ -102,15 +112,15 @@ export function horoscopeText(h: Horoscope): HoroscopeText {
   let day = MOON_DAY[p.moon.house - 1]
   if (h.moonIngress) {
     const hora = h.moonIngress.at.toLocaleTimeString(locale(), { hour: '2-digit', minute: '2-digit' })
-    day += ` Às ${hora}, a Lua entra em ${SIGNS[h.moonIngress.sign].name} e o clima muda para ${HOUSE_SHORT[(h.moonIngress.sign - h.sign + 12) % 12]}.`
+    day += ` ${t('Às {time}, a Lua entra em {sign} e o clima muda para {theme}.', { time: hora, sign: SIGNS[h.moonIngress.sign].name, theme: HOUSE_SHORT[(h.moonIngress.sign - h.sign + 12) % 12] })}`
   }
-  const work = `${MARS_ACTION[p.mars.house - 1]}${p.mercury.retro ? ' Mercúrio está retrógrado: revise antes de assinar ou enviar.' : ''}`
+  const work = `${MARS_ACTION[p.mars.house - 1]}${p.mercury.retro ? ` ${t('Mercúrio está retrógrado: revise antes de assinar ou enviar.')}` : ''}`
   let highlight: string | null = null
   if (h.aspect) {
     const a = h.aspect
-    const tone = a.type === 'conjunção' ? 'funde e intensifica' : a.harmonious ? 'une com facilidade' : 'coloca em tensão'
-    const temas = a.houseA === a.houseB ? `o tema de ${HOUSE_SHORT[a.houseA - 1]}` : `os temas de ${HOUSE_SHORT[a.houseA - 1]} e ${HOUSE_SHORT[a.houseB - 1]}`
-    highlight = `${POINTS[a.a].name} em ${a.type} com ${POINTS[a.b].name}: o céu ${tone} ${temas} para você.`
+    const tone = t(a.key === 'conjunction' ? 'funde e intensifica' : a.harmonious ? 'une com facilidade' : 'coloca em tensão')
+    const temas = a.houseA === a.houseB ? t('o tema de {a}', { a: HOUSE_SHORT[a.houseA - 1] }) : t('os temas de {a} e {b}', { a: HOUSE_SHORT[a.houseA - 1], b: HOUSE_SHORT[a.houseB - 1] })
+    highlight = t('{a} em {type} com {b}: o céu {tone} {themes} para você.', { a: POINTS[a.a].name, type: a.type, b: POINTS[a.b].name, tone, themes: temas })
   }
   return {
     headline,
