@@ -1,5 +1,9 @@
+import { byLang } from '../i18n'
+import { CHIRON_SIGN_EN } from './en/aspects'
+import { CHIRON_SIGN_ES } from './es/aspects'
+
 /** Quíron por signo: a ferida que pede cuidado e o dom que nasce dela. */
-export const CHIRON_SIGN: { wound: string; gift: string }[] = [
+const CHIRON_SIGN_PT: { wound: string; gift: string }[] = [
   { wound: 'uma ferida ligada ao direito de existir, de se afirmar e de ocupar o próprio espaço', gift: 'a coragem de ser quem é — e de encorajar outras pessoas a fazerem o mesmo' },
   { wound: 'inseguranças com o próprio valor, o corpo, o dinheiro ou a estabilidade', gift: 'uma presença serena que ensina os outros a se sentirem seguros e merecedores' },
   { wound: 'o medo de não ser ouvido, de não ser inteligente o bastante ou de não saber se expressar', gift: 'a palavra que cura: escrever, ensinar e traduzir o que os outros não conseguem dizer' },
@@ -13,3 +17,5 @@ export const CHIRON_SIGN: { wound: string; gift: string }[] = [
   { wound: 'o sentimento de ser diferente, de não pertencer ao grupo', gift: 'a originalidade colocada a serviço do coletivo — unir pessoas em torno de algo novo' },
   { wound: 'limites frágeis, sensibilidade extrema ou sensação de abandono espiritual', gift: 'uma compaixão imensa, que cura pela presença, pela arte e pela espiritualidade' },
 ]
+
+export const CHIRON_SIGN = byLang({ pt: CHIRON_SIGN_PT, en: CHIRON_SIGN_EN, es: CHIRON_SIGN_ES })

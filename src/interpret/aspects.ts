@@ -1,8 +1,11 @@
 import type { AspectKey, PlanetKey, PointKey } from '../astro/constants'
 import { POINTS } from '../astro/constants'
+import { byLang, getLang, t } from '../i18n'
+import { ASPECT_TEXT_EN, DURATION_EN, HEADLINE_VERB_EN, NATAL_TARGET_EN } from './en/aspects'
+import { ASPECT_TEXT_ES, DURATION_ES, HEADLINE_VERB_ES, NATAL_TARGET_ES } from './es/aspects'
 import { PLANET_TEXT } from './planets'
 
-export const ASPECT_TEXT: Record<AspectKey, { dynamic: string; advice: string; transit: string }> = {
+const ASPECT_TEXT_PT: Record<AspectKey, { dynamic: string; advice: string; transit: string }> = {
   conjunction: {
     dynamic: 'fundem-se numa só força — energias que agem juntas, intensificando-se mutuamente',
     advice: 'Integre essas forças conscientemente: elas são inseparáveis em você.',
@@ -40,14 +43,16 @@ export const ASPECT_TEXT: Record<AspectKey, { dynamic: string; advice: string; t
   },
 }
 
+export const ASPECT_TEXT = byLang({ pt: ASPECT_TEXT_PT, en: ASPECT_TEXT_EN, es: ASPECT_TEXT_ES })
+
 const lower = (k: PointKey) => (PLANET_TEXT[k]?.principle ?? POINTS[k].name).toLowerCase()
 
 export function natalAspectText(a: PointKey, b: PointKey, type: AspectKey): string {
-  const t = ASPECT_TEXT[type]
-  return `${POINTS[a].name} (${lower(a)}) e ${POINTS[b].name} (${lower(b)}) ${t.dynamic}. ${t.advice}`
+  const x = ASPECT_TEXT[type]
+  return `${t('{a} ({pa}) e {b} ({pb})', { a: POINTS[a].name, pa: lower(a), b: POINTS[b].name, pb: lower(b) })} ${x.dynamic}. ${x.advice}`
 }
 
-const DURATION: Partial<Record<PlanetKey, string>> = {
+const DURATION_PT: Partial<Record<PlanetKey, string>> = {
   moon: 'algumas horas',
   sun: 'alguns dias',
   mercury: 'alguns dias',
@@ -62,7 +67,7 @@ const DURATION: Partial<Record<PlanetKey, string>> = {
   node: 'algumas semanas',
 }
 
-const NATAL_TARGET: Partial<Record<PointKey, string>> = {
+const NATAL_TARGET_PT: Partial<Record<PointKey, string>> = {
   sun: 'sua identidade e vitalidade',
   moon: 'suas emoções e necessidades íntimas',
   mercury: 'sua mente e comunicação',
@@ -78,8 +83,13 @@ const NATAL_TARGET: Partial<Record<PointKey, string>> = {
   mc: 'sua carreira e direção de vida',
 }
 
-/** "seu Sol", "sua Lua"… */
+const DURATION = byLang({ pt: DURATION_PT, en: DURATION_EN, es: DURATION_ES })
+const NATAL_TARGET = byLang({ pt: NATAL_TARGET_PT, en: NATAL_TARGET_EN, es: NATAL_TARGET_ES })
+
+/** "seu Sol", "sua Lua"… ("your Sun", "tu Sol") */
 export function possessive(k: PointKey): string {
+  if (getLang() === 'en') return `your ${POINTS[k].name}`
+  if (getLang() === 'es') return `tu ${POINTS[k].name}`
   const fem = k === 'moon' || k === 'venus' || k === 'lilith' || k === 'fortune'
   return `${fem ? 'sua' : 'seu'} ${POINTS[k].name}`
 }
@@ -87,13 +97,13 @@ export function possessive(k: PointKey): string {
 export function transitText(transit: PlanetKey, natal: PointKey, type: AspectKey): string {
   const tp = PLANET_TEXT[transit]
   const target = NATAL_TARGET[natal] ?? POINTS[natal].name
-  return `${POINTS[transit].name} ${tp?.transit ?? ''} — e toca ${target}. ${ASPECT_TEXT[type].transit} Influência de ${DURATION[transit] ?? 'alguns dias'}.`
+  return `${POINTS[transit].name} ${tp?.transit ?? ''} — ${t('e toca {target}.', { target })} ${ASPECT_TEXT[type].transit} ${t('Influência de {time}.', { time: DURATION[transit] ?? DURATION.sun! })}`
 }
 
 /** Short daily-horoscope style headline per transit nature. */
 export function transitHeadline(transit: PlanetKey, natal: PointKey, type: AspectKey): string {
   const T = POINTS[transit].name
-  const verb: Record<AspectKey, string> = {
+  const pt: Record<AspectKey, string> = {
     conjunction: 'encontra',
     opposition: 'confronta',
     trine: 'harmoniza com',
@@ -102,5 +112,6 @@ export function transitHeadline(transit: PlanetKey, natal: PointKey, type: Aspec
     quincunx: 'ajusta',
     semisextile: 'roça',
   }
+  const verb = getLang() === 'en' ? HEADLINE_VERB_EN : getLang() === 'es' ? HEADLINE_VERB_ES : pt
   return `${T} ${verb[type]} ${possessive(natal)}`
 }
