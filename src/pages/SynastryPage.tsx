@@ -18,6 +18,7 @@ import { Locked } from '../components/Locked'
 import { compositeChart } from '../astro/relationship'
 import { relationshipReading } from '../interpret/relationship'
 import type { Chart } from '../astro/chart'
+import { t } from '../i18n'
 
 interface Props {
   profiles: Profile[]
@@ -110,7 +111,7 @@ export function SynastryPage({ profiles, activeId, houseSystem, onSave, go }: Pr
       {(adding || (!B && profiles.length < 2)) && (
         <section className="edit-box">
           <p className="muted">Dados de nascimento da outra pessoa:</p>
-          <BirthForm submitLabel="Adicionar e comparar" onSubmit={(d) => { const id = onSave(d); if (id) { setBId(id); setAdding(false) } }} />
+          <BirthForm submitLabel={t('Adicionar e comparar')} onSubmit={(d) => { const id = onSave(d); if (id) { setBId(id); setAdding(false) } }} />
         </section>
       )}
 

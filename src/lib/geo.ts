@@ -1,3 +1,4 @@
+import { getLang } from '../i18n'
 export interface Place {
   name: string
   region?: string
@@ -81,7 +82,7 @@ export async function searchPlaces(q: string, signal?: AbortSignal): Promise<Pla
   const query = q.trim()
   if (query.length < 2) return []
   try {
-    const url = `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(query)}&count=8&language=pt&format=json`
+    const url = `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(query)}&count=8&language=${getLang()}&format=json`
     const res = await fetch(url, { signal })
     if (!res.ok) throw new Error(String(res.status))
     const json = (await res.json()) as { results?: OpenMeteoResult[] }

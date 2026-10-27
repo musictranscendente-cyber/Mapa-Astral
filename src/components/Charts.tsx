@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { ELEMENT_INFO, MODALITY_INFO, type Element, type Modality } from '../astro/constants'
 import type { Balance } from '../astro/chart'
 import { LIFE_AREAS, type DayScore, type LifeArea } from '../astro/transits'
-import { locale } from '../i18n'
+import { locale, t } from '../i18n'
 
 const ELEMENT_ICON: Record<Element, string> = { fogo: '🜂', terra: '🜃', ar: '🜁', agua: '🜄' }
 
@@ -52,7 +52,7 @@ export function AreaMeters({ areas }: { areas: Record<LifeArea, number> }) {
     <div className="meter-list areas">
       {LIFE_AREAS.map((a) => {
         const v = areas[a.key]
-        const label = v >= 70 ? 'favorável' : v >= 55 ? 'positivo' : v > 45 ? 'neutro' : v > 30 ? 'atenção' : 'desafiador'
+        const label = t(v >= 70 ? 'favorável' : v >= 55 ? 'positivo' : v > 45 ? 'neutro' : v > 30 ? 'atenção' : 'desafiador')
         return (
           <div className="meter" key={a.key} title={`${a.name}: ${v}/100 (${label})`}>
             <span className="meter-label"><span className="area-icon" style={{ color: a.color }}>{a.icon}</span>{a.name}</span>
@@ -106,7 +106,7 @@ export function FlowChart({ days, selected, onSelect }: { days: DayScore[]; sele
         onPointerLeave={() => setHover(null)}
         onClick={() => hover != null && onSelect?.(hover)}
         role="img"
-        aria-label="Fluxo energético por dia"
+        aria-label={t('Fluxo energético por dia')}
       >
         <defs>
           <linearGradient id="flowFill" x1="0" y1="0" x2="0" y2="1">
@@ -140,7 +140,7 @@ export function FlowChart({ days, selected, onSelect }: { days: DayScore[]; sele
           <span>Intensidade {days[h].intensity}</span>
         </div>
       )}
-      <div className="chart-note">Acima de 0: dias de fluxo e harmonia · abaixo de 0: dias de tensão e desafio</div>
+      <div className="chart-note">{t('Acima de 0: dias de fluxo e harmonia · abaixo de 0: dias de tensão e desafio')}</div>
     </div>
   )
 }

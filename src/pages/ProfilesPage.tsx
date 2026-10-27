@@ -4,6 +4,7 @@ import { chartFromBirth } from '../astro/chart'
 import { ELEMENT_INFO, POINTS, SIGNS } from '../astro/constants'
 import { BirthForm } from '../components/BirthForm'
 import type { Profile } from '../lib/profiles'
+import { t } from '../i18n'
 
 interface Props {
   profiles: Profile[]
@@ -29,7 +30,7 @@ export function ProfilesPage({ profiles, activeId, onSelect, onSave, onRemove }:
           <BirthForm
             key={editing === 'new' ? 'new' : editing.id}
             initial={editing === 'new' ? null : editing}
-            submitLabel={editing === 'new' ? 'Criar mapa' : 'Salvar alterações'}
+            submitLabel={editing === 'new' ? t('Criar mapa') : t('Salvar alterações')}
             onSubmit={(d) => { onSave(d, editing === 'new' ? undefined : editing.id); setEditing(null) }}
           />
           <button className="link" onClick={() => setEditing(null)}>Cancelar</button>

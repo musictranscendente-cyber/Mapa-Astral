@@ -3,6 +3,7 @@ import type { Aspect, Chart } from '../astro/chart'
 import { ELEMENT_INFO, POINTS, SIGNS, norm360, type PointKey } from '../astro/constants'
 import type { TransitHit } from '../astro/transits'
 import { OUTER_POINTS, WHEEL_POINTS, spread } from '../lib/wheelLayout'
+import { t } from '../i18n'
 
 const C = 400
 const rad = Math.PI / 180
@@ -59,7 +60,7 @@ export function ChartWheel({ chart, outer, outerHits, selected, onSelect, showAs
       width={size}
       height={size}
       role="img"
-      aria-label="Roda do mapa astral"
+      aria-label={t('Roda do mapa astral')}
       onClick={() => onSelect?.(null)}
     >
       <defs>
@@ -225,7 +226,7 @@ export function ChartWheel({ chart, outer, outerHits, selected, onSelect, showAs
                 <text x={gx} y={gy} className="planet-glyph" fill="#6ef0e0" fontSize="18" textAnchor="middle" dominantBaseline="central">
                   {info.glyph}
                 </text>
-                <title>{`${info.name} em trânsito ${Math.floor(real.lon % 30)}° ${SIGNS[real.sign].name}${real.retro ? ' ℞' : ''}`}</title>
+                <title>{`${t('{planet} em trânsito', { planet: info.name })} ${Math.floor(real.lon % 30)}° ${SIGNS[real.sign].name}${real.retro ? ' ℞' : ''}`}</title>
               </g>
             )
           })}

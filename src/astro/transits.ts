@@ -2,6 +2,7 @@ import { ASPECTS, POINTS, angDiff, norm360, type AspectInfo, type PlanetKey, typ
 import { bodyLongitude, bodySpeed, toTime } from './ephemeris'
 import { houseOf } from './houses'
 import type { Chart } from './chart'
+import { byLang } from '../i18n'
 
 export const TRANSIT_PLANETS: PlanetKey[] = [
   'sun', 'moon', 'mercury', 'venus', 'mars', 'jupiter', 'saturn', 'uranus', 'neptune', 'pluto', 'chiron', 'node',
@@ -178,7 +179,7 @@ function dedupe(list: TransitEvent[]): TransitEvent[] {
 
 export type LifeArea = 'amor' | 'carreira' | 'energia' | 'mente' | 'emocoes' | 'espirito'
 
-export const LIFE_AREAS: { key: LifeArea; name: string; icon: string; color: string }[] = [
+const LIFE_AREAS_PT: { key: LifeArea; name: string; icon: string; color: string }[] = [
   { key: 'amor', name: 'Amor & Relações', icon: '♡', color: '#ff8fc7' },
   { key: 'carreira', name: 'Carreira & Propósito', icon: '♛', color: '#ffd166' },
   { key: 'energia', name: 'Energia & Vitalidade', icon: '✦', color: '#ff7a59' },
@@ -186,6 +187,15 @@ export const LIFE_AREAS: { key: LifeArea; name: string; icon: string; color: str
   { key: 'emocoes', name: 'Emoções & Lar', icon: '☾', color: '#c5b3ff' },
   { key: 'espirito', name: 'Espiritualidade', icon: '❋', color: '#6ef0e0' },
 ]
+const AREA_NAMES: Record<'en' | 'es', Record<LifeArea, string>> = {
+  en: { amor: 'Love & Relationships', carreira: 'Career & Purpose', energia: 'Energy & Vitality', mente: 'Mind & Communication', emocoes: 'Emotions & Home', espirito: 'Spirituality' },
+  es: { amor: 'Amor y Relaciones', carreira: 'Carrera y Propósito', energia: 'Energía y Vitalidad', mente: 'Mente y Comunicación', emocoes: 'Emociones y Hogar', espirito: 'Espiritualidad' },
+}
+export const LIFE_AREAS = byLang({
+  pt: LIFE_AREAS_PT,
+  en: LIFE_AREAS_PT.map((a) => ({ ...a, name: AREA_NAMES.en[a.key] })),
+  es: LIFE_AREAS_PT.map((a) => ({ ...a, name: AREA_NAMES.es[a.key] })),
+})
 
 const AREA_PLANETS: Record<LifeArea, PointKey[]> = {
   amor: ['venus', 'moon', 'mars'],

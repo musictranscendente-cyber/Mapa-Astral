@@ -4,7 +4,7 @@ import { ELEMENT_INFO, POINTS, SIGNS, formatDegree, type PointKey } from '../ast
 import type { ReportSection } from '../interpret/report'
 import { SIGN_TEXT } from '../interpret/signs'
 import { ChartWheel } from './ChartWheel'
-import { locale } from '../i18n'
+import { locale, t } from '../i18n'
 
 const ROWS: PointKey[] = ['sun', 'moon', 'mercury', 'venus', 'mars', 'jupiter', 'saturn', 'uranus', 'neptune', 'pluto', 'chiron', 'node', 'lilith']
 
@@ -13,21 +13,21 @@ export function PrintReport({ chart, report, when }: { chart: Chart; report: Rep
   const b = chart.birth!
   const [today] = useState(() => new Date().toLocaleDateString(locale()))
   const P = chart.points
-  const trio: [string, PointKey][] = [['Sol', 'sun'], ['Lua', 'moon'], ...(chart.hasHouses ? [['Ascendente', 'asc'] as [string, PointKey]] : [])]
+  const trio: PointKey[] = chart.hasHouses ? ['sun', 'moon', 'asc'] : ['sun', 'moon']
   return (
     <div className="print-report" aria-hidden="true">
       <section className="pr-page pr-cover">
         <p className="pr-brand">✶ COSMIC SKY ✶</p>
-        <p className="pr-kicker">Mapa Astral de</p>
+        <p className="pr-kicker">{t('Mapa Astral de')}</p>
         <h1>{b.name}</h1>
         <p className="pr-sub">{when} · {b.place}</p>
         <div className="pr-wheel"><ChartWheel chart={chart} spin={false} /></div>
         <div className="pr-trio">
-          {trio.map(([label, k]) => {
+          {trio.map((k) => {
             const s = SIGNS[P[k].sign]
             return (
               <div key={k}>
-                <small>{label}</small>
+                <small>{POINTS[k].name}</small>
                 <span className="g" style={{ color: ELEMENT_INFO[s.element].color }}>{s.glyph}</span>
                 <b>{s.name}</b>
               </div>
@@ -38,21 +38,21 @@ export function PrintReport({ chart, report, when }: { chart: Chart; report: Rep
       </section>
 
       <section className="pr-page">
-        <h2>Posições no nascimento</h2>
+        <h2>{t('Posições no nascimento')}</h2>
         <table className="pr-table">
           <tbody>
             {ROWS.map((k) => (
               <tr key={k}>
                 <td><span className="g" style={{ color: POINTS[k].color }}>{POINTS[k].glyph}</span> {POINTS[k].name}</td>
                 <td>{formatDegree(P[k].lon)}{P[k].retro ? ' ℞' : ''}</td>
-                <td>{chart.hasHouses ? `Casa ${P[k].house}` : ''}</td>
+                <td>{chart.hasHouses ? t('Casa {n}', { n: P[k].house }) : ''}</td>
               </tr>
             ))}
-            {chart.hasHouses && <tr><td>AC Ascendente</td><td>{formatDegree(chart.asc)}</td><td /></tr>}
-            {chart.hasHouses && <tr><td>MC Meio do Céu</td><td>{formatDegree(chart.mc)}</td><td /></tr>}
+            {chart.hasHouses && <tr><td>AC {POINTS.asc.name}</td><td>{formatDegree(chart.asc)}</td><td /></tr>}
+            {chart.hasHouses && <tr><td>MC {POINTS.mc.name}</td><td>{formatDegree(chart.mc)}</td><td /></tr>}
           </tbody>
         </table>
-        <p className="pr-note">Zodíaco tropical · casas {chart.houseSystem} · efemérides de precisão</p>
+        <p className="pr-note">{t('Zodíaco tropical · casas {system} · efemérides de precisão', { system: chart.houseSystem })}</p>
       </section>
 
       <section className="pr-chapters">
@@ -63,7 +63,7 @@ export function PrintReport({ chart, report, when }: { chart: Chart; report: Rep
             {s.paragraphs.filter(Boolean).map((p, j) => <p key={j}>{p}</p>)}
           </article>
         ))}
-        <p className="pr-note pr-end">Relatório gerado pelo Cosmic Sky · {today}</p>
+        <p className="pr-note pr-end">{t('Relatório gerado pelo Cosmic Sky · {date}', { date: today })}</p>
       </section>
     </div>
   )

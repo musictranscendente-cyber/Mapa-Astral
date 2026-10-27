@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import type { Chart } from '../astro/chart'
 import { SHARE_SIZES, renderShareImage, shareUrl, type ShareFormat } from '../lib/shareImage'
 import { track } from '../lib/analytics'
+import { t } from '../i18n'
 
 interface Props {
   chart: Chart
@@ -24,7 +25,7 @@ export function ShareDialog({ chart, onClose }: Props) {
       if (cancelled) return
       url = URL.createObjectURL(blob)
       setImage({ blob, url, key: `${format}|${showName}` })
-    }, () => { if (!cancelled) setMsg('Não foi possível gerar a imagem neste aparelho.') })
+    }, () => { if (!cancelled) setMsg(t('Não foi possível gerar a imagem neste aparelho.')) })
     return () => { cancelled = true; if (url) URL.revokeObjectURL(url) }
   }, [chart, format, showName])
 
@@ -37,7 +38,7 @@ export function ShareDialog({ chart, onClose }: Props) {
 
   const ready = image?.key === key ? image : null
   const link = shareUrl()
-  const text = `Olha o meu mapa astral no Cosmic Sky ✦ Faça o seu grátis: ${link}`
+  const text = t('Olha o meu mapa astral no Cosmic Sky ✦ Faça o seu grátis: {link}', { link })
   const fileName = `mapa-astral-${(chart.birth?.name ?? 'meu').split(' ')[0].toLowerCase()}.png`
   const file = ready ? new File([ready.blob], fileName, { type: 'image/png' }) : null
   const canShareFile = !!file && typeof navigator.canShare === 'function' && navigator.canShare({ files: [file] })
@@ -45,7 +46,7 @@ export function ShareDialog({ chart, onClose }: Props) {
   const share = async () => {
     if (!file) return
     try {
-      await navigator.share({ files: [file], text, title: 'Meu mapa astral' })
+      await navigator.share({ files: [file], text, title: t('Meu mapa astral') })
       track('compartilhar', format)
     } catch { /* cancelled */ }
   }
@@ -57,35 +58,35 @@ export function ShareDialog({ chart, onClose }: Props) {
     a.download = fileName
     a.click()
     track('compartilhar', `${format}-download`)
-    setMsg('Imagem salva! Agora é só postar no Instagram ou no status do WhatsApp.')
+    setMsg(t('Imagem salva! Agora é só postar no Instagram ou no status do WhatsApp.'))
   }
 
   const copy = async () => {
     try {
       await navigator.clipboard.writeText(text)
-      setMsg('Link copiado ✓')
+      setMsg(t('Link copiado ✓'))
     } catch {
       setMsg(link)
     }
   }
 
   return (
-    <div className="share-backdrop" role="dialog" aria-modal="true" aria-label="Compartilhar meu mapa" onClick={onClose}>
+    <div className="share-backdrop" role="dialog" aria-modal="true" aria-label={t('Compartilhar meu mapa')} onClick={onClose}>
       <div className="share-dialog glass" onClick={(e) => e.stopPropagation()}>
         <div className="share-head">
-          <h2>✦ Compartilhar meu mapa</h2>
-          <button ref={closeBtn} className="icon-btn" aria-label="Fechar" onClick={onClose}>✕</button>
+          <h2>✦ {t('Compartilhar meu mapa')}</h2>
+          <button ref={closeBtn} className="icon-btn" aria-label={t('Fechar')} onClick={onClose}>✕</button>
         </div>
 
         <div className="share-options">
           <div className="segmented small left">
             {(Object.keys(SHARE_SIZES) as ShareFormat[]).map((f) => (
-              <button key={f} className={format === f ? 'active' : ''} onClick={() => setFormat(f)}>{SHARE_SIZES[f].label}</button>
+              <button key={f} className={format === f ? 'active' : ''} onClick={() => setFormat(f)}>{t(SHARE_SIZES[f].label)}</button>
             ))}
           </div>
           <label className="check">
             <input type="checkbox" checked={showName} onChange={(e) => setShowName(e.target.checked)} />
-            <span>Mostrar meu nome</span>
+            <span>{t('Mostrar meu nome')}</span>
           </label>
         </div>
 
@@ -96,23 +97,23 @@ export function ShareDialog({ chart, onClose }: Props) {
               width={SHARE_SIZES[format].w}
               height={SHARE_SIZES[format].h}
               style={{ aspectRatio: `${SHARE_SIZES[format].w} / ${SHARE_SIZES[format].h}` }}
-              alt="Prévia da imagem do seu mapa astral"
+              alt={t('Prévia da imagem do seu mapa astral')}
             />
-          ) : <div className="loader"><span /> Desenhando seu céu…</div>}
+          ) : <div className="loader"><span /> {t('Desenhando seu céu…')}</div>}
         </div>
 
         <div className="share-actions">
-          {canShareFile && <button className="cta" onClick={share}><span>Compartilhar imagem</span></button>}
+          {canShareFile && <button className="cta" onClick={share}><span>{t('Compartilhar imagem')}</span></button>}
           <button className={canShareFile ? 'ghost' : 'cta'} disabled={!ready} onClick={download}>
-            {canShareFile ? '⤓ Salvar imagem' : <span>⤓ Salvar imagem</span>}
+            {canShareFile ? `⤓ ${t('Salvar imagem')}` : <span>⤓ {t('Salvar imagem')}</span>}
           </button>
           <a className="ghost" href={`https://wa.me/?text=${encodeURIComponent(text)}`} target="_blank" rel="noreferrer" onClick={() => track('compartilhar', 'whatsapp-link')}>
             Enviar link no WhatsApp
           </a>
-          <button className="ghost" onClick={copy}>Copiar link</button>
+          <button className="ghost" onClick={copy}>{t('Copiar link')}</button>
         </div>
         {msg && <p className="muted small center">{msg}</p>}
-        <p className="muted small center">A imagem mostra só o nome, o mapa e os signos — nunca a data, a hora ou o local de nascimento.</p>
+        <p className="muted small center">{t('A imagem mostra só o nome, o mapa e os signos — nunca a data, a hora ou o local de nascimento.')}</p>
       </div>
     </div>
   )
