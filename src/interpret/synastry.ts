@@ -1,10 +1,13 @@
 import type { AspectKey, PointKey } from '../astro/constants'
 import { POINTS } from '../astro/constants'
 import type { SynAspect } from '../astro/synastry'
+import { byLang, t } from '../i18n'
+import { NATURE_TEXT_EN, OVERLAY_TEXT_EN, PAIR_TEXT_EN } from './en/synastry'
+import { NATURE_TEXT_ES, OVERLAY_TEXT_ES, PAIR_TEXT_ES } from './es/synastry'
 import { HOUSE_TEXT, PLANET_TEXT } from './planets'
 
 /** Specific meaning of the most important inter-chart contacts. */
-const PAIR_TEXT: Record<string, { flow: string; tension: string }> = {
+const PAIR_TEXT_PT: Record<string, { flow: string; tension: string }> = {
   'sun|moon': {
     flow: 'Um dos laços mais clássicos de compatibilidade: a essência de um ilumina o mundo emocional do outro. Há sensação de complementaridade, como dia e noite que se completam.',
     tension: 'A vontade de um nem sempre acolhe as necessidades emocionais do outro. Com consciência, a relação ensina a equilibrar o "eu quero" com o "eu preciso".',
@@ -103,12 +106,14 @@ const PAIR_TEXT: Record<string, { flow: string; tension: string }> = {
   },
 }
 
+const PAIR_TEXT = byLang({ pt: PAIR_TEXT_PT, en: PAIR_TEXT_EN, es: PAIR_TEXT_ES })
+
 const key = (a: PointKey, b: PointKey) => {
   const k1 = `${a}|${b}`, k2 = `${b}|${a}`
   return PAIR_TEXT[k1] ? k1 : PAIR_TEXT[k2] ? k2 : null
 }
 
-const NATURE_TEXT: Record<AspectKey, string> = {
+const NATURE_TEXT_PT: Record<AspectKey, string> = {
   conjunction: 'se fundem — energia intensa e marcante na relação',
   trine: 'fluem com naturalidade — um talento da relação',
   sextile: 'cooperam — oportunidades que crescem com iniciativa',
@@ -118,21 +123,23 @@ const NATURE_TEXT: Record<AspectKey, string> = {
   semisextile: 'roçam-se sutilmente',
 }
 
+const NATURE_TEXT = byLang({ pt: NATURE_TEXT_PT, en: NATURE_TEXT_EN, es: NATURE_TEXT_ES })
+
 export function synAspectText(s: SynAspect, nameA: string, nameB: string): string {
   const k = key(s.a, s.b)
   const nature = s.type.nature
-  const intro = `${POINTS[s.a].name} de ${nameA} e ${POINTS[s.b].name} de ${nameB} ${NATURE_TEXT[s.type.key]}.`
+  const intro = `${t('{pa} de {a} e {pb} de {b}', { pa: POINTS[s.a].name, a: nameA, pb: POINTS[s.b].name, b: nameB })} ${NATURE_TEXT[s.type.key]}.`
   if (k) {
-    const t = PAIR_TEXT[k]
-    const txt = nature === 'tenso' ? t.tension : nature === 'harmonico' ? t.flow : `${t.flow} A conjunção torna esse encontro especialmente intenso.`
+    const pair = PAIR_TEXT[k]
+    const txt = nature === 'tenso' ? pair.tension : nature === 'harmonico' ? pair.flow : `${pair.flow} ${t('A conjunção torna esse encontro especialmente intenso.')}`
     return `${intro} ${txt}`
   }
   const pa = PLANET_TEXT[s.a]?.principle.toLowerCase() ?? POINTS[s.a].name
   const pb = PLANET_TEXT[s.b]?.principle.toLowerCase() ?? POINTS[s.b].name
-  return `${intro} Aqui se encontram ${pa} de um e ${pb} do outro.`
+  return `${intro} ${t('Aqui se encontram {a} de um e {b} do outro.', { a: pa, b: pb })}`
 }
 
-const OVERLAY_TEXT: Partial<Record<PointKey, string>> = {
+const OVERLAY_TEXT_PT: Partial<Record<PointKey, string>> = {
   sun: 'ilumina e dá vitalidade',
   moon: 'traz intimidade e conforto emocional',
   mercury: 'estimula conversas e ideias',
@@ -145,14 +152,16 @@ const OVERLAY_TEXT: Partial<Record<PointKey, string>> = {
   pluto: 'transforma profundamente',
 }
 
+const OVERLAY_TEXT = byLang({ pt: OVERLAY_TEXT_PT, en: OVERLAY_TEXT_EN, es: OVERLAY_TEXT_ES })
+
 export function overlayText(planet: PointKey, house: number, guest: string, host: string): string {
   const h = HOUSE_TEXT[house - 1]
-  return `${POINTS[planet].name} de ${guest} cai na ${h.name.toLowerCase()} de ${host} (${h.theme.toLowerCase()}): ${guest} ${OVERLAY_TEXT[planet] ?? 'atua'} na área de ${h.keywords.join(', ')}.`
+  return t('{planet} de {guest} cai na {house} de {host} ({theme}): {guest} {action} na área de {kw}.', { planet: POINTS[planet].name, guest, house: h.name.toLowerCase(), host, theme: h.theme.toLowerCase(), action: OVERLAY_TEXT[planet] ?? t('atua'), kw: h.keywords.join(', ') })
 }
 
 export function synSummary(total: number): { title: string; text: string } {
-  if (total >= 75) return { title: 'Conexão luminosa', text: 'Uma combinação de grande afinidade: os contatos harmônicos predominam e a relação tende a fluir com naturalidade. Os desafios existem, mas encontram terreno fértil para serem superados.' }
-  if (total >= 60) return { title: 'Boa sintonia', text: 'Há afinidades reais e áreas de crescimento. A relação tem base para florescer, especialmente quando vocês cultivam os pontos fortes abaixo.' }
-  if (total >= 45) return { title: 'Encontro de aprendizado', text: 'Uma relação que mistura facilidade e atrito em medidas parecidas. Vocês se ensinam muito — o resultado depende da consciência e do diálogo.' }
-  return { title: 'Encontro desafiador', text: 'Os contatos tensos são marcantes. Isso não impede o vínculo — muitas relações intensas nascem assim — mas pede maturidade, paciência e comunicação clara.' }
+  if (total >= 75) return { title: t('Conexão luminosa'), text: t('Uma combinação de grande afinidade: os contatos harmônicos predominam e a relação tende a fluir com naturalidade. Os desafios existem, mas encontram terreno fértil para serem superados.') }
+  if (total >= 60) return { title: t('Boa sintonia'), text: t('Há afinidades reais e áreas de crescimento. A relação tem base para florescer, especialmente quando vocês cultivam os pontos fortes abaixo.') }
+  if (total >= 45) return { title: t('Encontro de aprendizado'), text: t('Uma relação que mistura facilidade e atrito em medidas parecidas. Vocês se ensinam muito — o resultado depende da consciência e do diálogo.') }
+  return { title: t('Encontro desafiador'), text: t('Os contatos tensos são marcantes. Isso não impede o vínculo — muitas relações intensas nascem assim — mas pede maturidade, paciência e comunicação clara.') }
 }
