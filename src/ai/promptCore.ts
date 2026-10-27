@@ -27,7 +27,7 @@ Princípios:
 - Extensão: entre 600 e 1000 palavras.`
 
 const KIND_INSTRUCTIONS: Record<ReadingKind, string> = {
-  natal: 'Escreva a leitura do mapa natal. Seções sugeridas: essência (Sol, Lua, Ascendente e regente), mente e afetos, ação e vocação, desafios e dons (aspectos mais exatos), propósito evolutivo (Nodos) e uma mensagem final.',
+  natal: 'Escreva a leitura do mapa natal. Seções sugeridas: essência (Sol, Lua, Ascendente e regente), mente e afetos, ação e vocação, as áreas da vida (as casas com planetas e as mais marcantes pelo regente — se a hora for conhecida), desafios e dons (aspectos mais exatos), propósito evolutivo (Nodos) e uma mensagem final.',
   sinastria: 'Escreva a leitura de compatibilidade entre as duas pessoas. Seções sugeridas: a dinâmica geral do encontro, atração e afeto, comunicação e convivência, pontos de atrito e como trabalhá-los, o propósito da relação e conselhos práticos para o casal (ou dupla).',
   revolucao: 'Escreva a leitura da Revolução Solar (o ano astrológico entre dois aniversários). Seções sugeridas: o tom do ano (Ascendente da revolução), áreas em destaque (casas do Sol e da Lua, planetas angulares), oportunidades, desafios, conselhos por área da vida e uma mensagem final.',
   previsao: 'Escreva a leitura das previsões do período. Seções sugeridas: visão geral do período, os trânsitos mais importantes em ordem cronológica, melhores dias e dias de atenção, conselhos práticos por área da vida.',
