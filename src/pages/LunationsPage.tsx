@@ -5,7 +5,7 @@ import { lunations, personalize, type PersonalLunation } from '../astro/lunation
 import { MoonPhase } from '../components/MoonPhase'
 import { KIND_LABEL, lunationMeaning, lunationPersonal } from '../interpret/lunations'
 import type { Route } from '../App'
-import { locale } from '../i18n'
+import { locale, t } from '../i18n'
 
 const fmt = (d: Date) => d.toLocaleString(locale(), { weekday: 'short', day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })
 
@@ -22,24 +22,24 @@ export function LunationsPage({ natal, go }: { natal: Chart | null; go: (r: Rout
   return (
     <div className="lunations">
       <header className="page-head">
-        <p className="eyebrow">Próximos 12 meses</p>
-        <h1 className="title-glow">Eclipses e Lunações</h1>
+        <p className="eyebrow">{t('Próximos 12 meses')}</p>
+        <h1 className="title-glow">{t('Eclipses e Lunações')}</h1>
         <p className="muted">
-          {natal?.birth ? `Luas Novas, Luas Cheias e eclipses sobre o mapa de ${natal.birth.name}.` : 'Luas Novas, Luas Cheias e eclipses — crie seu mapa para ver em que casa cada um cai para você.'}
+          {natal?.birth ? t('Luas Novas, Luas Cheias e eclipses sobre o mapa de {name}.', { name: natal.birth.name }) : t('Luas Novas, Luas Cheias e eclipses — crie seu mapa para ver em que casa cada um cai para você.')}
         </p>
         <div className="segmented">
-          <button className={filter === 'todas' ? 'active' : ''} onClick={() => setFilter('todas')}>Todas</button>
-          <button className={filter === 'eclipses' ? 'active' : ''} onClick={() => setFilter('eclipses')}>Só eclipses</button>
+          <button className={filter === 'todas' ? 'active' : ''} onClick={() => setFilter('todas')}>{t('Todas')}</button>
+          <button className={filter === 'eclipses' ? 'active' : ''} onClick={() => setFilter('eclipses')}>{t('Só eclipses')}</button>
         </div>
       </header>
 
       {nextEclipse && filter === 'todas' && (
         <section className="glass pad eclipse-hero">
-          <p className="eyebrow">Próximo eclipse</p>
-          <h2>{KIND_LABEL(nextEclipse)} em {SIGNS[nextEclipse.sign].name}</h2>
+          <p className="eyebrow">{t('Próximo eclipse')}</p>
+          <h2>{t('{phase} em {sign}', { phase: KIND_LABEL(nextEclipse), sign: SIGNS[nextEclipse.sign].name })}</h2>
           <p className="muted">{fmt(nextEclipse.date)} · {formatDegree(nextEclipse.lon)}</p>
           <p>{lunationMeaning(nextEclipse)}</p>
-          {lunationPersonal(nextEclipse as PersonalLunation).map((t, i) => <p key={i} className="personal">✦ {t}</p>)}
+          {lunationPersonal(nextEclipse as PersonalLunation).map((line, i) => <p key={i} className="personal">✦ {line}</p>)}
         </section>
       )}
 
@@ -54,12 +54,12 @@ export function LunationsPage({ natal, go }: { natal: Chart | null; go: (r: Rout
               </div>
               <div className="lc-body">
                 <h3>
-                  {KIND_LABEL(l)} em <span style={{ color }}>{SIGNS[l.sign].glyph} {SIGNS[l.sign].name}</span>
-                  {l.house && <span className="lc-house">casa {l.house}</span>}
+                  {KIND_LABEL(l)} {t('em')} <span style={{ color }}>{SIGNS[l.sign].glyph} {SIGNS[l.sign].name}</span>
+                  {l.house && <span className="lc-house">{t('casa {n}', { n: l.house })}</span>}
                 </h3>
                 <p className="muted small">{fmt(l.date)} · {formatDegree(l.lon)}</p>
                 <p>{lunationMeaning(l)}</p>
-                {personal.map((t, i) => <p key={i} className="personal">✦ {t}</p>)}
+                {personal.map((line, i) => <p key={i} className="personal">✦ {line}</p>)}
               </div>
             </article>
           )
@@ -68,8 +68,8 @@ export function LunationsPage({ natal, go }: { natal: Chart | null; go: (r: Rout
 
       {!natal && (
         <section className="glass pad center">
-          <h3>Veja onde cada eclipse cai no seu mapa</h3>
-          <button className="cta" onClick={() => go('inicio')}><span>✦ Criar meu mapa grátis</span></button>
+          <h3>{t('Veja onde cada eclipse cai no seu mapa')}</h3>
+          <button className="cta" onClick={() => go('inicio')}><span>✦ {t('Criar meu mapa grátis')}</span></button>
         </section>
       )}
     </div>

@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { POINTS } from '../astro/constants'
 import { calendarEvents, retrogradesAt, type CalEvent, type CalEventKind } from '../astro/calendar'
 import { KIND_INFO, eventHint, eventTime, eventTitle } from '../interpret/calendar'
-import { locale } from '../i18n'
+import { locale, t } from '../i18n'
 
 const WEEK = ['dom', 'seg', 'ter', 'qua', 'qui', 'sex', 'sáb']
 const DEFAULT_KINDS: CalEventKind[] = ['fase', 'eclipse', 'ingresso', 'estacao', 'fora-de-curso']
@@ -40,27 +40,27 @@ export function CalendarPage() {
   return (
     <div className="calendar">
       <header className="page-head">
-        <p className="eyebrow">Calendário astral</p>
+        <p className="eyebrow">{t('Calendário astral')}</p>
         <h1 className="title-glow">{cap(month.toLocaleDateString(locale(), { month: 'long', year: 'numeric' }))}</h1>
         <div className="head-tools">
-          <button className="ghost" onClick={() => { setOffset((o) => o - 1); setSelected(null) }}>‹ Anterior</button>
-          {offset !== 0 && <button className="ghost" onClick={() => { setOffset(0); setSelected(null) }}>Hoje</button>}
-          <button className="ghost" onClick={() => { setOffset((o) => o + 1); setSelected(null) }}>Próximo ›</button>
+          <button className="ghost" onClick={() => { setOffset((o) => o - 1); setSelected(null) }}>‹ {t('Anterior')}</button>
+          {offset !== 0 && <button className="ghost" onClick={() => { setOffset(0); setSelected(null) }}>{t('Hoje')}</button>}
+          <button className="ghost" onClick={() => { setOffset((o) => o + 1); setSelected(null) }}>{t('Próximo')} ›</button>
         </div>
         <p className="muted small">
-          {retros.length ? `Retrógrados ${offset === 0 ? 'agora' : 'no início do mês'}: ${retros.map((k) => POINTS[k].name).join(', ')}` : 'Nenhum planeta retrógrado neste momento.'}
+          {retros.length ? `${t(offset === 0 ? 'Retrógrados agora:' : 'Retrógrados no início do mês:')} ${retros.map((k) => POINTS[k].name).join(', ')}` : t('Nenhum planeta retrógrado neste momento.')}
         </p>
       </header>
 
       <div className="acg-chips">
         {(Object.keys(KIND_INFO) as CalEventKind[]).map((k) => (
           <button key={k} className={kinds.includes(k) ? 'on' : ''} onClick={() => toggle(k)} style={{ ['--c' as string]: 'var(--gold)' }}>
-            <span className="g">{KIND_INFO[k].icon}</span> {KIND_INFO[k].label}
+            <span className="g">{KIND_INFO[k].icon}</span> {t(KIND_INFO[k].label)}
           </button>
         ))}
       </div>
 
-      <section className="glass pad cal-grid" aria-label="Dias do mês">
+      <section className="glass pad cal-grid" aria-label={t('Dias do mês')}>
         {WEEK.map((w) => <span key={w} className="cal-wd">{w}</span>)}
         {Array.from({ length: first }, (_, i) => <span key={`e${i}`} />)}
         {Array.from({ length: days }, (_, i) => {
@@ -77,10 +77,10 @@ export function CalendarPage() {
         })}
       </section>
 
-      {loading && <div className="loader"><span /> Calculando o céu do mês…</div>}
+      {loading && <div className="loader"><span /> {t('Calculando o céu do mês…')}</div>}
       <section className="cal-list">
-        {selected && <button className="link" onClick={() => setSelected(null)}>Ver o mês inteiro</button>}
-        {!loading && listDays.length === 0 && <p className="glass pad muted">Nenhum evento com os filtros escolhidos.</p>}
+        {selected && <button className="link" onClick={() => setSelected(null)}>{t('Ver o mês inteiro')}</button>}
+        {!loading && listDays.length === 0 && <p className="glass pad muted">{t('Nenhum evento com os filtros escolhidos.')}</p>}
         {listDays.map(([k, evs]) => (
           <div key={k} className="glass cal-day-block">
             <h3>{cap(evs[0].date.toLocaleDateString(locale(), { weekday: 'long', day: 'numeric', month: 'long' }))}</h3>
