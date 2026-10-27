@@ -271,7 +271,7 @@ export function SynastryPage({ profiles, activeId, houseSystem, onSave, go }: Pr
 
 function CoupleChart({ a, b, houseSystem }: { a: Chart; b: Chart; houseSystem: HouseSystem }) {
   const chart = useMemo(() => compositeChart(a, b, houseSystem), [a, b, houseSystem])
-  const reading = relationshipReading(chart, 'composto')
+  const reading = relationshipReading(chart)
   return (
     <>
       <section className="wheel-layout">

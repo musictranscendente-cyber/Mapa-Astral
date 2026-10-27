@@ -1,10 +1,13 @@
 import type { PlanetKey } from '../astro/constants'
 import type { AngleKey } from '../astro/astrocarto'
+import { byLang } from '../i18n'
+import { ANGLE_GUIDE_EN, ANGLE_NAME_EN, LINES_EN, PLANET_GUIDE_EN } from './en/astrocarto'
+import { ANGLE_GUIDE_ES, ANGLE_NAME_ES, LINES_ES, PLANET_GUIDE_ES } from './es/astrocarto'
 
-export const ANGLE_NAME: Record<AngleKey, string> = { AC: 'Ascendente', MC: 'Meio do Céu', DC: 'Descendente', IC: 'Fundo do Céu' }
+const ANGLE_NAME_PT: Record<AngleKey, string> = { AC: 'Ascendente', MC: 'Meio do Céu', DC: 'Descendente', IC: 'Fundo do Céu' }
 
 /** What each kind of line means, for the "how to read" guide. */
-export const ANGLE_GUIDE: Record<AngleKey, { title: string; text: string }> = {
+const ANGLE_GUIDE_PT: Record<AngleKey, { title: string; text: string }> = {
   AC: {
     title: 'AC · Ascendente — linha cheia',
     text: 'Onde o planeta estava nascendo no horizonte. Perto dela, ele age em você mesmo: no corpo, na energia, no jeito como as pessoas te percebem. É a linha mais "pessoal".',
@@ -24,7 +27,7 @@ export const ANGLE_GUIDE: Record<AngleKey, { title: string; text: string }> = {
 }
 
 /** Short note per planet for the guide: what it brings and when to be careful. */
-export const PLANET_GUIDE: Partial<Record<PlanetKey, string>> = {
+const PLANET_GUIDE_PT: Partial<Record<PlanetKey, string>> = {
   sun: 'vitalidade, autoconfiança e destaque',
   moon: 'emoções, acolhimento e sensação de pertencer',
   mercury: 'ideias, estudos, contatos e negócios',
@@ -37,7 +40,7 @@ export const PLANET_GUIDE: Partial<Record<PlanetKey, string>> = {
   pluto: 'transformação profunda, poder e intensidade',
 }
 
-const LINES: Partial<Record<PlanetKey, Record<AngleKey, string>>> = {
+const LINES_PT: Partial<Record<PlanetKey, Record<AngleKey, string>>> = {
   sun: {
     AC: 'Você se sente mais vivo, confiante e visível; ótimo para recomeçar e cuidar da autoestima.',
     MC: 'Linha de sucesso e reconhecimento profissional: chance de liderar e ser notado pelo que faz.',
@@ -99,6 +102,11 @@ const LINES: Partial<Record<PlanetKey, Record<AngleKey, string>>> = {
     IC: 'Mexe nas raízes e na família; lugar de cura profunda, nem sempre leve.',
   },
 }
+
+export const ANGLE_NAME = byLang({ pt: ANGLE_NAME_PT, en: ANGLE_NAME_EN, es: ANGLE_NAME_ES })
+export const ANGLE_GUIDE = byLang({ pt: ANGLE_GUIDE_PT, en: ANGLE_GUIDE_EN, es: ANGLE_GUIDE_ES })
+export const PLANET_GUIDE = byLang({ pt: PLANET_GUIDE_PT, en: PLANET_GUIDE_EN, es: PLANET_GUIDE_ES })
+const LINES = byLang({ pt: LINES_PT, en: LINES_EN, es: LINES_ES })
 
 export const lineMeaning = (p: PlanetKey, a: AngleKey) => LINES[p]?.[a] ?? ''
 

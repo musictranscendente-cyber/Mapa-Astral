@@ -1,6 +1,10 @@
+import { byLang } from '../i18n'
+import { LR_MOON_HOUSE_EN, LR_SUN_HOUSE_EN, LR_ASC_EN } from './en/returns'
+import { LR_MOON_HOUSE_ES, LR_SUN_HOUSE_ES, LR_ASC_ES } from './es/returns'
+
 /** Retorno Lunar: o mapa do mês. */
 
-export const LR_MOON_HOUSE = [
+const LR_MOON_HOUSE_PT = [
   'Mês centrado em você: emoções intensas, vontade de se cuidar e de recomeçar. Seu humor dá o tom de tudo.',
   'Mês de atenção às finanças e à segurança material; conforto e estabilidade acalmam o coração.',
   'Mês de conversas, mensagens e movimento: a mente fica agitada e os contatos próximos ganham peso.',
@@ -15,7 +19,7 @@ export const LR_MOON_HOUSE = [
   'Mês de recolhimento: descanso, intuição e espiritualidade; menos agenda, mais escuta interior.',
 ]
 
-export const LR_SUN_HOUSE = [
+const LR_SUN_HOUSE_PT = [
   'A vitalidade do mês está em você mesmo: apareça e tome iniciativas.',
   'A energia do mês vai para recursos, renda e autoestima.',
   'A energia do mês vai para estudos, comunicação e trocas.',
@@ -30,7 +34,7 @@ export const LR_SUN_HOUSE = [
   'A energia do mês vai para os bastidores: descanso, fé e preparação.',
 ]
 
-export const LR_ASC = [
+const LR_ASC_PT = [
   'Ascendente em Áries: um mês de iniciativa, pressa e coragem.',
   'Ascendente em Touro: um mês de calma, constância e prazer.',
   'Ascendente em Gêmeos: um mês curioso, falante e cheio de movimento.',
@@ -44,3 +48,7 @@ export const LR_ASC = [
   'Ascendente em Aquário: um mês original, livre e voltado ao coletivo.',
   'Ascendente em Peixes: um mês intuitivo, sonhador e compassivo.',
 ]
+
+export const LR_MOON_HOUSE = byLang({ pt: LR_MOON_HOUSE_PT, en: LR_MOON_HOUSE_EN, es: LR_MOON_HOUSE_ES })
+export const LR_SUN_HOUSE = byLang({ pt: LR_SUN_HOUSE_PT, en: LR_SUN_HOUSE_EN, es: LR_SUN_HOUSE_ES })
+export const LR_ASC = byLang({ pt: LR_ASC_PT, en: LR_ASC_EN, es: LR_ASC_ES })

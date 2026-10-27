@@ -1,5 +1,7 @@
 import type { Chart } from './chart'
 import { POINTS, angDiff, type PointKey } from './constants'
+import { ANGLE_NAME } from '../interpret/astrocarto'
+import { t } from '../i18n'
 
 export type SrGoal = 'geral' | 'carreira' | 'amor' | 'saude' | 'espiritual'
 
@@ -23,7 +25,6 @@ export interface SrEvaluation {
   angular: { k: PointKey; angle: 'AC' | 'MC' | 'DC' | 'IC' }[]
 }
 
-const ANGLE_NAME = { AC: 'Ascendente', MC: 'Meio do Céu', DC: 'Descendente', IC: 'Fundo do Céu' } as const
 
 /** Planets within `orb` degrees of one of the four angles. */
 export function angularPlanets(sr: Chart, orb = 6): SrEvaluation['angular'] {
@@ -80,16 +81,16 @@ export function evaluateLocation(sr: Chart, goal: SrGoal = 'geral'): SrEvaluatio
     const house = sr.points[k].house
     const pts = (BASE[k]?.[house] ?? 0) + (GOAL[goal][k]?.[house] ?? 0)
     if (!pts) continue
-    const role = PLANET_ROLE[k]?.[pts > 0 ? 0 : 1] ?? 'ganha força'
-    const factor = { text: `${POINTS[k].name} na casa ${house} (${HOUSE_AREA[house]}): ${role}`, points: pts }
+    const role = t(PLANET_ROLE[k]?.[pts > 0 ? 0 : 1] ?? 'ganha força')
+    const factor = { text: t('{planet} na casa {house} ({area}): {role}', { planet: POINTS[k].name, house, area: t(HOUSE_AREA[house]), role }), points: pts }
     ;(pts > 0 ? pros : cons).push(factor)
   }
   const angular = angularPlanets(sr)
   for (const { k, angle } of angular) {
     const hard = k === 'saturn' || k === 'mars' || k === 'pluto' || k === 'uranus'
     const soft = k === 'jupiter' || k === 'venus'
-    if (hard) cons.push({ text: `${POINTS[k].name} colado ao ${ANGLE_NAME[angle]}: influência intensa e marcante no ano`, points: -5 })
-    else if (soft) pros.push({ text: `${POINTS[k].name} colado ao ${ANGLE_NAME[angle]}: bênção em destaque no ano`, points: 5 })
+    if (hard) cons.push({ text: t('{planet} colado ao {angle}: influência intensa e marcante no ano', { planet: POINTS[k].name, angle: ANGLE_NAME[angle] }), points: -5 })
+    else if (soft) pros.push({ text: t('{planet} colado ao {angle}: bênção em destaque no ano', { planet: POINTS[k].name, angle: ANGLE_NAME[angle] }), points: 5 })
   }
   pros.sort((a, b) => b.points - a.points)
   cons.sort((a, b) => a.points - b.points)

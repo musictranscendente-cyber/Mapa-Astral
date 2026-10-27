@@ -140,7 +140,7 @@ export function AstroMapPage({ natal, go }: { natal: Chart | null; go: (r: Route
                   <ul className="acg-near">
                     {near.map((l) => (
                       <li key={l.planet + l.angle} className={BENEFIC.includes(l.planet) ? 'good' : ''}>
-                        <b style={{ color: POINTS[l.planet].color }}>{POINTS[l.planet].glyph} {POINTS[l.planet].name} no {ANGLE_NAME[l.angle]}</b>
+                        <b style={{ color: POINTS[l.planet].color }}>{POINTS[l.planet].glyph} {t('{planet} no {angle}', { planet: POINTS[l.planet].name, angle: ANGLE_NAME[l.angle] })}</b>
                         <small className="muted"> · {t('a {km} km', { km: Math.round(l.km) })} · {t(strengthLabel(l.km))}</small>
                         <p>{lineMeaning(l.planet, l.angle)}</p>
                       </li>
