@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import type { Session, User } from '@supabase/supabase-js'
+import { t } from '../i18n'
 import { redirectUrl, supabase, supabaseAnonKey, supabaseUrl } from './supabase'
 
 export interface AuthState {
@@ -23,11 +24,11 @@ function reportLoginError(raw: string) {
 
 /** Turns the provider's message into something the person (and we) can act on. */
 export function describeLoginError(raw: string): string {
-  if (/provider is not enabled|unsupported provider/i.test(raw)) return 'O login com Google ainda não está ativado no servidor (Supabase → Authentication → Providers → Google).'
-  if (/redirect_uri_mismatch|redirect/i.test(raw)) return 'O endereço de retorno do Google não está autorizado (confira as URLs de redirecionamento no Google Cloud e no Supabase).'
-  if (/code verifier|flow state|flow_state|pkce/i.test(raw)) return 'O login começou em um navegador e terminou em outro. Abra o Cosmic Sky no mesmo navegador e tente de novo, ou entre com o código por e-mail.'
-  if (/access_denied|denied|cancel/i.test(raw)) return 'O login com Google foi cancelado.'
-  return 'Não foi possível entrar com Google.'
+  if (/provider is not enabled|unsupported provider/i.test(raw)) return t('O login com Google ainda não está ativado no servidor (Supabase → Authentication → Providers → Google).')
+  if (/redirect_uri_mismatch|redirect/i.test(raw)) return t('O endereço de retorno do Google não está autorizado (confira as URLs de redirecionamento no Google Cloud e no Supabase).')
+  if (/code verifier|flow state|flow_state|pkce/i.test(raw)) return t('O login começou em um navegador e terminou em outro. Abra o Cosmic Sky no mesmo navegador e tente de novo, ou entre com o código por e-mail.')
+  if (/access_denied|denied|cancel/i.test(raw)) return t('O login com Google foi cancelado.')
+  return t('Não foi possível entrar com Google.')
 }
 
 // Errors arrive in the URL (`?error_description=` or `#error_description=`); read them before anything cleans the URL.
@@ -115,7 +116,7 @@ const rememberRoute = () => {
 }
 
 export async function signInWithGoogle() {
-  if (!supabase) throw new Error('Login não configurado.')
+  if (!supabase) throw new Error(t('Login não configurado.'))
   // If Google is off in Supabase, /authorize shows a raw error page and never returns to the app: check first.
   try {
     const res = await fetch(`${supabaseUrl}/auth/v1/settings`, { headers: { apikey: supabaseAnonKey! } })
@@ -133,7 +134,7 @@ export async function signInWithGoogle() {
 
 /** Sends an e-mail with a 6-digit code (and a sign-in link, depending on the template). */
 export async function sendEmailCode(email: string) {
-  if (!supabase) throw new Error('Login não configurado.')
+  if (!supabase) throw new Error(t('Login não configurado.'))
   rememberRoute()
   const { error } = await supabase.auth.signInWithOtp({
     email,
@@ -143,7 +144,7 @@ export async function sendEmailCode(email: string) {
 }
 
 export async function verifyEmailCode(email: string, token: string) {
-  if (!supabase) throw new Error('Login não configurado.')
+  if (!supabase) throw new Error(t('Login não configurado.'))
   const { error } = await supabase.auth.verifyOtp({ email, token, type: 'email' })
   if (error) throw error
 }
@@ -163,8 +164,8 @@ export async function deleteAccount() {
 export function authErrorMessage(e: unknown): string {
   if (e instanceof LoginError) return e.message
   const msg = e instanceof Error ? e.message : String(e)
-  if (/rate|security purposes|seconds/i.test(msg)) return 'Muitas tentativas. Aguarde um minuto e tente de novo.'
-  if (/email/i.test(msg) && /invalid/i.test(msg)) return 'E-mail inválido.'
-  if (/expired|invalid|token/i.test(msg)) return 'Código inválido ou expirado. Peça um novo código.'
-  return 'Não foi possível entrar agora. Verifique sua conexão e tente novamente.'
+  if (/rate|security purposes|seconds/i.test(msg)) return t('Muitas tentativas. Aguarde um minuto e tente de novo.')
+  if (/email/i.test(msg) && /invalid/i.test(msg)) return t('E-mail inválido.')
+  if (/expired|invalid|token/i.test(msg)) return t('Código inválido ou expirado. Peça um novo código.')
+  return t('Não foi possível entrar agora. Verifique sua conexão e tente novamente.')
 }
