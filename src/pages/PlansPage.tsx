@@ -6,7 +6,7 @@ import { birthKey } from '../billing/keys'
 import { PLAN_ANALYSES, PRODUCTS, PROFILE_LIMIT, formatBRL, type ProductKey } from '../billing/rules'
 import { rememberReturn } from '../lib/auth'
 import type { Route } from '../App'
-import { locale } from '../i18n'
+import { locale, t } from '../i18n'
 
 interface Props {
   natal: Chart | null
@@ -75,8 +75,8 @@ export function PlansPage({ natal, go }: Props) {
       <div className="plans">
         <header className="page-head">
           <p className="eyebrow">Planos</p>
-          <h1 className="title-glow">Em breve</h1>
-          <p className="muted">Por enquanto, todos os recursos do app estão liberados.</p>
+          <h1 className="title-glow">{t('Em breve')}</h1>
+          <p className="muted">{t('Por enquanto, todos os recursos do app estão liberados.')}</p>
         </header>
       </div>
     )

@@ -33,7 +33,7 @@ export function LunarReturnPage({ natal, houseSystem, go }: Props) {
       <div className="empty glass">
         <h2>{t('Retorno Lunar')}</h2>
         <p>{t('Crie seu mapa natal para ver o mapa do seu mês.')}</p>
-        <button className="cta" onClick={() => go('inicio')}><span>✦ Criar mapa</span></button>
+        <button className="cta" onClick={() => go('inicio')}><span>✦ {t('Criar mapa')}</span></button>
       </div>
     )
   }

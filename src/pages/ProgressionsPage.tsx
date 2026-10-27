@@ -38,7 +38,7 @@ export function ProgressionsPage({ natal, go }: { natal: Chart | null; go: (r: R
       <div className="empty glass">
         <h2>{t('Progressões')}</h2>
         <p>{t('Crie seu mapa natal para ver como ele evoluiu até hoje.')}</p>
-        <button className="cta" onClick={() => go('inicio')}><span>✦ Criar mapa</span></button>
+        <button className="cta" onClick={() => go('inicio')}><span>✦ {t('Criar mapa')}</span></button>
       </div>
     )
   }

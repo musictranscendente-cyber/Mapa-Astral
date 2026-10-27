@@ -39,7 +39,7 @@ export function SolarReturnPage({ natal, houseSystem, go }: Props) {
       <div className="empty glass">
         <h2>{t('Revolução Solar')}</h2>
         <p>{t('Crie primeiro o seu mapa natal para calcular o mapa do seu ano pessoal.')}</p>
-        <button className="cta" onClick={() => go('inicio')}><span>✦ Criar mapa</span></button>
+        <button className="cta" onClick={() => go('inicio')}><span>✦ {t('Criar mapa')}</span></button>
       </div>
     )
   }

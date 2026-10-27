@@ -29,7 +29,7 @@ export function AstroMapPage({ natal, go }: { natal: Chart | null; go: (r: Route
       <div className="empty glass">
         <h2>{t('Astrocartografia')}</h2>
         <p>{t('Crie seu mapa natal para ver onde no mundo cada planeta fica mais forte para você.')}</p>
-        <button className="cta" onClick={() => go('inicio')}><span>✦ Criar mapa</span></button>
+        <button className="cta" onClick={() => go('inicio')}><span>✦ {t('Criar mapa')}</span></button>
       </div>
     )
   }

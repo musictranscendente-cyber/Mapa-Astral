@@ -69,7 +69,7 @@ export function ForecastPage({ natal, go }: { natal: Chart | null; go: (r: Route
       <div className="empty glass">
         <h2>{t('Previsões pessoais')}</h2>
         <p>{t('Para correlacionar o céu com a sua vida, crie primeiro o seu mapa natal.')}</p>
-        <button className="cta" onClick={() => go('inicio')}><span>✦ Criar mapa</span></button>
+        <button className="cta" onClick={() => go('inicio')}><span>✦ {t('Criar mapa')}</span></button>
       </div>
     )
   }
@@ -88,7 +88,7 @@ export function ForecastPage({ natal, go }: { natal: Chart | null; go: (r: Route
       <header className="page-head">
         <p className="eyebrow">{t('Projeção astrológica')}</p>
         <h1 className="title-glow">{t('Os próximos {range}', { range: t(RANGES.find((r) => r.days === range)?.label ?? '') })}</h1>
-        <p className="muted">Trânsitos do céu sobre o mapa de {natal.birth?.name} · a partir de {fmt(start, { day: 'numeric', month: 'long' })}</p>
+        <p className="muted">{t('Trânsitos do céu sobre o mapa de {name} · a partir de {date}', { name: natal.birth?.name ?? '', date: fmt(start, { day: 'numeric', month: 'long' }) })}</p>
         <div className="segmented">
           {RANGES.map((r) => (
             <button
