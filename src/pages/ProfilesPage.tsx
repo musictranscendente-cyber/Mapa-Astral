@@ -4,7 +4,7 @@ import { chartFromBirth } from '../astro/chart'
 import { ELEMENT_INFO, POINTS, SIGNS } from '../astro/constants'
 import { BirthForm } from '../components/BirthForm'
 import type { Profile } from '../lib/profiles'
-import { t } from '../i18n'
+import { locale, t } from '../i18n'
 
 interface Props {
   profiles: Profile[]
@@ -19,10 +19,10 @@ export function ProfilesPage({ profiles, activeId, onSelect, onSave, onRemove }:
   return (
     <div className="profiles">
       <header className="page-head">
-        <p className="eyebrow">Seus mapas</p>
-        <h1 className="title-glow">Perfis</h1>
-        <p className="muted">Guarde os mapas de quem você ama. Tudo fica salvo apenas neste dispositivo.</p>
-        <button className="cta" onClick={() => setEditing('new')}><span>+ Novo mapa</span></button>
+        <p className="eyebrow">{t('Seus mapas')}</p>
+        <h1 className="title-glow">{t('Perfis')}</h1>
+        <p className="muted">{t('Guarde os mapas de quem você ama. Tudo fica salvo apenas neste dispositivo.')}</p>
+        <button className="cta" onClick={() => setEditing('new')}><span>+ {t('Novo mapa')}</span></button>
       </header>
 
       {editing && (
@@ -33,7 +33,7 @@ export function ProfilesPage({ profiles, activeId, onSelect, onSave, onRemove }:
             submitLabel={editing === 'new' ? t('Criar mapa') : t('Salvar alterações')}
             onSubmit={(d) => { onSave(d, editing === 'new' ? undefined : editing.id); setEditing(null) }}
           />
-          <button className="link" onClick={() => setEditing(null)}>Cancelar</button>
+          <button className="link" onClick={() => setEditing(null)}>{t('Cancelar')}</button>
         </section>
       )}
 
@@ -52,7 +52,7 @@ export function ProfilesPage({ profiles, activeId, onSelect, onSave, onRemove }:
               <div className="pc-glyph">{SIGNS[sun].glyph}</div>
               <h3>{p.name}</h3>
               <p className="muted small">
-                {String(p.local.day).padStart(2, '0')}/{String(p.local.month).padStart(2, '0')}/{p.local.year}
+                {new Date(p.local.year, p.local.month - 1, p.local.day).toLocaleDateString(locale())}
                 {!p.timeUnknown && ` · ${String(p.local.hour).padStart(2, '0')}:${String(p.local.minute).padStart(2, '0')}`} · {p.place}
               </p>
               <p className="pc-trio">
@@ -61,9 +61,9 @@ export function ProfilesPage({ profiles, activeId, onSelect, onSave, onRemove }:
                 {asc != null && <span>AC {SIGNS[asc].name}</span>}
               </p>
               <div className="pc-actions">
-                <button className="ghost" onClick={() => onSelect(p.id)}>Abrir</button>
-                <button className="ghost" onClick={() => setEditing(p)}>Editar</button>
-                <button className="ghost danger" onClick={() => { if (confirm(`Excluir o mapa de ${p.name}?`)) onRemove(p.id) }}>Excluir</button>
+                <button className="ghost" onClick={() => onSelect(p.id)}>{t('Abrir')}</button>
+                <button className="ghost" onClick={() => setEditing(p)}>{t('Editar')}</button>
+                <button className="ghost danger" onClick={() => { if (confirm(t('Excluir o mapa de {name}?', { name: p.name }))) onRemove(p.id) }}>{t('Excluir')}</button>
               </div>
             </article>
           )
