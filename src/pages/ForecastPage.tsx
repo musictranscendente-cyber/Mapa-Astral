@@ -16,6 +16,7 @@ import { useAccess } from '../billing/context'
 import { birthKey } from '../billing/keys'
 import { forecastKey } from '../billing/rules'
 import { Locked } from '../components/Locked'
+import { locale } from '../i18n'
 
 const RANGES = [
   { days: 7, label: '7 dias' },
@@ -29,7 +30,7 @@ const SLOW: PlanetKey[] = ['jupiter', 'saturn', 'uranus', 'neptune', 'pluto', 'c
 const FAST: PlanetKey[] = ['sun', 'mercury', 'venus', 'mars']
 
 const startOfDay = (d: Date) => new Date(d.getFullYear(), d.getMonth(), d.getDate(), 12, 0, 0)
-const fmt = (d: Date, o: Intl.DateTimeFormatOptions = { day: '2-digit', month: 'short' }) => d.toLocaleDateString('pt-BR', o)
+const fmt = (d: Date, o: Intl.DateTimeFormatOptions = { day: '2-digit', month: 'short' }) => d.toLocaleDateString(locale(), o)
 
 export function ForecastPage({ natal, go }: { natal: Chart | null; go: (r: Route) => void }) {
   const [range, setRange] = useState(30)
@@ -208,7 +209,7 @@ export function ForecastPage({ natal, go }: { natal: Chart | null; go: (r: Route
                           {transitHeadline(e.transit, e.natal, e.type.key)}{e.retro ? ' ℞' : ''}
                         </h4>
                         <p className="muted small">
-                          {e.exact < start && 'Em andamento · '}Exato {fmt(e.exact, { day: '2-digit', month: 'short' })} às {e.exact.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })} · ativo de {fmt(e.start)} a {fmt(e.end)}
+                          {e.exact < start && 'Em andamento · '}Exato {fmt(e.exact, { day: '2-digit', month: 'short' })} às {e.exact.toLocaleTimeString(locale(), { hour: '2-digit', minute: '2-digit' })} · ativo de {fmt(e.start)} a {fmt(e.end)}
                         </p>
                         <p>{transitText(e.transit, e.natal, e.type.key)}</p>
                       </div>
@@ -258,7 +259,7 @@ export function ForecastPage({ natal, go }: { natal: Chart | null; go: (r: Route
 function groupByMonth(events: TransitEvent[]): [string, TransitEvent[]][] {
   const map = new Map<string, TransitEvent[]>()
   for (const e of events) {
-    const k = e.exact.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' })
+    const k = e.exact.toLocaleDateString(locale(), { month: 'long', year: 'numeric' })
     if (!map.has(k)) map.set(k, [])
     map.get(k)!.push(e)
   }
@@ -282,14 +283,14 @@ function Timeline({ events, start, range }: { events: TransitEvent[]; start: Dat
       <div className="tl-axis">
         {Array.from({ length: ticks + 1 }, (_, i) => {
           const d = new Date(start.getTime() + (span * i) / ticks)
-          return <span key={i} style={{ left: `${(i / ticks) * 100}%` }}>{d.toLocaleDateString('pt-BR', range > 90 ? { month: 'short' } : { day: '2-digit', month: 'short' })}</span>
+          return <span key={i} style={{ left: `${(i / ticks) * 100}%` }}>{d.toLocaleDateString(locale(), range > 90 ? { month: 'short' } : { day: '2-digit', month: 'short' })}</span>
         })}
       </div>
       {rows.map((e, i) => (
         <div
           key={i}
           className="tl-row"
-          onMouseEnter={() => setTip(`${transitHeadline(e.transit, e.natal, e.type.key)} — exato em ${e.exact.toLocaleDateString('pt-BR')}`)}
+          onMouseEnter={() => setTip(`${transitHeadline(e.transit, e.natal, e.type.key)} — exato em ${e.exact.toLocaleDateString(locale())}`)}
           onMouseLeave={() => setTip('')}
         >
           <span className="tl-label">

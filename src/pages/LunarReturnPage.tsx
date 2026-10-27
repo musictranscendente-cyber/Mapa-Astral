@@ -11,6 +11,7 @@ import { PlacePicker, type Where } from '../components/PlacePicker'
 import { LR_ASC, LR_MOON_HOUSE, LR_SUN_HOUSE } from '../interpret/lunarReturn'
 import { HOUSE_TEXT } from '../interpret/planets'
 import type { Route } from '../App'
+import { locale } from '../i18n'
 
 interface Props {
   natal: Chart | null
@@ -18,7 +19,7 @@ interface Props {
   go: (r: Route) => void
 }
 
-const fmt = (d: Date) => d.toLocaleString('pt-BR', { day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' })
+const fmt = (d: Date) => d.toLocaleString(locale(), { day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' })
 
 export function LunarReturnPage({ natal, houseSystem, go }: Props) {
   const access = useAccess()

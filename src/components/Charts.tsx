@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { ELEMENT_INFO, MODALITY_INFO, type Element, type Modality } from '../astro/constants'
 import type { Balance } from '../astro/chart'
 import { LIFE_AREAS, type DayScore, type LifeArea } from '../astro/transits'
+import { locale } from '../i18n'
 
 const ELEMENT_ICON: Record<Element, string> = { fogo: '🜂', terra: '🜃', ar: '🜁', agua: '🜄' }
 
@@ -86,7 +87,7 @@ export function FlowChart({ days, selected, onSelect }: { days: DayScore[]; sele
   const y = (v: number) => padT + ((100 - v) / 200) * (H - padT - padB)
   const path = days.map((d, i) => `${i ? 'L' : 'M'}${x(i).toFixed(1)},${y(d.flow).toFixed(1)}`).join('')
   const area = `${path}L${x(n - 1)},${y(0)}L${x(0)},${y(0)}Z`
-  const fmt = (d: Date) => d.toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' })
+  const fmt = (d: Date) => d.toLocaleDateString(locale(), { day: '2-digit', month: 'short' })
   const step = Math.max(1, Math.ceil(n / Math.max(3, Math.floor(W / 95))))
 
   const onMove = (e: React.PointerEvent) => {
@@ -134,7 +135,7 @@ export function FlowChart({ days, selected, onSelect }: { days: DayScore[]; sele
       </svg>
       {h != null && days[h] && (
         <div className="chart-tip" style={{ left: `${Math.min(85, Math.max(15, (x(h) / W) * 100))}%` }}>
-          <strong>{days[h].date.toLocaleDateString('pt-BR', { weekday: 'short', day: '2-digit', month: 'short' })}</strong>
+          <strong>{days[h].date.toLocaleDateString(locale(), { weekday: 'short', day: '2-digit', month: 'short' })}</strong>
           <span>Fluxo {days[h].flow > 0 ? '+' : ''}{days[h].flow}</span>
           <span>Intensidade {days[h].intensity}</span>
         </div>

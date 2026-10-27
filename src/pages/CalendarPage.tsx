@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { POINTS } from '../astro/constants'
 import { calendarEvents, retrogradesAt, type CalEvent, type CalEventKind } from '../astro/calendar'
 import { KIND_INFO, eventHint, eventTime, eventTitle } from '../interpret/calendar'
+import { locale } from '../i18n'
 
 const WEEK = ['dom', 'seg', 'ter', 'qua', 'qui', 'sex', 'sáb']
 const DEFAULT_KINDS: CalEventKind[] = ['fase', 'eclipse', 'ingresso', 'estacao', 'fora-de-curso']
@@ -40,7 +41,7 @@ export function CalendarPage() {
     <div className="calendar">
       <header className="page-head">
         <p className="eyebrow">Calendário astral</p>
-        <h1 className="title-glow">{cap(month.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' }))}</h1>
+        <h1 className="title-glow">{cap(month.toLocaleDateString(locale(), { month: 'long', year: 'numeric' }))}</h1>
         <div className="head-tools">
           <button className="ghost" onClick={() => { setOffset((o) => o - 1); setSelected(null) }}>‹ Anterior</button>
           {offset !== 0 && <button className="ghost" onClick={() => { setOffset(0); setSelected(null) }}>Hoje</button>}
@@ -82,7 +83,7 @@ export function CalendarPage() {
         {!loading && listDays.length === 0 && <p className="glass pad muted">Nenhum evento com os filtros escolhidos.</p>}
         {listDays.map(([k, evs]) => (
           <div key={k} className="glass cal-day-block">
-            <h3>{cap(evs[0].date.toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'long' }))}</h3>
+            <h3>{cap(evs[0].date.toLocaleDateString(locale(), { weekday: 'long', day: 'numeric', month: 'long' }))}</h3>
             <ul>
               {evs.map((e, i) => (
                 <li key={i} className={`k-${e.kind}`}>

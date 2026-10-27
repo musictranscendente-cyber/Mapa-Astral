@@ -5,8 +5,9 @@ import { lunations, personalize, type PersonalLunation } from '../astro/lunation
 import { MoonPhase } from '../components/MoonPhase'
 import { KIND_LABEL, lunationMeaning, lunationPersonal } from '../interpret/lunations'
 import type { Route } from '../App'
+import { locale } from '../i18n'
 
-const fmt = (d: Date) => d.toLocaleString('pt-BR', { weekday: 'short', day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })
+const fmt = (d: Date) => d.toLocaleString(locale(), { weekday: 'short', day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })
 
 export function LunationsPage({ natal, go }: { natal: Chart | null; go: (r: Route) => void }) {
   const [start] = useState(() => new Date())

@@ -5,6 +5,7 @@ import { SIGN_DATES, horoscope } from '../astro/horoscope'
 import { MoonPhase } from '../components/MoonPhase'
 import { horoscopeText } from '../interpret/horoscope'
 import type { Route } from '../App'
+import { locale } from '../i18n'
 
 const DAYS = [
   { offset: -1, label: 'Ontem' },
@@ -60,7 +61,7 @@ export function HoroscopePage({ natal, go }: { natal: Chart | null; go: (r: Rout
         <p className="eyebrow">Horóscopo do dia</p>
         <h1 className="title-glow">{s.name}</h1>
         <p className="muted">
-          {SIGN_DATES[sign]} · {date.toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'long' })}
+          {SIGN_DATES[sign]} · {date.toLocaleDateString(locale(), { weekday: 'long', day: 'numeric', month: 'long' })}
         </p>
         <div className="segmented">
           {DAYS.map((d) => <button key={d.offset} className={offset === d.offset ? 'active' : ''} onClick={() => setOffset(d.offset)}>{d.label}</button>)}

@@ -9,6 +9,8 @@ import { useAccess } from '../billing/context'
 import { SimulatorCard } from '../components/SimulatorCard'
 import { StatsCard } from '../components/StatsCard'
 import type { Route } from '../App'
+import { LangPicker } from '../components/LangPicker'
+import { locale, t } from '../i18n'
 
 const TOPICS: [keyof NotifyTopics, string, string][] = [
   ['transitos', 'Trânsitos sobre o seu mapa', 'a mensagem principal do dia'],
@@ -53,8 +55,13 @@ export function SettingsPage({ natal, settings, setSettings, go }: Props) {
     <div className="settings">
       <header className="page-head">
         <p className="eyebrow">Preferências</p>
-        <h1 className="title-glow">Ajustes</h1>
+        <h1 className="title-glow">{t('Ajustes')}</h1>
       </header>
+
+      <section className="glass pad settings-card">
+        <h2>🌐 {t('Idioma')}</h2>
+        <LangPicker />
+      </section>
 
       {access.owner && <StatsCard />}
       {access.owner && <SimulatorCard go={go} />}
@@ -103,7 +110,7 @@ export function SettingsPage({ natal, settings, setSettings, go }: Props) {
                     <div>
                       <strong>{m.title}</strong>
                       {m.body.split('\n').map((l, i) => <p key={i}>{l}</p>)}
-                      <small className="muted">{new Date(m.date + 'T12:00').toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'short' })}</small>
+                      <small className="muted">{new Date(m.date + 'T12:00').toLocaleDateString(locale(), { weekday: 'long', day: 'numeric', month: 'short' })}</small>
                     </div>
                   </div>
                 ))}

@@ -7,6 +7,7 @@ import { moonSignOfDayText } from '../interpret/report'
 import { calendarEvents, type CalEvent } from '../astro/calendar'
 import { eventTime, eventTitle } from '../interpret/calendar'
 import { DEFAULT_TOPICS, type NotifyTopics } from './profiles'
+import { locale } from '../i18n'
 
 const FAST = ['moon', 'sun', 'mercury', 'venus', 'mars']
 
@@ -22,7 +23,7 @@ export const notificationsSupported = () =>
 const localDay = (d: Date) =>
   `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
 
-const time = (d: Date) => d.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })
+const time = (d: Date) => d.toLocaleTimeString(locale(), { hour: '2-digit', minute: '2-digit' })
 const ICON: Partial<Record<CalEvent['kind'], string>> = { eclipse: '🌘', estacao: '℞', ingresso: '✦', 'lua-signo': '☽', 'fora-de-curso': '∅' }
 
 /** Personal message for each of the next `days` days, at the chosen local hour, following the chosen topics. */

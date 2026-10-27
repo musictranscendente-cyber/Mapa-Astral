@@ -11,6 +11,7 @@ import { transitHeadline } from '../interpret/aspects'
 import { HOUSE_TEXT } from '../interpret/planets'
 import { PROG_MOON_SIGN, phaseOf } from '../interpret/progressions'
 import type { Route } from '../App'
+import { locale } from '../i18n'
 
 const headline = (a: { moving: string; natal: string; type: { key: string } }) =>
   transitHeadline(a.moving as PlanetKey, a.natal as PlanetKey, a.type.key as never)
@@ -75,7 +76,7 @@ export function ProgressionsPage({ natal, go }: { natal: Chart | null; go: (r: R
                 <b style={{ color: POINTS.moon.color }}>☽ Lua progredida em {SIGNS[pm.sign].name}</b> ({formatDegree(pm.lon)}): {PROG_MOON_SIGN[pm.sign]}
                 {moonHouse && ` No seu mapa natal, ela passa pela ${moonHouse.name.toLowerCase()} — ${moonHouse.theme.toLowerCase()}.`}
               </p>
-              <p className="muted small">Entra em {SIGNS[p.moonIngress.sign].name} em {p.moonIngress.date.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' })}.</p>
+              <p className="muted small">Entra em {SIGNS[p.moonIngress.sign].name} em {p.moonIngress.date.toLocaleDateString(locale(), { month: 'long', year: 'numeric' })}.</p>
               <p className="serif">
                 <b style={{ color: POINTS.sun.color }}>☉ Sol progredido em {SIGNS[ps.sign].name}</b> ({formatDegree(ps.lon)})
                 {ps.sign !== natal.points.sun.sign ? ` — sua identidade amadureceu de ${SIGNS[natal.points.sun.sign].name} para ${SIGNS[ps.sign].name}.` : ' — ainda no signo natal.'}
@@ -105,7 +106,7 @@ export function ProgressionsPage({ natal, go }: { natal: Chart | null; go: (r: R
                 <ul className="prog-timeline">
                   {upcoming.slice(0, 40).map((e, i) => (
                     <li key={i}>
-                      <span className="pt-date">{e.date.toLocaleDateString('pt-BR', { month: 'short', year: 'numeric' })}</span>
+                      <span className="pt-date">{e.date.toLocaleDateString(locale(), { month: 'short', year: 'numeric' })}</span>
                       <span style={{ color: e.type.color }}>{e.type.glyph}</span>
                       <span>{headline(e)}</span>
                       <small className="muted">{e.kind}</small>

@@ -1,8 +1,9 @@
 import { POINTS, SIGNS } from '../astro/constants'
 import type { CalEvent, CalEventKind } from '../astro/calendar'
+import { locale } from '../i18n'
 
 const QUARTERS = ['Lua Nova', 'Quarto Crescente', 'Lua Cheia', 'Quarto Minguante']
-const time = (d: Date) => d.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })
+const time = (d: Date) => d.toLocaleTimeString(locale(), { hour: '2-digit', minute: '2-digit' })
 
 export const KIND_INFO: Record<CalEventKind, { label: string; icon: string }> = {
   fase: { label: 'Fases da Lua', icon: '◐' },

@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { fetchStats, type AppStats, type DayStat } from '../lib/analytics'
+import { locale } from '../i18n'
 
 const RANGES = [7, 30, 90]
 
@@ -17,7 +18,7 @@ function fillDays(daily: DayStat[], days: number): DayStat[] {
 }
 
 const fmtDay = (key: string, o: Intl.DateTimeFormatOptions = { day: '2-digit', month: 'short' }) =>
-  new Date(`${key}T12:00:00`).toLocaleDateString('pt-BR', o)
+  new Date(`${key}T12:00:00`).toLocaleDateString(locale(), o)
 
 /** Owner-only: visitors per day, charts created, shares and where people come from. */
 export function StatsCard() {
@@ -85,7 +86,7 @@ function StatsBody({ stats, days }: { stats: AppStats; days: number }) {
       <div className="stat-tiles">
         {tiles.map(([label, value, hint]) => (
           <div key={label} className="stat-tile">
-            <span className="stat-value">{value.toLocaleString('pt-BR')}</span>
+            <span className="stat-value">{value.toLocaleString(locale())}</span>
             <span className="stat-label">{label}</span>
             <small className="muted">{hint}</small>
           </div>

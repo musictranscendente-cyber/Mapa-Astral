@@ -1,3 +1,5 @@
+import { byLang } from '../i18n'
+
 export type Element = 'fogo' | 'terra' | 'ar' | 'agua'
 export type Modality = 'cardinal' | 'fixo' | 'mutavel'
 
@@ -15,7 +17,7 @@ export interface SignInfo {
 // Variation selector U+FE0E forces text (non-emoji) presentation of glyphs.
 const T = '︎'
 
-export const SIGNS: SignInfo[] = [
+const SIGNS_PT: SignInfo[] = [
   { id: 0, key: 'aries', name: 'Áries', glyph: '♈' + T, element: 'fogo', modality: 'cardinal', ruler: 'mars', polarity: 'yang' },
   { id: 1, key: 'taurus', name: 'Touro', glyph: '♉' + T, element: 'terra', modality: 'fixo', ruler: 'venus', polarity: 'yin' },
   { id: 2, key: 'gemini', name: 'Gêmeos', glyph: '♊' + T, element: 'ar', modality: 'mutavel', ruler: 'mercury', polarity: 'yang' },
@@ -29,19 +31,58 @@ export const SIGNS: SignInfo[] = [
   { id: 10, key: 'aquarius', name: 'Aquário', glyph: '♒' + T, element: 'ar', modality: 'fixo', ruler: 'uranus', polarity: 'yang' },
   { id: 11, key: 'pisces', name: 'Peixes', glyph: '♓' + T, element: 'agua', modality: 'mutavel', ruler: 'neptune', polarity: 'yin' },
 ]
+const SIGN_NAMES = {
+  en: ['Aries', 'Taurus', 'Gemini', 'Cancer', 'Leo', 'Virgo', 'Libra', 'Scorpio', 'Sagittarius', 'Capricorn', 'Aquarius', 'Pisces'],
+  es: ['Aries', 'Tauro', 'Géminis', 'Cáncer', 'Leo', 'Virgo', 'Libra', 'Escorpio', 'Sagitario', 'Capricornio', 'Acuario', 'Piscis'],
+}
+export const SIGNS: SignInfo[] = byLang({
+  pt: SIGNS_PT,
+  en: SIGNS_PT.map((s, i) => ({ ...s, name: SIGN_NAMES.en[i] })),
+  es: SIGNS_PT.map((s, i) => ({ ...s, name: SIGN_NAMES.es[i] })),
+})
 
-export const ELEMENT_INFO: Record<Element, { name: string; color: string; glow: string; essence: string }> = {
+type ElementInfo = Record<Element, { name: string; color: string; glow: string; essence: string }>
+const ELEMENT_PT: ElementInfo = {
   fogo: { name: 'Fogo', color: '#e66767', glow: 'rgba(230,103,103,0.55)', essence: 'vontade, entusiasmo, coragem e inspiração' },
   terra: { name: 'Terra', color: '#199e70', glow: 'rgba(25,158,112,0.55)', essence: 'concretude, paciência, corpo e realização' },
   ar: { name: 'Ar', color: '#c98500', glow: 'rgba(201,133,0,0.55)', essence: 'mente, comunicação, ideias e conexões' },
   agua: { name: 'Água', color: '#3987e5', glow: 'rgba(57,135,229,0.55)', essence: 'emoção, intuição, empatia e memória' },
 }
+const withText = (names: Record<Element, [string, string]>): ElementInfo =>
+  Object.fromEntries(Object.entries(ELEMENT_PT).map(([k, v]) => [k, { ...v, name: names[k as Element][0], essence: names[k as Element][1] }])) as ElementInfo
+export const ELEMENT_INFO: ElementInfo = byLang({
+  pt: ELEMENT_PT,
+  en: withText({
+    fogo: ['Fire', 'will, enthusiasm, courage and inspiration'],
+    terra: ['Earth', 'practicality, patience, the body and achievement'],
+    ar: ['Air', 'mind, communication, ideas and connections'],
+    agua: ['Water', 'emotion, intuition, empathy and memory'],
+  }),
+  es: withText({
+    fogo: ['Fuego', 'voluntad, entusiasmo, coraje e inspiración'],
+    terra: ['Tierra', 'concreción, paciencia, cuerpo y realización'],
+    ar: ['Aire', 'mente, comunicación, ideas y conexiones'],
+    agua: ['Agua', 'emoción, intuición, empatía y memoria'],
+  }),
+})
 
-export const MODALITY_INFO: Record<Modality, { name: string; essence: string }> = {
-  cardinal: { name: 'Cardinal', essence: 'iniciar, liderar, abrir caminhos' },
-  fixo: { name: 'Fixo', essence: 'sustentar, aprofundar, persistir' },
-  mutavel: { name: 'Mutável', essence: 'adaptar, transformar, integrar' },
-}
+export const MODALITY_INFO: Record<Modality, { name: string; essence: string }> = byLang({
+  pt: {
+    cardinal: { name: 'Cardinal', essence: 'iniciar, liderar, abrir caminhos' },
+    fixo: { name: 'Fixo', essence: 'sustentar, aprofundar, persistir' },
+    mutavel: { name: 'Mutável', essence: 'adaptar, transformar, integrar' },
+  },
+  en: {
+    cardinal: { name: 'Cardinal', essence: 'starting, leading, opening paths' },
+    fixo: { name: 'Fixed', essence: 'sustaining, deepening, persisting' },
+    mutavel: { name: 'Mutable', essence: 'adapting, transforming, integrating' },
+  },
+  es: {
+    cardinal: { name: 'Cardinal', essence: 'iniciar, liderar, abrir caminos' },
+    fixo: { name: 'Fijo', essence: 'sostener, profundizar, persistir' },
+    mutavel: { name: 'Mutable', essence: 'adaptar, transformar, integrar' },
+  },
+})
 
 export type PlanetKey =
   | 'sun' | 'moon' | 'mercury' | 'venus' | 'mars' | 'jupiter' | 'saturn'
@@ -59,7 +100,7 @@ export interface PointInfo {
   personal?: boolean
 }
 
-export const POINTS: Record<PointKey, PointInfo> = {
+const POINTS_PT: Record<PointKey, PointInfo> = {
   sun: { key: 'sun', name: 'Sol', glyph: '☉' + T, color: '#ffd166', weight: 4, personal: true },
   moon: { key: 'moon', name: 'Lua', glyph: '☽' + T, color: '#e8ecff', weight: 4, personal: true },
   mercury: { key: 'mercury', name: 'Mercúrio', glyph: '☿' + T, color: '#9be7ff', weight: 2, personal: true },
@@ -80,6 +121,21 @@ export const POINTS: Record<PointKey, PointInfo> = {
   ic: { key: 'ic', name: 'Fundo do Céu', glyph: 'IC', color: '#ffe8a3', weight: 0 },
   fortune: { key: 'fortune', name: 'Roda da Fortuna', glyph: '⊗', color: '#f6d365', weight: 0 },
 }
+const POINT_NAMES: Record<'en' | 'es', Record<PointKey, string>> = {
+  en: {
+    sun: 'Sun', moon: 'Moon', mercury: 'Mercury', venus: 'Venus', mars: 'Mars', jupiter: 'Jupiter', saturn: 'Saturn',
+    uranus: 'Uranus', neptune: 'Neptune', pluto: 'Pluto', chiron: 'Chiron', node: 'North Node', southNode: 'South Node',
+    lilith: 'Lilith', asc: 'Ascendant', mc: 'Midheaven', dsc: 'Descendant', ic: 'Imum Coeli', fortune: 'Part of Fortune',
+  },
+  es: {
+    sun: 'Sol', moon: 'Luna', mercury: 'Mercurio', venus: 'Venus', mars: 'Marte', jupiter: 'Júpiter', saturn: 'Saturno',
+    uranus: 'Urano', neptune: 'Neptuno', pluto: 'Plutón', chiron: 'Quirón', node: 'Nodo Norte', southNode: 'Nodo Sur',
+    lilith: 'Lilith', asc: 'Ascendente', mc: 'Medio Cielo', dsc: 'Descendente', ic: 'Fondo del Cielo', fortune: 'Parte de la Fortuna',
+  },
+}
+const renamePoints = (names: Record<PointKey, string>) =>
+  Object.fromEntries(Object.entries(POINTS_PT).map(([k, v]) => [k, { ...v, name: names[k as PointKey] }])) as Record<PointKey, PointInfo>
+export const POINTS: Record<PointKey, PointInfo> = byLang({ pt: POINTS_PT, en: renamePoints(POINT_NAMES.en), es: renamePoints(POINT_NAMES.es) })
 
 export const PLANET_ORDER: PlanetKey[] = [
   'sun', 'moon', 'mercury', 'venus', 'mars', 'jupiter', 'saturn',
@@ -99,7 +155,7 @@ export interface AspectInfo {
   major: boolean
 }
 
-export const ASPECTS: AspectInfo[] = [
+const ASPECTS_PT: AspectInfo[] = [
   { key: 'conjunction', name: 'Conjunção', angle: 0, glyph: '☌' + T, orb: 8, nature: 'neutro', color: '#ffd166', major: true },
   { key: 'opposition', name: 'Oposição', angle: 180, glyph: '☍' + T, orb: 8, nature: 'tenso', color: '#ff5d73', major: true },
   { key: 'trine', name: 'Trígono', angle: 120, glyph: '△', orb: 7, nature: 'harmonico', color: '#4ade80', major: true },
@@ -109,7 +165,21 @@ export const ASPECTS: AspectInfo[] = [
   { key: 'semisextile', name: 'Semissextil', angle: 30, glyph: '⚺', orb: 2, nature: 'neutro', color: '#94a3b8', major: false },
 ]
 
-export const ASPECT_BY_KEY = Object.fromEntries(ASPECTS.map((a) => [a.key, a])) as Record<AspectKey, AspectInfo>
+const ASPECT_NAMES: Record<'en' | 'es', Record<AspectKey, string>> = {
+  en: { conjunction: 'Conjunction', opposition: 'Opposition', trine: 'Trine', square: 'Square', sextile: 'Sextile', quincunx: 'Quincunx', semisextile: 'Semi-sextile' },
+  es: { conjunction: 'Conjunción', opposition: 'Oposición', trine: 'Trígono', square: 'Cuadratura', sextile: 'Sextil', quincunx: 'Quincuncio', semisextile: 'Semisextil' },
+}
+export const ASPECTS: AspectInfo[] = byLang({
+  pt: ASPECTS_PT,
+  en: ASPECTS_PT.map((a) => ({ ...a, name: ASPECT_NAMES.en[a.key] })),
+  es: ASPECTS_PT.map((a) => ({ ...a, name: ASPECT_NAMES.es[a.key] })),
+})
+
+export const ASPECT_BY_KEY = byLang({
+  pt: Object.fromEntries(ASPECTS_PT.map((a) => [a.key, a])),
+  en: Object.fromEntries(ASPECTS_PT.map((a) => [a.key, { ...a, name: ASPECT_NAMES.en[a.key] }])),
+  es: Object.fromEntries(ASPECTS_PT.map((a) => [a.key, { ...a, name: ASPECT_NAMES.es[a.key] }])),
+}) as Record<AspectKey, AspectInfo>
 
 /** Classical dignities, used in the report. */
 export const DIGNITIES: Partial<Record<PlanetKey, { domicile: number[]; exaltation: number[]; detriment: number[]; fall: number[] }>> = {

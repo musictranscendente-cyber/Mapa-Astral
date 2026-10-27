@@ -16,6 +16,7 @@ import { useAccess } from '../billing/context'
 import { birthKey } from '../billing/keys'
 import { solarKey } from '../billing/rules'
 import { Locked } from '../components/Locked'
+import { locale } from '../i18n'
 
 interface Props {
   natal: Chart | null
@@ -52,7 +53,7 @@ export function SolarReturnPage({ natal, houseSystem, go }: Props) {
     .flatMap((k) => ([['AC', sr.asc], ['MC', sr.mc], ['DC', sr.asc + 180], ['IC', sr.mc + 180]] as const)
       .filter(([, lon]) => Math.abs(angDiff(lon, sr.points[k].lon)) <= 6)
       .map(([ang]) => ({ k, ang })))
-  const when = sr.date.toLocaleString('pt-BR', { dateStyle: 'long', timeStyle: 'short' })
+  const when = sr.date.toLocaleString(locale(), { dateStyle: 'long', timeStyle: 'short' })
   const thisYear = currentReturnYear(natal)
   const bk = birthKey(natal.birth)
   const key = solarKey(bk, year)

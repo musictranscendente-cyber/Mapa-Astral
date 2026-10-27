@@ -11,6 +11,7 @@ import { transitHeadline, transitText } from '../interpret/aspects'
 import { RETRO_TEXT, moonSignOfDayText } from '../interpret/report'
 import type { Settings } from '../lib/profiles'
 import type { Route } from '../App'
+import { locale } from '../i18n'
 
 interface Props {
   natal: Chart | null
@@ -71,9 +72,9 @@ export function SkyPage({ natal, profile, settings, go }: Props) {
     <div className="sky">
       <header className="page-head">
         <p className="eyebrow">Céu do momento</p>
-        <h1 className="title-glow">{date.toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}</h1>
+        <h1 className="title-glow">{date.toLocaleDateString(locale(), { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}</h1>
         <p className="muted">
-          {date.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })} ({userTimeZone()}) · {loc.label}
+          {date.toLocaleTimeString(locale(), { hour: '2-digit', minute: '2-digit' })} ({userTimeZone()}) · {loc.label}
           {live && <span className="live-dot"> ● ao vivo</span>}
         </p>
       </header>
@@ -137,7 +138,7 @@ export function SkyPage({ natal, profile, settings, go }: Props) {
               <li key={i}>
                 <MoonPhase angle={p.quarter * 90} size={26} south={loc.lat < 0} />
                 <span>{p.name}</span>
-                <small>{p.date.toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' })} · {p.date.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}</small>
+                <small>{p.date.toLocaleDateString(locale(), { day: '2-digit', month: 'short' })} · {p.date.toLocaleTimeString(locale(), { hour: '2-digit', minute: '2-digit' })}</small>
               </li>
             ))}
           </ul>

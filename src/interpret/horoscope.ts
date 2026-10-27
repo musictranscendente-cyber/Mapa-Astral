@@ -1,5 +1,6 @@
 import { POINTS, SIGNS } from '../astro/constants'
 import type { Horoscope } from '../astro/horoscope'
+import { locale } from '../i18n'
 
 /** Moon in each solar house: the main theme of the day. */
 const MOON_DAY = [
@@ -100,7 +101,7 @@ export function horoscopeText(h: Horoscope): HoroscopeText {
   const headline = headlines[(h.date.getDate() + h.sign) % headlines.length]
   let day = MOON_DAY[p.moon.house - 1]
   if (h.moonIngress) {
-    const hora = h.moonIngress.at.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })
+    const hora = h.moonIngress.at.toLocaleTimeString(locale(), { hour: '2-digit', minute: '2-digit' })
     day += ` Às ${hora}, a Lua entra em ${SIGNS[h.moonIngress.sign].name} e o clima muda para ${HOUSE_SHORT[(h.moonIngress.sign - h.sign + 12) % 12]}.`
   }
   const work = `${MARS_ACTION[p.mars.house - 1]}${p.mercury.retro ? ' Mercúrio está retrógrado: revise antes de assinar ou enviar.' : ''}`

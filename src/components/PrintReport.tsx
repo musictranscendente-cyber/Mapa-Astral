@@ -4,13 +4,14 @@ import { ELEMENT_INFO, POINTS, SIGNS, formatDegree, type PointKey } from '../ast
 import type { ReportSection } from '../interpret/report'
 import { SIGN_TEXT } from '../interpret/signs'
 import { ChartWheel } from './ChartWheel'
+import { locale } from '../i18n'
 
 const ROWS: PointKey[] = ['sun', 'moon', 'mercury', 'venus', 'mars', 'jupiter', 'saturn', 'uranus', 'neptune', 'pluto', 'chiron', 'node', 'lilith']
 
 /** Layout used only when printing / saving as PDF: cover, positions and every chapter. */
 export function PrintReport({ chart, report, when }: { chart: Chart; report: ReportSection[]; when: string }) {
   const b = chart.birth!
-  const [today] = useState(() => new Date().toLocaleDateString('pt-BR'))
+  const [today] = useState(() => new Date().toLocaleDateString(locale()))
   const P = chart.points
   const trio: [string, PointKey][] = [['Sol', 'sun'], ['Lua', 'moon'], ...(chart.hasHouses ? [['Ascendente', 'asc'] as [string, PointKey]] : [])]
   return (

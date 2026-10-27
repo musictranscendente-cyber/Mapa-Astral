@@ -1,3 +1,5 @@
+import { locale } from '../i18n'
+
 /**
  * Converts a wall-clock time in an IANA time zone to a UTC instant.
  * Uses the browser's tz database, which includes historical DST rules
@@ -60,9 +62,9 @@ export function formatInZone(date: Date, timeZone: string, opts: Intl.DateTimeFo
   const tz = timeZone.startsWith('UTC') ? undefined : timeZone
   if (!tz) {
     const shifted = new Date(date.getTime() + parseUtcOffset(timeZone) * 60000)
-    return new Intl.DateTimeFormat('pt-BR', { ...opts, timeZone: 'UTC' }).format(shifted)
+    return new Intl.DateTimeFormat(locale(), { ...opts, timeZone: 'UTC' }).format(shifted)
   }
-  return new Intl.DateTimeFormat('pt-BR', { ...opts, timeZone: tz }).format(date)
+  return new Intl.DateTimeFormat(locale(), { ...opts, timeZone: tz }).format(date)
 }
 
 export const userTimeZone = () => Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC'

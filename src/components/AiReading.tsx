@@ -6,6 +6,7 @@ import { useAccess, type Offer } from '../billing/context'
 import type { Allowance } from '../billing/rules'
 import { Locked } from './Locked'
 import type { Route } from '../App'
+import { locale } from '../i18n'
 
 interface Props {
   kind: ReadingKind
@@ -128,7 +129,7 @@ function AiReadingInner({ kind, subject, getSummary, accessKey, offer, go, stora
 function ReadingActions({ kind, subject, text }: { kind: ReadingKind; subject: string; text: string }) {
   const [printing, setPrinting] = useState(false)
   const [msg, setMsg] = useState('')
-  const [today] = useState(() => new Date().toLocaleDateString('pt-BR'))
+  const [today] = useState(() => new Date().toLocaleDateString(locale()))
   const title = READING_TITLES[kind]
   const plain = `${title} — ${subject}\n\n${text.replace(/[*_#]/g, '')}\n\nCosmic Sky · ${window.location.host}${window.location.pathname}`
 

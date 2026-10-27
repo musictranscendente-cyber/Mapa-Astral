@@ -6,6 +6,7 @@ import { authConfigured } from '../lib/supabase'
 import { useAccess } from '../billing/context'
 import { fetchPurchases, type PurchaseSummary } from '../billing/api'
 import { PLAN_ANALYSES, PRODUCTS } from '../billing/rules'
+import { locale } from '../i18n'
 
 interface Props {
   user: User | null
@@ -179,7 +180,7 @@ function MyAccess() {
   if (!access.enabled) return null
 
   const plan = access.plan
-  const until = access.data.planUntil ? new Date(access.data.planUntil).toLocaleDateString('pt-BR', { dateStyle: 'long' }) : ''
+  const until = access.data.planUntil ? new Date(access.data.planUntil).toLocaleDateString(locale(), { dateStyle: 'long' }) : ''
   return (
     <section className="glass pad account-card">
       <h2>Meu acesso</h2>
@@ -199,8 +200,8 @@ function MyAccess() {
             <li key={p.id}>
               <span>{PRODUCTS[p.product]?.name ?? p.product}{p.label ? ` · ${p.label}` : ''}</span>
               <small className="muted">
-                {new Date(p.created_at).toLocaleDateString('pt-BR')}
-                {p.expires_at && !PRODUCTS[p.product]?.plan ? ` · válida até ${new Date(p.expires_at).toLocaleDateString('pt-BR')}` : ''}
+                {new Date(p.created_at).toLocaleDateString(locale())}
+                {p.expires_at && !PRODUCTS[p.product]?.plan ? ` · válida até ${new Date(p.expires_at).toLocaleDateString(locale())}` : ''}
               </small>
             </li>
           ))}
