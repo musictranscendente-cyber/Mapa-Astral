@@ -6,6 +6,7 @@ import { useAccess, type Offer } from '../billing/context'
 import type { Allowance } from '../billing/rules'
 import { Locked } from './Locked'
 import type { Route } from '../App'
+import { locale, t } from '../i18n'
 
 interface Props {
   kind: ReadingKind
@@ -75,7 +76,7 @@ function AiReadingInner({ kind, subject, getSummary, accessKey, offer, go, stora
     } catch (e) {
       if (ctl.signal.aborted) return
       access.refresh()
-      setError(e instanceof AiError ? e.message : 'Não foi possível gerar a análise agora.')
+      setError(e instanceof AiError ? e.message : t('Não foi possível gerar a análise agora.'))
       setStatus('error')
     }
   }
@@ -86,37 +87,37 @@ function AiReadingInner({ kind, subject, getSummary, accessKey, offer, go, stora
   return (
     <section className="glass ai-reading">
       <div className="section-title">
-        <h2><span className="ai-spark">✦</span> {READING_TITLES[kind]}</h2>
-        {status === 'done' && canRun && <button className="ghost" onClick={run}>↻ Gerar nova versão</button>}
+        <h2><span className="ai-spark">✦</span> {t(READING_TITLES[kind])}</h2>
+        {status === 'done' && canRun && <button className="ghost" onClick={run}>↻ {t('Gerar nova versão')}</button>}
       </div>
       {status === 'idle' && access.enabled && !canRun && (
         <Locked
-          title={access.loggedIn ? 'Libere esta análise completa' : 'Entre para receber sua análise completa'}
+          title={access.loggedIn ? t('Libere esta análise completa') : t('Entre para receber sua análise completa')}
           text={access.loggedIn
-            ? 'Você já usou as análises disponíveis na sua conta. Libere esta análise ou escolha um plano com análises todo mês.'
-            : 'Ao criar sua conta grátis, sua primeira análise completa é por nossa conta.'}
+            ? t('Você já usou as análises disponíveis na sua conta. Libere esta análise ou escolha um plano com análises todo mês.')
+            : t('Ao criar sua conta grátis, sua primeira análise completa é por nossa conta.')}
           offer={offer}
           go={go}
         />
       )}
       {status === 'idle' && canRun && (
         <div className="ai-intro">
-          <p>Uma análise escrita sob medida, que integra todos os fatores calculados num texto único e profundo.</p>
+          <p>{t('Uma análise escrita sob medida, que integra todos os fatores calculados num texto único e profundo.')}</p>
           {available ? (
-            <button className="cta" onClick={run}><span>✧ Gerar análise completa ✧</span></button>
+            <button className="cta" onClick={run}><span>✧ {t('Gerar análise completa')} ✧</span></button>
           ) : (
-            <button className="ghost" onClick={() => go('ajustes')}>⚙ Ativar a análise completa em Ajustes</button>
+            <button className="ghost" onClick={() => go('ajustes')}>⚙ {t('Ativar a análise completa em Ajustes')}</button>
           )}
           {access.enabled && !access.loading && <p className="muted small">{allowanceNote(allowance)}</p>}
         </div>
       )}
-      {status === 'loading' && !text && <div className="loader"><span /> Consultando as estrelas…</div>}
+      {status === 'loading' && !text && <div className="loader"><span /> {t('Consultando as estrelas…')}</div>}
       {text && <div className={`ai-text ${status === 'loading' ? 'typing' : ''}`}>{renderMarkdown(text)}</div>}
-      {status === 'loading' && text && <button className="link" onClick={() => { abort.current?.abort(); setStatus('done'); writeCache(key, text) }}>Parar</button>}
+      {status === 'loading' && text && <button className="link" onClick={() => { abort.current?.abort(); setStatus('done'); writeCache(key, text) }}>{t('Parar')}</button>}
       {status === 'error' && (
         <div className="ai-intro">
           <p className="error">{error}</p>
-          <button className="ghost" onClick={run}>Tentar novamente</button>
+          <button className="ghost" onClick={run}>{t('Tentar novamente')}</button>
         </div>
       )}
       {status === 'done' && text && <ReadingActions kind={kind} subject={subject} text={text} />}
@@ -128,8 +129,8 @@ function AiReadingInner({ kind, subject, getSummary, accessKey, offer, go, stora
 function ReadingActions({ kind, subject, text }: { kind: ReadingKind; subject: string; text: string }) {
   const [printing, setPrinting] = useState(false)
   const [msg, setMsg] = useState('')
-  const [today] = useState(() => new Date().toLocaleDateString('pt-BR'))
-  const title = READING_TITLES[kind]
+  const [today] = useState(() => new Date().toLocaleDateString(locale()))
+  const title = t(READING_TITLES[kind])
   const plain = `${title} — ${subject}\n\n${text.replace(/[*_#]/g, '')}\n\nCosmic Sky · ${window.location.host}${window.location.pathname}`
 
   useEffect(() => {
@@ -143,7 +144,7 @@ function ReadingActions({ kind, subject, text }: { kind: ReadingKind; subject: s
   }, [printing])
 
   const copy = async () => {
-    try { await navigator.clipboard.writeText(plain); setMsg('Texto copiado.') } catch { setMsg('Não foi possível copiar neste aparelho.') }
+    try { await navigator.clipboard.writeText(plain); setMsg(t('Texto copiado.')) } catch { setMsg(t('Não foi possível copiar neste aparelho.')) }
   }
   const share = async () => {
     try { await navigator.share({ title, text: plain }) } catch { /* cancelled */ }
@@ -153,18 +154,18 @@ function ReadingActions({ kind, subject, text }: { kind: ReadingKind; subject: s
   return (
     <>
       <div className="ai-actions">
-        <button className="ghost" onClick={() => setPrinting(true)}>⎙ PDF da análise</button>
-        <button className="ghost" onClick={copy}>⧉ Copiar texto</button>
-        {canShare && <button className="ghost" onClick={share}>↗ Compartilhar</button>}
+        <button className="ghost" onClick={() => setPrinting(true)}>⎙ {t('PDF da análise')}</button>
+        <button className="ghost" onClick={copy}>⧉ {t('Copiar texto')}</button>
+        {canShare && <button className="ghost" onClick={share}>↗ {t('Compartilhar')}</button>}
       </div>
-      <p className="muted small ai-saved">✓ Esta análise fica salva neste aparelho: é só voltar a esta página para ler de novo.{msg && ` ${msg}`}</p>
+      <p className="muted small ai-saved">✓ {t('Esta análise fica salva neste aparelho: é só voltar a esta página para ler de novo.')}{msg && ` ${msg}`}</p>
       {printing && createPortal(
         <div id="ai-print">
           <p className="pr-brand">✶ COSMIC SKY ✶</p>
           <h1>{title}</h1>
           <p className="ai-print-sub">{subject}</p>
           <div className="ai-print-text">{renderMarkdown(text)}</div>
-          <p className="ai-print-end">Gerada pelo Cosmic Sky · {today}</p>
+          <p className="ai-print-end">{t('Gerada pelo Cosmic Sky · {date}', { date: today })}</p>
         </div>,
         document.body,
       )}
@@ -173,9 +174,9 @@ function ReadingActions({ kind, subject, text }: { kind: ReadingKind; subject: s
 }
 
 function allowanceNote(a: Allowance): string {
-  if (a.source === 'grant') return `Incluída na sua compra${a.left ? ` · depois desta, você ainda pode gerar ${a.left} ${a.left === 1 ? 'nova versão' : 'novas versões'}` : ''}.`
-  if (a.source === 'plan') return `Do seu plano · depois desta, ${a.left === 1 ? 'resta 1 análise' : `restam ${a.left} análises`} neste mês.`
-  if (a.source === 'welcome') return 'Presente de boas-vindas: sua primeira análise completa é grátis.'
+  if (a.source === 'grant') return a.left ? t(a.left === 1 ? 'Incluída na sua compra · depois desta, você ainda pode gerar 1 nova versão.' : 'Incluída na sua compra · depois desta, você ainda pode gerar {n} novas versões.', { n: a.left }) : t('Incluída na sua compra.')
+  if (a.source === 'plan') return t(a.left === 1 ? 'Do seu plano · depois desta, resta 1 análise neste mês.' : 'Do seu plano · depois desta, restam {n} análises neste mês.', { n: a.left ?? 0 })
+  if (a.source === 'welcome') return t('Presente de boas-vindas: sua primeira análise completa é grátis.')
   return ''
 }
 
@@ -218,9 +219,9 @@ function inline(s: string): ReactNode[] {
   let m: RegExpExecArray | null
   while ((m = re.exec(s))) {
     if (m.index > last) parts.push(s.slice(last, m.index))
-    const t = m[0]
-    parts.push(t.startsWith('**') ? <strong key={m.index}>{t.slice(2, -2)}</strong> : <em key={m.index}>{t.slice(1, -1)}</em>)
-    last = m.index + t.length
+    const tok = m[0]
+    parts.push(tok.startsWith('**') ? <strong key={m.index}>{tok.slice(2, -2)}</strong> : <em key={m.index}>{tok.slice(1, -1)}</em>)
+    last = m.index + tok.length
   }
   if (last < s.length) parts.push(s.slice(last))
   return parts

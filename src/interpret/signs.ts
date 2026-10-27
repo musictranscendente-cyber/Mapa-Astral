@@ -1,3 +1,7 @@
+import { byLang } from '../i18n'
+import { SIGN_TEXT_EN } from './en/signs'
+import { SIGN_TEXT_ES } from './es/signs'
+
 export interface SignText {
   title: string
   keywords: string[]
@@ -11,7 +15,7 @@ export interface SignText {
   myth: string
 }
 
-export const SIGN_TEXT: SignText[] = [
+const SIGN_TEXT_PT: SignText[] = [
   {
     title: 'O Pioneiro',
     keywords: ['coragem', 'iniciativa', 'impulso', 'liderança', 'autenticidade'],
@@ -157,3 +161,5 @@ export const SIGN_TEXT: SignText[] = [
     myth: 'Afrodite e Eros, que se transformaram em peixes unidos por um cordão para escapar de Tifão.',
   },
 ]
+
+export const SIGN_TEXT: SignText[] = byLang({ pt: SIGN_TEXT_PT, en: SIGN_TEXT_EN, es: SIGN_TEXT_ES })

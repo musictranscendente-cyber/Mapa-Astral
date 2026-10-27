@@ -1,5 +1,9 @@
+import { byLang } from '../i18n'
+import { SR_ASC_EN, SR_SUN_HOUSE_EN, SR_MOON_HOUSE_EN } from './en/returns'
+import { SR_ASC_ES, SR_SUN_HOUSE_ES, SR_MOON_HOUSE_ES } from './es/returns'
+
 /** Tone of the year by Solar Return Ascendant sign. */
-export const SR_ASC: string[] = [
+const SR_ASC_PT: string[] = [
   'Ascendente da Revolução em Áries: um ano de recomeços, coragem e iniciativa. Você se sentirá impelido a agir, liderar e abrir caminhos novos. Cuide da impulsividade e da saúde física — energia alta pede movimento.',
   'Ascendente da Revolução em Touro: ano de construção e estabilidade. Bom para consolidar finanças, cuidar do corpo e investir no que é duradouro. O ritmo é mais lento, porém sólido.',
   'Ascendente da Revolução em Gêmeos: ano movimentado, de estudos, conversas, viagens curtas e muitas trocas. A mente fica acelerada — ótimo para aprender, escrever e conectar pessoas.',
@@ -15,7 +19,7 @@ export const SR_ASC: string[] = [
 ]
 
 /** Focus of the year by the Sun's house in the Solar Return. */
-export const SR_SUN_HOUSE: string[] = [
+const SR_SUN_HOUSE_PT: string[] = [
   'Sol na Casa 1: o ano é sobre você — identidade, imagem, saúde e novos começos pessoais. Um ciclo de afirmação.',
   'Sol na Casa 2: foco em dinheiro, recursos, autoestima e valores. Bom para aumentar renda e organizar finanças.',
   'Sol na Casa 3: ano de estudos, comunicação, irmãos, vizinhança e deslocamentos. Escrever e ensinar são favorecidos.',
@@ -31,7 +35,7 @@ export const SR_SUN_HOUSE: string[] = [
 ]
 
 /** Emotional climate by the Moon's house in the Solar Return. */
-export const SR_MOON_HOUSE: string[] = [
+const SR_MOON_HOUSE_PT: string[] = [
   'Lua na Casa 1: emoções à flor da pele e necessidade de se cuidar.',
   'Lua na Casa 2: oscilações financeiras; segurança emocional ligada ao material.',
   'Lua na Casa 3: mente inquieta, muitas conversas e pequenos deslocamentos.',
@@ -45,3 +49,7 @@ export const SR_MOON_HOUSE: string[] = [
   'Lua na Casa 11: apoio dos amigos e envolvimento com grupos.',
   'Lua na Casa 12: introspecção, sonhos intensos e necessidade de silêncio.',
 ]
+
+export const SR_ASC = byLang({ pt: SR_ASC_PT, en: SR_ASC_EN, es: SR_ASC_ES })
+export const SR_SUN_HOUSE = byLang({ pt: SR_SUN_HOUSE_PT, en: SR_SUN_HOUSE_EN, es: SR_SUN_HOUSE_ES })
+export const SR_MOON_HOUSE = byLang({ pt: SR_MOON_HOUSE_PT, en: SR_MOON_HOUSE_EN, es: SR_MOON_HOUSE_ES })

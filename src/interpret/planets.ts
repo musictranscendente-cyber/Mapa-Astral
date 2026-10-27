@@ -1,4 +1,7 @@
 import type { PointKey } from '../astro/constants'
+import { byLang, getLang } from '../i18n'
+import { HOUSE_TEXT_EN, PLANET_TEXT_EN, planetInHouseEn } from './en/planets'
+import { HOUSE_TEXT_ES, PLANET_TEXT_ES, planetInHouseEs } from './es/planets'
 
 export interface PlanetText {
   principle: string
@@ -9,7 +12,7 @@ export interface PlanetText {
   transit: string
 }
 
-export const PLANET_TEXT: Partial<Record<PointKey, PlanetText>> = {
+const PLANET_TEXT_PT: Partial<Record<PointKey, PlanetText>> = {
   sun: {
     principle: 'Identidade, vitalidade e propósito',
     keywords: ['eu', 'vontade', 'propósito', 'consciência'],
@@ -131,7 +134,7 @@ export interface HouseText {
   description: string
 }
 
-export const HOUSE_TEXT: HouseText[] = [
+const HOUSE_TEXT_PT: HouseText[] = [
   { name: 'Casa 1', theme: 'Identidade e aparência', keywords: ['eu', 'corpo', 'presença'], description: 'A Casa 1 é o início de tudo: sua personalidade, seu corpo, sua maneira espontânea de reagir à vida.' },
   { name: 'Casa 2', theme: 'Recursos e valores', keywords: ['dinheiro', 'talentos', 'autoestima'], description: 'A Casa 2 fala de recursos materiais, talentos, autoestima e daquilo que você valoriza.' },
   { name: 'Casa 3', theme: 'Comunicação e entorno', keywords: ['irmãos', 'estudos', 'trocas'], description: 'A Casa 3 rege a comunicação, os estudos, os irmãos, vizinhos e deslocamentos curtos.' },
@@ -146,10 +149,15 @@ export const HOUSE_TEXT: HouseText[] = [
   { name: 'Casa 12', theme: 'Espiritualidade e inconsciente', keywords: ['retiro', 'karma', 'transcendência'], description: 'A Casa 12 é o oceano interior: espiritualidade, inconsciente, retiro e o que está oculto.' },
 ]
 
+export const PLANET_TEXT: Partial<Record<PointKey, PlanetText>> = byLang({ pt: PLANET_TEXT_PT, en: PLANET_TEXT_EN, es: PLANET_TEXT_ES })
+export const HOUSE_TEXT: HouseText[] = byLang({ pt: HOUSE_TEXT_PT, en: HOUSE_TEXT_EN, es: HOUSE_TEXT_ES })
+
 /** Phrase for a planet occupying a house. */
 export function planetInHouse(planet: PointKey, house: number): string {
   const p = PLANET_TEXT[planet]
   const h = HOUSE_TEXT[house - 1]
   if (!p) return ''
+  if (getLang() === 'en') return planetInHouseEn(p, h)
+  if (getLang() === 'es') return planetInHouseEs(p, h)
   return `Na ${h.name.toLowerCase()} (${h.theme.toLowerCase()}), esta energia de ${p.principle.toLowerCase()} se manifesta sobretudo nos temas de ${h.keywords.join(', ')}. É nessa área da vida que você ${p.verb}.`
 }

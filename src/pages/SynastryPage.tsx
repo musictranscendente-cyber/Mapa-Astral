@@ -18,6 +18,7 @@ import { Locked } from '../components/Locked'
 import { compositeChart } from '../astro/relationship'
 import { relationshipReading } from '../interpret/relationship'
 import type { Chart } from '../astro/chart'
+import { t } from '../i18n'
 
 interface Props {
   profiles: Profile[]
@@ -54,8 +55,8 @@ export function SynastryPage({ profiles, activeId, houseSystem, onSave, go }: Pr
   if (profiles.length === 0) {
     return (
       <div className="empty glass">
-        <h2>Sinastria</h2>
-        <p>Crie primeiro o seu mapa; depois adicione a pessoa com quem deseja comparar.</p>
+        <h2>{t('Sinastria')}</h2>
+        <p>{t('Crie primeiro o seu mapa; depois adicione a pessoa com quem deseja comparar.')}</p>
         <button className="cta" onClick={() => go('inicio')}><span>✦ Criar meu mapa</span></button>
       </div>
     )
@@ -77,7 +78,7 @@ export function SynastryPage({ profiles, activeId, houseSystem, onSave, go }: Pr
   const key = pairKey(bkA, bkB)
   const full = access.full(key)
   const needsLogin = access.enabled && !access.loggedIn
-  const offer = A && B ? { product: 'sinastria' as const, scope: { birth: bkA, other: bkB }, label: `${nameA} e ${nameB}` } : undefined
+  const offer = A && B ? { product: 'sinastria' as const, scope: { birth: bkA, other: bkB }, label: t('{a} e {b}', { a: nameA, b: nameB }) } : undefined
   const flow = data?.aspects.filter((s) => s.type.nature !== 'tenso').slice(0, full ? 6 : 2) ?? []
   const tense = data?.aspects.filter((s) => s.type.nature === 'tenso').slice(0, full ? 6 : 1) ?? []
   const summary = data ? synSummary(data.score.total) : null
@@ -85,32 +86,32 @@ export function SynastryPage({ profiles, activeId, houseSystem, onSave, go }: Pr
   return (
     <div className="synastry">
       <header className="page-head">
-        <p className="eyebrow">Compatibilidade astrológica</p>
-        <h1 className="title-glow">Sinastria</h1>
-        <p className="muted">Como dois céus conversam: atração, afeto, comunicação e propósito.</p>
+        <p className="eyebrow">{t('Compatibilidade astrológica')}</p>
+        <h1 className="title-glow">{t('Sinastria')}</h1>
+        <p className="muted">{t('Como dois céus conversam: atração, afeto, comunicação e propósito.')}</p>
         <div className="pair-pick">
           <label className="select">
-            <span>Pessoa A</span>
+            <span>{t('Pessoa A')}</span>
             <select value={aId ?? ''} onChange={(e) => setAId(e.target.value)}>
               {profiles.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}
             </select>
           </label>
           <span className="pair-heart">♡</span>
           <label className="select">
-            <span>Pessoa B</span>
+            <span>{t('Pessoa B')}</span>
             <select value={bId ?? ''} onChange={(e) => setBId(e.target.value || null)}>
-              <option value="">— escolher —</option>
+              <option value="">— {t('escolher')} —</option>
               {profiles.filter((p) => p.id !== aId).map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}
             </select>
           </label>
-          <button className="ghost" onClick={() => setAdding((v) => !v)}>{adding ? '− Cancelar' : '+ Nova pessoa'}</button>
+          <button className="ghost" onClick={() => setAdding((v) => !v)}>{adding ? `− ${t('Cancelar')}` : `+ ${t('Nova pessoa')}`}</button>
         </div>
       </header>
 
       {(adding || (!B && profiles.length < 2)) && (
         <section className="edit-box">
-          <p className="muted">Dados de nascimento da outra pessoa:</p>
-          <BirthForm submitLabel="Adicionar e comparar" onSubmit={(d) => { const id = onSave(d); if (id) { setBId(id); setAdding(false) } }} />
+          <p className="muted">{t('Dados de nascimento da outra pessoa:')}</p>
+          <BirthForm submitLabel={t('Adicionar e comparar')} onSubmit={(d) => { const id = onSave(d); if (id) { setBId(id); setAdding(false) } }} />
         </section>
       )}
 
@@ -137,19 +138,19 @@ export function SynastryPage({ profiles, activeId, houseSystem, onSave, go }: Pr
           </section>
 
           <div className="segmented">
-            <button className={tab === 'sinastria' ? 'active' : ''} onClick={() => setTab('sinastria')}>♡ Sinastria</button>
-            <button className={tab === 'composto' ? 'active' : ''} onClick={() => setTab('composto')}>⚭ Mapa Composto</button>
+            <button className={tab === 'sinastria' ? 'active' : ''} onClick={() => setTab('sinastria')}>♡ {t('Sinastria')}</button>
+            <button className={tab === 'composto' ? 'active' : ''} onClick={() => setTab('composto')}>⚭ {t('Mapa Composto')}</button>
           </div>
 
           {tab !== 'sinastria' && (
             needsLogin ? (
-              <Locked title="O mapa do casal" text="Entre grátis para ver o mapa da relação." go={go} />
+              <Locked title={t('O mapa do casal')} text={t('Entre grátis para ver o mapa da relação.')} go={go} />
             ) : full ? (
               <CoupleChart a={data.ca} b={data.cb} houseSystem={houseSystem} />
             ) : (
               <Locked
-                title="Mapa Composto do casal"
-                text="O mapa da própria relação: propósito, clima emocional e como o casal é visto — incluso na Sinastria completa e nos planos."
+                title={t('Mapa Composto do casal')}
+                text={t('O mapa da própria relação: propósito, clima emocional e como o casal é visto — incluso na Sinastria completa e nos planos.')}
                 offer={offer}
                 go={go}
               />
@@ -158,8 +159,8 @@ export function SynastryPage({ profiles, activeId, houseSystem, onSave, go }: Pr
 
           {tab === 'sinastria' && needsLogin && (
             <Locked
-              title="Dimensões da relação e os principais contatos"
-              text="Entre grátis para ver a nota de cada área (amor, comunicação, convivência…) e os aspectos mais fortes entre vocês."
+              title={t('Dimensões da relação e os principais contatos')}
+              text={t('Entre grátis para ver a nota de cada área (amor, comunicação, convivência…) e os aspectos mais fortes entre vocês.')}
               go={go}
             />
           )}
@@ -168,10 +169,10 @@ export function SynastryPage({ profiles, activeId, houseSystem, onSave, go }: Pr
           <section className="wheel-layout">
             <div className="wheel-box">
               <ChartWheel chart={data.ca} outer={data.cb} outerHits={hits} showAspects={false} />
-              <p className="hint">Interno: {A.name} · anel externo (turquesa): {B.name}. Linhas: contatos entre os mapas.</p>
+              <p className="hint">{t('Interno: {a} · anel externo (turquesa): {b}. Linhas: contatos entre os mapas.', { a: A.name, b: B.name })}</p>
             </div>
             <aside className="glass detail">
-              <p className="eyebrow">Dimensões da relação</p>
+              <p className="eyebrow">{t('Dimensões da relação')}</p>
               <div className="meter-list areas">
                 {SYN_AREAS.map((a) => {
                   const v = data.score.areas[a.key]
@@ -184,13 +185,13 @@ export function SynastryPage({ profiles, activeId, houseSystem, onSave, go }: Pr
                   )
                 })}
               </div>
-              <p className="muted small">{data.aspects.length} contatos entre os mapas · harmonia {Math.round(data.score.harmony)} · tensão {Math.round(data.score.tension)}</p>
+              <p className="muted small">{t('{n} contatos entre os mapas · harmonia {h} · tensão {x}', { n: data.aspects.length, h: Math.round(data.score.harmony), x: Math.round(data.score.tension) })}</p>
             </aside>
           </section>
 
           <section className="syn-columns">
             <div>
-              <h2>✦ O que flui</h2>
+              <h2>✦ {t('O que flui')}</h2>
               {flow.map((s, i) => (
                 <article key={i} className="glass transit-card" style={{ ['--accent' as string]: s.type.color }}>
                   <div className="tc-glyphs">
@@ -199,13 +200,13 @@ export function SynastryPage({ profiles, activeId, houseSystem, onSave, go }: Pr
                     <span style={{ color: POINTS[s.b].color }}>{POINTS[s.b].glyph}</span>
                   </div>
                   <p>{synAspectText(s, nameA, nameB)}</p>
-                  <p className="muted small">{s.type.name} · orbe {s.orb.toFixed(1)}°</p>
+                  <p className="muted small">{s.type.name} · {t('orbe')} {s.orb.toFixed(1)}°</p>
                 </article>
               ))}
             </div>
             <div>
-              <h2>⚡ O que desafia</h2>
-              {tense.length === 0 && <p className="glass pad">Poucos atritos relevantes entre os mapas.</p>}
+              <h2>⚡ {t('O que desafia')}</h2>
+              {tense.length === 0 && <p className="glass pad">{t('Poucos atritos relevantes entre os mapas.')}</p>}
               {tense.map((s, i) => (
                 <article key={i} className="glass transit-card" style={{ ['--accent' as string]: s.type.color }}>
                   <div className="tc-glyphs">
@@ -214,7 +215,7 @@ export function SynastryPage({ profiles, activeId, houseSystem, onSave, go }: Pr
                     <span style={{ color: POINTS[s.b].color }}>{POINTS[s.b].glyph}</span>
                   </div>
                   <p>{synAspectText(s, nameA, nameB)}</p>
-                  <p className="muted small">{s.type.name} · orbe {s.orb.toFixed(1)}°</p>
+                  <p className="muted small">{s.type.name} · {t('orbe')} {s.orb.toFixed(1)}°</p>
                 </article>
               ))}
             </div>
@@ -222,8 +223,8 @@ export function SynastryPage({ profiles, activeId, houseSystem, onSave, go }: Pr
 
           {!full && (
             <Locked
-              title="Sinastria completa"
-              text="Todos os contatos entre os mapas, a sobreposição de casas e a análise completa do casal."
+              title={t('Sinastria completa')}
+              text={t('Todos os contatos entre os mapas, a sobreposição de casas e a análise completa do casal.')}
               offer={offer}
               go={go}
             />
@@ -231,8 +232,8 @@ export function SynastryPage({ profiles, activeId, houseSystem, onSave, go }: Pr
 
           {full && (data.ca.hasHouses || data.cb.hasHouses) && (
             <section className="glass pad">
-              <h2>Sobreposição de casas</h2>
-              <p className="muted">Em que áreas da vida um ativa o outro.</p>
+              <h2>{t('Sobreposição de casas')}</h2>
+              <p className="muted">{t('Em que áreas da vida um ativa o outro.')}</p>
               <div className="overlay-cols">
                 {data.ca.hasHouses && (
                   <ul className="retro-list">
@@ -254,7 +255,7 @@ export function SynastryPage({ profiles, activeId, houseSystem, onSave, go }: Pr
 
           <AiReading
             kind="sinastria"
-            subject={`${nameA} e ${nameB}`}
+            subject={t('{a} e {b}', { a: nameA, b: nameB })}
             cacheKey={`${A.id}|${B.id}|${houseSystem}`}
             accessKey={key}
             offer={offer}
@@ -270,16 +271,16 @@ export function SynastryPage({ profiles, activeId, houseSystem, onSave, go }: Pr
 
 function CoupleChart({ a, b, houseSystem }: { a: Chart; b: Chart; houseSystem: HouseSystem }) {
   const chart = useMemo(() => compositeChart(a, b, houseSystem), [a, b, houseSystem])
-  const reading = relationshipReading(chart, 'composto')
+  const reading = relationshipReading(chart)
   return (
     <>
       <section className="wheel-layout">
         <div className="wheel-box">
           <ChartWheel chart={chart} />
-          <p className="hint">Mapa Composto: cada planeta no ponto médio entre os dois mapas — o retrato simbólico da relação.</p>
+          <p className="hint">{t('Mapa Composto: cada planeta no ponto médio entre os dois mapas — o retrato simbólico da relação.')}</p>
         </div>
         <aside className="glass detail">
-          <p className="eyebrow">A relação como um ser</p>
+          <p className="eyebrow">{t('A relação como um ser')}</p>
           {reading.map((r) => (
             <div key={r.title} className="couple-item">
               <h4>{r.title}</h4>
@@ -289,7 +290,7 @@ function CoupleChart({ a, b, houseSystem }: { a: Chart; b: Chart; houseSystem: H
         </aside>
       </section>
       <section className="glass pad">
-        <h2>Aspectos principais do mapa do casal</h2>
+        <h2>{t('Aspectos principais do mapa do casal')}</h2>
         <ul className="aspect-list">
           {chart.aspects.filter((x) => x.type.major && x.a !== 'lilith' && x.b !== 'lilith').slice(0, 12).map((x, i) => (
             <li key={i}><span style={{ color: x.type.color }}>{x.type.glyph}</span>{POINTS[x.a].name} {x.type.name.toLowerCase()} {POINTS[x.b].name}<small>{x.orb.toFixed(1)}°</small></li>

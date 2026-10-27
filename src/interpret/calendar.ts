@@ -1,8 +1,10 @@
 import { POINTS, SIGNS } from '../astro/constants'
 import type { CalEvent, CalEventKind } from '../astro/calendar'
+import { locale, t } from '../i18n'
+import { eclipseLabel } from './lunations'
 
 const QUARTERS = ['Lua Nova', 'Quarto Crescente', 'Lua Cheia', 'Quarto Minguante']
-const time = (d: Date) => d.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })
+const time = (d: Date) => d.toLocaleTimeString(locale(), { hour: '2-digit', minute: '2-digit' })
 
 export const KIND_INFO: Record<CalEventKind, { label: string; icon: string }> = {
   fase: { label: 'Fases da Lua', icon: '◐' },
@@ -16,23 +18,23 @@ export const KIND_INFO: Record<CalEventKind, { label: string; icon: string }> = 
 export function eventTitle(e: CalEvent): string {
   const s = e.sign !== undefined ? SIGNS[e.sign].name : ''
   switch (e.kind) {
-    case 'fase': return `${QUARTERS[e.quarter ?? 0]} em ${s}`
-    case 'eclipse': return `Eclipse ${e.lunation === 'nova' ? 'solar' : 'lunar'} ${e.eclipse} em ${s}`
-    case 'ingresso': return `${POINTS[e.planet!].name} entra em ${s}`
-    case 'lua-signo': return `Lua entra em ${s}`
-    case 'estacao': return e.retro ? `${POINTS[e.planet!].name} fica retrógrado em ${s}` : `${POINTS[e.planet!].name} volta a andar direto em ${s}`
-    case 'fora-de-curso': return 'Lua fora de curso'
+    case 'fase': return t('{phase} em {sign}', { phase: t(QUARTERS[e.quarter ?? 0]), sign: s })
+    case 'eclipse': return t('{phase} em {sign}', { phase: eclipseLabel(e.lunation === 'nova', e.eclipse!), sign: s })
+    case 'ingresso': return t('{planet} entra em {sign}', { planet: POINTS[e.planet!].name, sign: s })
+    case 'lua-signo': return t('{planet} entra em {sign}', { planet: POINTS.moon.name, sign: s })
+    case 'estacao': return t(e.retro ? '{planet} fica retrógrado em {sign}' : '{planet} volta a andar direto em {sign}', { planet: POINTS[e.planet!].name, sign: s })
+    case 'fora-de-curso': return t('Lua fora de curso')
   }
 }
 
 export function eventHint(e: CalEvent): string {
   switch (e.kind) {
-    case 'fase': return ['Plante intenções e comece algo novo.', 'Aja e supere obstáculos.', 'Colha, celebre e veja com clareza.', 'Solte, revise e reorganize.'][e.quarter ?? 0]
-    case 'eclipse': return 'Portal de mudanças: evite decisões precipitadas e observe o que se revela.'
-    case 'ingresso': return 'Muda o clima coletivo nos temas desse planeta.'
-    case 'lua-signo': return 'O clima emocional do dia muda de tom.'
-    case 'estacao': return e.retro ? 'Tempo de revisar os temas desse planeta.' : 'Os temas desse planeta voltam a fluir.'
-    case 'fora-de-curso': return 'Evite começar coisas importantes, assinar ou comprar: bom para descansar e concluir.'
+    case 'fase': return t(['Plante intenções e comece algo novo.', 'Aja e supere obstáculos.', 'Colha, celebre e veja com clareza.', 'Solte, revise e reorganize.'][e.quarter ?? 0])
+    case 'eclipse': return t('Portal de mudanças: evite decisões precipitadas e observe o que se revela.')
+    case 'ingresso': return t('Muda o clima coletivo nos temas desse planeta.')
+    case 'lua-signo': return t('O clima emocional do dia muda de tom.')
+    case 'estacao': return t(e.retro ? 'Tempo de revisar os temas desse planeta.' : 'Os temas desse planeta voltam a fluir.')
+    case 'fora-de-curso': return t('Evite começar coisas importantes, assinar ou comprar: bom para descansar e concluir.')
   }
 }
 

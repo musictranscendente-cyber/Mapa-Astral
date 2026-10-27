@@ -7,6 +7,7 @@ import {
 import { natalAspectText } from './aspects'
 import { HOUSE_TEXT, PLANET_TEXT, planetInHouse } from './planets'
 import { SIGN_TEXT } from './signs'
+import { t } from '../i18n'
 
 export interface ReportSection {
   id: string
@@ -29,8 +30,10 @@ export function planetInSign(key: PointKey, sign: number): string {
   const p = PLANET_TEXT[key]
   const s = SIGN_TEXT[sign]
   if (!p) return ''
-  return `${POINTS[key].name} em ${SIGNS[sign].name}: você ${p.verb} ${s.style}. Aqui vibram as qualidades de ${s.keywords.slice(0, 3).join(', ')}.`
+  return t('{planet} em {sign}: você {verb} {style}. Aqui vibram as qualidades de {kw}.', { planet: POINTS[key].name, sign: SIGNS[sign].name, verb: p.verb, style: s.style, kw: s.keywords.slice(0, 3).join(', ') })
 }
+
+const inSign = (k: PointKey, sign: number) => t('{planet} em {sign}', { planet: POINTS[k].name, sign: SIGNS[sign].name })
 
 function dominant<T extends string>(rec: Record<T, number>): { top: T; low: T; total: number } {
   const entries = Object.entries(rec) as [T, number][]
@@ -61,7 +64,7 @@ const MODALITY_DOMINANT: Record<Modality, string> = {
 export function buildNatalReport(chart: Chart): ReportSection[] {
   const P = chart.points
   const sections: ReportSection[] = []
-  const name = chart.birth?.name?.split(' ')[0] || 'Você'
+  const name = chart.birth?.name?.split(' ')[0] || t('Você')
 
   // Big three
   const sun = P.sun, moon = P.moon
@@ -72,13 +75,13 @@ export function buildNatalReport(chart: Chart): ReportSection[] {
   if (chart.hasHouses) pillars.push(SIGN_TEXT[P.asc.sign].asc)
   sections.push({
     id: 'pilares',
-    title: 'Os Três Pilares',
+    title: t('Os Três Pilares'),
     subtitle: chart.hasHouses
-      ? `Sol em ${SIGNS[sun.sign].name} · Lua em ${SIGNS[moon.sign].name} · Ascendente em ${SIGNS[P.asc.sign].name}`
-      : `Sol em ${SIGNS[sun.sign].name} · Lua em ${SIGNS[moon.sign].name}`,
+      ? [inSign('sun', sun.sign), inSign('moon', moon.sign), inSign('asc', P.asc.sign)].join(' · ')
+      : [inSign('sun', sun.sign), inSign('moon', moon.sign)].join(' · '),
     glyph: '✶',
     paragraphs: [
-      `${name}, o Sol, a Lua e o Ascendente formam a trindade central do seu mapa: quem você é, o que você sente e como você se apresenta.`,
+      t('{name}, o Sol, a Lua e o Ascendente formam a trindade central do seu mapa: quem você é, o que você sente e como você se apresenta.', { name }),
       ...pillars,
     ],
   })
@@ -89,13 +92,13 @@ export function buildNatalReport(chart: Chart): ReportSection[] {
     const r = P[rulerKey]
     sections.push({
       id: 'regente',
-      title: 'Regente do Mapa',
-      subtitle: `${POINTS[rulerKey].name} em ${SIGNS[r.sign].name}, casa ${r.house}`,
+      title: t('Regente do Mapa'),
+      subtitle: `${inSign(rulerKey, r.sign)}, ${t('casa {n}', { n: r.house })}`,
       glyph: POINTS[rulerKey].glyph,
       color: POINTS[rulerKey].color,
       paragraphs: [
-        `Seu Ascendente em ${SIGNS[P.asc.sign].name} é regido por ${POINTS[rulerKey].name}, que se torna o "capitão" do seu mapa. ${PLANET_TEXT[rulerKey]?.description ?? ''}`,
-        `Com o regente na ${HOUSE_TEXT[r.house - 1].name}, a área de ${HOUSE_TEXT[r.house - 1].theme.toLowerCase()} se torna central na sua trajetória. ${HOUSE_TEXT[r.house - 1].description}`,
+        `${t('Seu Ascendente em {sign} é regido por {planet}, que se torna o "capitão" do seu mapa.', { sign: SIGNS[P.asc.sign].name, planet: POINTS[rulerKey].name })} ${PLANET_TEXT[rulerKey]?.description ?? ''}`,
+        `${t('Com o regente na {house}, a área de {theme} se torna central na sua trajetória.', { house: HOUSE_TEXT[r.house - 1].name, theme: HOUSE_TEXT[r.house - 1].theme.toLowerCase() })} ${HOUSE_TEXT[r.house - 1].description}`,
       ],
     })
   }
@@ -106,14 +109,14 @@ export function buildNatalReport(chart: Chart): ReportSection[] {
   const pct = (v: number, total: number) => Math.round((v / total) * 100)
   sections.push({
     id: 'elementos',
-    title: 'Elementos & Ritmos',
-    subtitle: `Dominante: ${ELEMENT_INFO[el.top].name} · ${MODALITY_INFO[mo.top].name}`,
+    title: t('Elementos & Ritmos'),
+    subtitle: `${t('Dominante:')} ${ELEMENT_INFO[el.top].name} · ${MODALITY_INFO[mo.top].name}`,
     glyph: '❂',
     paragraphs: [
-      ELEMENT_DOMINANT[el.top],
-      ELEMENT_LACK[el.low],
-      MODALITY_DOMINANT[mo.top],
-      `Distribuição: ${(Object.keys(chart.balance.elements) as Element[]).map((e) => `${ELEMENT_INFO[e].name} ${pct(chart.balance.elements[e], el.total)}%`).join(' · ')}.`,
+      t(ELEMENT_DOMINANT[el.top]),
+      t(ELEMENT_LACK[el.low]),
+      t(MODALITY_DOMINANT[mo.top]),
+      `${t('Distribuição:')} ${(Object.keys(chart.balance.elements) as Element[]).map((e) => `${ELEMENT_INFO[e].name} ${pct(chart.balance.elements[e], el.total)}%`).join(' · ')}.`,
     ],
   })
 
@@ -122,13 +125,13 @@ export function buildNatalReport(chart: Chart): ReportSection[] {
   for (const k of planets) {
     const p = P[k]
     const paras = [PLANET_TEXT[k]!.description, planetInSign(k, p.sign)]
-    if (p.dignity) paras.push(DIGNITY_NOTE[p.dignity])
-    if (p.retro) paras.push(`${POINTS[k].name} estava retrógrado no seu nascimento: a energia se volta para dentro, pedindo revisão, reflexão e um modo muito pessoal de expressão.`)
+    if (p.dignity) paras.push(t(DIGNITY_NOTE[p.dignity]))
+    if (p.retro) paras.push(t('{planet} estava retrógrado no seu nascimento: a energia se volta para dentro, pedindo revisão, reflexão e um modo muito pessoal de expressão.', { planet: POINTS[k].name }))
     if (chart.hasHouses) paras.push(planetInHouse(k, p.house))
     sections.push({
       id: `planeta-${k}`,
-      title: `${POINTS[k].name} em ${SIGNS[p.sign].name}`,
-      subtitle: `${formatDegree(p.lon)}${chart.hasHouses ? ` · Casa ${p.house}` : ''}${p.retro ? ' · Retrógrado' : ''}${p.dignity ? ` · ${p.dignity}` : ''}`,
+      title: inSign(k, p.sign),
+      subtitle: `${formatDegree(p.lon)}${chart.hasHouses ? ` · ${t('Casa {n}', { n: p.house })}` : ''}${p.retro ? ` · ${t('Retrógrado')}` : ''}${p.dignity ? ` · ${t(p.dignity)}` : ''}`,
       glyph: POINTS[k].glyph,
       color: POINTS[k].color,
       paragraphs: paras,
@@ -140,13 +143,13 @@ export function buildNatalReport(chart: Chart): ReportSection[] {
   const node = P.node
   sections.push({
     id: 'nodos',
-    title: 'Eixo do Destino',
-    subtitle: `Nodo Norte em ${SIGNS[node.sign].name} · Nodo Sul em ${SIGNS[P.southNode.sign].name}`,
+    title: t('Eixo do Destino'),
+    subtitle: `${inSign('node', node.sign)} · ${inSign('southNode', P.southNode.sign)}`,
     glyph: POINTS.node.glyph,
     color: POINTS.node.color,
     paragraphs: [
-      `Os Nodos Lunares desenham o eixo evolutivo da alma. O Nodo Sul em ${SIGNS[P.southNode.sign].name} mostra talentos já conhecidos — ${SIGN_TEXT[P.southNode.sign].light.toLowerCase()} — mas também a zona de conforto que pode aprisionar.`,
-      `O Nodo Norte em ${SIGNS[node.sign].name} aponta para onde crescer: desenvolver ${SIGN_TEXT[node.sign].keywords.slice(0, 3).join(', ')}. ${chart.hasHouses ? `Na ${HOUSE_TEXT[node.house - 1].name}, esse chamado se realiza através de ${HOUSE_TEXT[node.house - 1].keywords.join(', ')}.` : ''}`,
+      t('Os Nodos Lunares desenham o eixo evolutivo da alma. O Nodo Sul em {sign} mostra talentos já conhecidos — {light} — mas também a zona de conforto que pode aprisionar.', { sign: SIGNS[P.southNode.sign].name, light: SIGN_TEXT[P.southNode.sign].light.toLowerCase() }),
+      `${t('O Nodo Norte em {sign} aponta para onde crescer: desenvolver {kw}.', { sign: SIGNS[node.sign].name, kw: SIGN_TEXT[node.sign].keywords.slice(0, 3).join(', ') })} ${chart.hasHouses ? t('Na {house}, esse chamado se realiza através de {kw}.', { house: HOUSE_TEXT[node.house - 1].name, kw: HOUSE_TEXT[node.house - 1].keywords.join(', ') }) : ''}`,
     ],
   })
 
@@ -154,15 +157,15 @@ export function buildNatalReport(chart: Chart): ReportSection[] {
   const ch = P.chiron
   sections.push({
     id: 'quiron',
-    title: `Quíron em ${SIGNS[ch.sign].name}`,
-    subtitle: `O curador ferido · ${formatDegree(ch.lon)}${chart.hasHouses ? ` · Casa ${ch.house}` : ''}${ch.retro ? ' · Retrógrado' : ''}`,
+    title: inSign('chiron', ch.sign),
+    subtitle: `${t('O curador ferido')} · ${formatDegree(ch.lon)}${chart.hasHouses ? ` · ${t('Casa {n}', { n: ch.house })}` : ''}${ch.retro ? ` · ${t('Retrógrado')}` : ''}`,
     glyph: POINTS.chiron.glyph,
     color: POINTS.chiron.color,
     paragraphs: [
       PLANET_TEXT.chiron!.description,
-      `Em ${SIGNS[ch.sign].name}, Quíron fala de ${CHIRON_SIGN[ch.sign].wound}. Não é um defeito: é um ponto sensível que pede consciência e gentileza.`,
-      `O dom que nasce dessa ferida: ${CHIRON_SIGN[ch.sign].gift}.`,
-      chart.hasHouses ? `Na ${HOUSE_TEXT[ch.house - 1].name} (${HOUSE_TEXT[ch.house - 1].theme.toLowerCase()}), é nos temas de ${HOUSE_TEXT[ch.house - 1].keywords.join(', ')} que a ferida aparece — e onde a cura acontece.` : '',
+      t('Em {sign}, Quíron fala de {wound}. Não é um defeito: é um ponto sensível que pede consciência e gentileza.', { sign: SIGNS[ch.sign].name, wound: CHIRON_SIGN[ch.sign].wound }),
+      t('O dom que nasce dessa ferida: {gift}.', { gift: CHIRON_SIGN[ch.sign].gift }),
+      chart.hasHouses ? t('Na {house} ({theme}), é nos temas de {kw} que a ferida aparece — e onde a cura acontece.', { house: HOUSE_TEXT[ch.house - 1].name, theme: HOUSE_TEXT[ch.house - 1].theme.toLowerCase(), kw: HOUSE_TEXT[ch.house - 1].keywords.join(', ') }) : '',
     ],
     tags: PLANET_TEXT.chiron!.keywords,
   })
@@ -170,13 +173,13 @@ export function buildNatalReport(chart: Chart): ReportSection[] {
   // Lilith
   sections.push({
     id: 'lilith',
-    title: `Lilith em ${SIGNS[P.lilith.sign].name}`,
-    subtitle: formatDegree(P.lilith.lon) + (chart.hasHouses ? ` · Casa ${P.lilith.house}` : ''),
+    title: inSign('lilith', P.lilith.sign),
+    subtitle: formatDegree(P.lilith.lon) + (chart.hasHouses ? ` · ${t('Casa {n}', { n: P.lilith.house })}` : ''),
     glyph: POINTS.lilith.glyph,
     color: POINTS.lilith.color,
     paragraphs: [
       PLANET_TEXT.lilith!.description,
-      `Em ${SIGNS[P.lilith.sign].name}, sua força selvagem se expressa ${SIGN_TEXT[P.lilith.sign].style}. A sombra a integrar: ${SIGN_TEXT[P.lilith.sign].shadow.toLowerCase()}`,
+      t('Em {sign}, sua força selvagem se expressa {style}. A sombra a integrar: {shadow}', { sign: SIGNS[P.lilith.sign].name, style: SIGN_TEXT[P.lilith.sign].style, shadow: SIGN_TEXT[P.lilith.sign].shadow.toLowerCase() }),
     ],
   })
 
@@ -184,8 +187,8 @@ export function buildNatalReport(chart: Chart): ReportSection[] {
   const major = chart.aspects.filter((a) => a.type.major).slice(0, 14)
   sections.push({
     id: 'aspectos',
-    title: 'Diálogos Planetários',
-    subtitle: `${chart.aspects.length} aspectos — os mais exatos`,
+    title: t('Diálogos Planetários'),
+    subtitle: t('{n} aspectos — os mais exatos', { n: chart.aspects.length }),
     glyph: '✧',
     paragraphs: major.map((a) => `${a.type.name} (${a.orb.toFixed(1)}°) — ${natalAspectText(a.a, a.b, a.type.key)}`),
   })
@@ -208,9 +211,9 @@ const MOON_SIGN_DAY: string[] = [
   'Lua em Peixes: dia de intuição, arte e espiritualidade. Medite, sonhe, descanse.',
 ]
 
-export const moonSignOfDayText = (sign: number) => MOON_SIGN_DAY[sign]
+export const moonSignOfDayText = (sign: number) => t(MOON_SIGN_DAY[sign])
 
-export const RETRO_TEXT: Partial<Record<PlanetKey, string>> = {
+const RETRO_TEXT_PT: Partial<Record<PlanetKey, string>> = {
   mercury: 'Mercúrio retrógrado: revise contratos, comunicações e planos. Ótimo para retomar o que ficou pendente.',
   venus: 'Vênus retrógrada: reavaliação de afetos, valores e finanças. Amores do passado podem reaparecer.',
   mars: 'Marte retrógrado: energia voltada para dentro. Reveja estratégias antes de agir.',
@@ -221,3 +224,8 @@ export const RETRO_TEXT: Partial<Record<PlanetKey, string>> = {
   pluto: 'Plutão retrógrado: transformação silenciosa e profunda.',
   chiron: 'Quíron retrógrado: tempo de olhar para feridas antigas com mais gentileza.',
 }
+
+/** Retrograde notes in the current language. */
+export const RETRO_TEXT: Partial<Record<PlanetKey, string>> = new Proxy(RETRO_TEXT_PT, {
+  get: (target, k) => (typeof k === 'string' && target[k as PlanetKey] ? t(target[k as PlanetKey]!) : undefined),
+})

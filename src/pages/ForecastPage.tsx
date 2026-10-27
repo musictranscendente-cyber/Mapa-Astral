@@ -16,6 +16,7 @@ import { useAccess } from '../billing/context'
 import { birthKey } from '../billing/keys'
 import { forecastKey } from '../billing/rules'
 import { Locked } from '../components/Locked'
+import { locale, t } from '../i18n'
 
 const RANGES = [
   { days: 7, label: '7 dias' },
@@ -29,7 +30,7 @@ const SLOW: PlanetKey[] = ['jupiter', 'saturn', 'uranus', 'neptune', 'pluto', 'c
 const FAST: PlanetKey[] = ['sun', 'mercury', 'venus', 'mars']
 
 const startOfDay = (d: Date) => new Date(d.getFullYear(), d.getMonth(), d.getDate(), 12, 0, 0)
-const fmt = (d: Date, o: Intl.DateTimeFormatOptions = { day: '2-digit', month: 'short' }) => d.toLocaleDateString('pt-BR', o)
+const fmt = (d: Date, o: Intl.DateTimeFormatOptions = { day: '2-digit', month: 'short' }) => d.toLocaleDateString(locale(), o)
 
 export function ForecastPage({ natal, go }: { natal: Chart | null; go: (r: Route) => void }) {
   const [range, setRange] = useState(30)
@@ -66,9 +67,9 @@ export function ForecastPage({ natal, go }: { natal: Chart | null; go: (r: Route
   if (!natal) {
     return (
       <div className="empty glass">
-        <h2>Previsões pessoais</h2>
-        <p>Para correlacionar o céu com a sua vida, crie primeiro o seu mapa natal.</p>
-        <button className="cta" onClick={() => go('inicio')}><span>✦ Criar mapa</span></button>
+        <h2>{t('Previsões pessoais')}</h2>
+        <p>{t('Para correlacionar o céu com a sua vida, crie primeiro o seu mapa natal.')}</p>
+        <button className="cta" onClick={() => go('inicio')}><span>✦ {t('Criar mapa')}</span></button>
       </div>
     )
   }
@@ -85,9 +86,9 @@ export function ForecastPage({ natal, go }: { natal: Chart | null; go: (r: Route
   return (
     <div className="forecast">
       <header className="page-head">
-        <p className="eyebrow">Projeção astrológica</p>
-        <h1 className="title-glow">Os próximos {RANGES.find((r) => r.days === range)?.label}</h1>
-        <p className="muted">Trânsitos do céu sobre o mapa de {natal.birth?.name} · a partir de {fmt(start, { day: 'numeric', month: 'long' })}</p>
+        <p className="eyebrow">{t('Projeção astrológica')}</p>
+        <h1 className="title-glow">{t('Os próximos {range}', { range: t(RANGES.find((r) => r.days === range)?.label ?? '') })}</h1>
+        <p className="muted">{t('Trânsitos do céu sobre o mapa de {name} · a partir de {date}', { name: natal.birth?.name ?? '', date: fmt(start, { day: 'numeric', month: 'long' }) })}</p>
         <div className="segmented">
           {RANGES.map((r) => (
             <button
@@ -98,7 +99,7 @@ export function ForecastPage({ natal, go }: { natal: Chart | null; go: (r: Route
                 setAskRange(null); setRange(r.days); setDay(0)
               }}
             >
-              {r.days > maxRange && '🔒 '}{r.label}
+              {r.days > maxRange && '🔒 '}{t(r.label)}
             </button>
           ))}
         </div>
@@ -106,28 +107,28 @@ export function ForecastPage({ natal, go }: { natal: Chart | null; go: (r: Route
 
       {askRange && (
         <Locked
-          title={`Previsão de ${RANGES.find((r) => r.days === askRange)?.label}`}
-          text="Veja os trânsitos de até 1 ano à frente, os meses-chave e a análise completa do período."
+          title={t('Previsão de {range}', { range: t(RANGES.find((r) => r.days === askRange)?.label ?? '') })}
+          text={t('Veja os trânsitos de até 1 ano à frente, os meses-chave e a análise completa do período.')}
           offer={offer}
           go={go}
         />
       )}
 
-      {!ready ? <div className="loader"><span /> Calculando trânsitos…</div> : (
+      {!ready ? <div className="loader"><span /> {t('Calculando trânsitos…')}</div> : (
         <>
           <section className="glass pad">
             <div className="section-title">
-              <h2>Ondas de energia</h2>
-              <span className="muted small">Toque no gráfico para escolher um dia</span>
+              <h2>{t('Ondas de energia')}</h2>
+              <span className="muted small">{t('Toque no gráfico para escolher um dia')}</span>
             </div>
             <FlowChart days={days} selected={day} onSelect={setDay} />
             <div className="day-highlights">
               <div>
-                <p className="eyebrow">✦ Dias de maior fluxo</p>
+                <p className="eyebrow">✦ {t('Dias de maior fluxo')}</p>
                 {best.map((d) => <button key={+d.date} className="chip good" onClick={() => setDay(days.indexOf(d))}>{fmt(d.date, { weekday: 'short', day: '2-digit', month: 'short' })} · {d.flow > 0 ? '+' : ''}{d.flow}</button>)}
               </div>
               <div>
-                <p className="eyebrow">⚠ Dias de maior desafio</p>
+                <p className="eyebrow">⚠ {t('Dias de maior desafio')}</p>
                 {hard.map((d) => <button key={+d.date} className="chip hard" onClick={() => setDay(days.indexOf(d))}>{fmt(d.date, { weekday: 'short', day: '2-digit', month: 'short' })} · {d.flow}</button>)}
               </div>
             </div>
@@ -143,10 +144,10 @@ export function ForecastPage({ natal, go }: { natal: Chart | null; go: (r: Route
               </div>
             </div>
             <aside className="glass detail">
-              <p className="eyebrow">Dia selecionado</p>
+              <p className="eyebrow">{t('Dia selecionado')}</p>
               <h3>{fmt(selectedDate, { weekday: 'long', day: 'numeric', month: 'long' })}</h3>
               <p className="muted">
-                Lua em {SIGNS[Math.floor(bodyLongitude('moon', toTime(selectedDate)) / 30)].name} · Fluxo {days[day]?.flow ?? 0} · Intensidade {days[day]?.intensity ?? 0}
+                {t('{planet} em {sign}', { planet: POINTS.moon.name, sign: SIGNS[Math.floor(bodyLongitude('moon', toTime(selectedDate)) / 30)].name })} · {t('Fluxo')} {days[day]?.flow ?? 0} · {t('Intensidade')} {days[day]?.intensity ?? 0}
               </p>
               {days[day] && <AreaMeters areas={days[day].areas} />}
               <ul className="mini-transits">
@@ -165,8 +166,8 @@ export function ForecastPage({ natal, go }: { natal: Chart | null; go: (r: Route
 
           {needsLogin && (
             <Locked
-              title="Linha do tempo e trânsitos da semana"
-              text="Entre grátis para ver os trânsitos dos próximos 7 dias com a interpretação de cada um."
+              title={t('Linha do tempo e trânsitos da semana')}
+              text={t('Entre grátis para ver os trânsitos dos próximos 7 dias com a interpretação de cada um.')}
               go={go}
             />
           )}
@@ -174,15 +175,15 @@ export function ForecastPage({ natal, go }: { natal: Chart | null; go: (r: Route
           {!needsLogin && <>
           <section className="glass pad">
             <div className="section-title">
-              <h2>Linha do tempo dos trânsitos</h2>
+              <h2>{t('Linha do tempo dos trânsitos')}</h2>
               <div className="filters">
                 <div className="segmented small">
                   {(['todos', 'lentos', 'rapidos'] as Speed[]).map((s) => (
-                    <button key={s} className={speed === s ? 'active' : ''} onClick={() => setSpeed(s)}>{s === 'todos' ? 'Todos' : s === 'lentos' ? 'Planetas lentos' : 'Planetas rápidos'}</button>
+                    <button key={s} className={speed === s ? 'active' : ''} onClick={() => setSpeed(s)}>{t(s === 'todos' ? 'Todos' : s === 'lentos' ? 'Planetas lentos' : 'Planetas rápidos')}</button>
                   ))}
                 </div>
                 {range <= 30 && (
-                  <label className="check"><input type="checkbox" checked={withMoon} onChange={(e) => setWithMoon(e.target.checked)} /><span>Incluir Lua</span></label>
+                  <label className="check"><input type="checkbox" checked={withMoon} onChange={(e) => setWithMoon(e.target.checked)} /><span>{t('Incluir Lua')}</span></label>
                 )}
               </div>
             </div>
@@ -208,7 +209,7 @@ export function ForecastPage({ natal, go }: { natal: Chart | null; go: (r: Route
                           {transitHeadline(e.transit, e.natal, e.type.key)}{e.retro ? ' ℞' : ''}
                         </h4>
                         <p className="muted small">
-                          {e.exact < start && 'Em andamento · '}Exato {fmt(e.exact, { day: '2-digit', month: 'short' })} às {e.exact.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })} · ativo de {fmt(e.start)} a {fmt(e.end)}
+                          {e.exact < start && `${t('Em andamento')} · `}{t('Exato {date} às {time} · ativo de {from} a {to}', { date: fmt(e.exact, { day: '2-digit', month: 'short' }), time: e.exact.toLocaleTimeString(locale(), { hour: '2-digit', minute: '2-digit' }), from: fmt(e.start), to: fmt(e.end) })}
                         </p>
                         <p>{transitText(e.transit, e.natal, e.type.key)}</p>
                       </div>
@@ -217,13 +218,13 @@ export function ForecastPage({ natal, go }: { natal: Chart | null; go: (r: Route
                 </div>
               </div>
             ))}
-            {events.length === 0 && <p className="glass pad">Nenhum trânsito exato neste período com os filtros atuais.</p>}
+            {events.length === 0 && <p className="glass pad">{t('Nenhum trânsito exato neste período com os filtros atuais.')}</p>}
           </section>
 
           {days.length > 0 && (
             <AiReading
               kind="previsao"
-              subject={`${natal.birth?.name ?? ''} · próximos ${RANGES.find((r) => r.days === range)?.label ?? ''}`}
+              subject={`${natal.birth?.name ?? ''} · ${t('Os próximos {range}', { range: t(RANGES.find((r) => r.days === range)?.label ?? '') })}`}
               cacheKey={`${natal.birth?.name}|${natal.date.toISOString()}|${start.toISOString().slice(0, 10)}|${range}`}
               accessKey={forecastKey(bk)}
               offer={offer}
@@ -235,16 +236,16 @@ export function ForecastPage({ natal, go }: { natal: Chart | null; go: (r: Route
 
           <section className="glass pad">
             <div className="section-title">
-              <h2>Ciclo lunar</h2>
-              <button className="ghost" onClick={() => go('lunacoes')}>◐ Eclipses e lunações no seu mapa</button>
+              <h2>{t('Ciclo lunar')}</h2>
+              <button className="ghost" onClick={() => go('lunacoes')}>◐ {t('Eclipses e lunações no seu mapa')}</button>
             </div>
             <div className="lunar-row">
               {lunar.map((l, i) => (
                 <div key={i} className="lunar-item">
                   <MoonPhase angle={l.quarter * 90} size={54} south={natal.latitude < 0} />
-                  <strong>{l.name}</strong>
+                  <strong>{t(l.name)}</strong>
                   <small>{fmt(l.date, { weekday: 'short', day: '2-digit', month: 'short' })}</small>
-                  <small className="muted">em {SIGNS[Math.floor(bodyLongitude('moon', toTime(l.date)) / 30)].name}</small>
+                  <small className="muted">{t('em {sign}', { sign: SIGNS[Math.floor(bodyLongitude('moon', toTime(l.date)) / 30)].name })}</small>
                 </div>
               ))}
             </div>
@@ -258,7 +259,7 @@ export function ForecastPage({ natal, go }: { natal: Chart | null; go: (r: Route
 function groupByMonth(events: TransitEvent[]): [string, TransitEvent[]][] {
   const map = new Map<string, TransitEvent[]>()
   for (const e of events) {
-    const k = e.exact.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' })
+    const k = e.exact.toLocaleDateString(locale(), { month: 'long', year: 'numeric' })
     if (!map.has(k)) map.set(k, [])
     map.get(k)!.push(e)
   }
@@ -282,14 +283,14 @@ function Timeline({ events, start, range }: { events: TransitEvent[]; start: Dat
       <div className="tl-axis">
         {Array.from({ length: ticks + 1 }, (_, i) => {
           const d = new Date(start.getTime() + (span * i) / ticks)
-          return <span key={i} style={{ left: `${(i / ticks) * 100}%` }}>{d.toLocaleDateString('pt-BR', range > 90 ? { month: 'short' } : { day: '2-digit', month: 'short' })}</span>
+          return <span key={i} style={{ left: `${(i / ticks) * 100}%` }}>{d.toLocaleDateString(locale(), range > 90 ? { month: 'short' } : { day: '2-digit', month: 'short' })}</span>
         })}
       </div>
       {rows.map((e, i) => (
         <div
           key={i}
           className="tl-row"
-          onMouseEnter={() => setTip(`${transitHeadline(e.transit, e.natal, e.type.key)} — exato em ${e.exact.toLocaleDateString('pt-BR')}`)}
+          onMouseEnter={() => setTip(`${transitHeadline(e.transit, e.natal, e.type.key)} — ${t('exato em {date}', { date: e.exact.toLocaleDateString(locale()) })}`)}
           onMouseLeave={() => setTip('')}
         >
           <span className="tl-label">
@@ -303,7 +304,7 @@ function Timeline({ events, start, range }: { events: TransitEvent[]; start: Dat
           </span>
         </div>
       ))}
-      <p className="aspect-hover">{tip || (rows.length ? 'As barras mostram o período ativo de cada trânsito; o ponto marca o dia exato.' : '')}</p>
+      <p className="aspect-hover">{tip || (rows.length ? t('As barras mostram o período ativo de cada trânsito; o ponto marca o dia exato.') : '')}</p>
     </div>
   )
 }

@@ -925,3 +925,5 @@ p { margin: 0 0 0.8em; }
 
 .ai-actions { display: flex; flex-wrap: wrap; gap: 0.5rem; justify-content: center; margin-top: 1.2rem; }
 .ai-saved { text-align: center; margin: 0.6rem 0 0; }
+.lang-picker { margin: 0 0 0.8rem; flex-wrap: wrap; }
+.menu-panel .lang-picker { margin: 0.2rem 0 0.8rem; }

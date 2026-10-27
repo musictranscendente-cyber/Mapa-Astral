@@ -9,6 +9,8 @@ import { useAccess } from '../billing/context'
 import { SimulatorCard } from '../components/SimulatorCard'
 import { StatsCard } from '../components/StatsCard'
 import type { Route } from '../App'
+import { LangPicker } from '../components/LangPicker'
+import { locale, t } from '../i18n'
 
 const TOPICS: [keyof NotifyTopics, string, string][] = [
   ['transitos', 'Trânsitos sobre o seu mapa', 'a mensagem principal do dia'],
@@ -52,27 +54,32 @@ export function SettingsPage({ natal, settings, setSettings, go }: Props) {
   return (
     <div className="settings">
       <header className="page-head">
-        <p className="eyebrow">Preferências</p>
-        <h1 className="title-glow">Ajustes</h1>
+        <p className="eyebrow">{t('Preferências')}</p>
+        <h1 className="title-glow">{t('Ajustes')}</h1>
       </header>
+
+      <section className="glass pad settings-card">
+        <h2>🌐 {t('Idioma')}</h2>
+        <LangPicker />
+      </section>
 
       {access.owner && <StatsCard />}
       {access.owner && <SimulatorCard go={go} />}
 
       <section className="glass pad settings-card">
-        <h2>☽ Notificação diária</h2>
-        <p className="muted">Receba uma mensagem por dia com o céu do dia sobre o seu mapa. Escolha abaixo o que você quer acompanhar.</p>
+        <h2>☽ {t('Notificação diária')}</h2>
+        <p className="muted">{t('Receba uma mensagem por dia com o céu do dia sobre o seu mapa. Escolha abaixo o que você quer acompanhar.')}</p>
         {notifStatus === 'unsupported' ? (
-          <p className="warn">Este navegador não suporta notificações. No celular, instale o app pela opção "Adicionar à tela inicial".</p>
+          <p className="warn">{t('Este navegador não suporta notificações. No celular, instale o app pela opção "Adicionar à tela inicial".')}</p>
         ) : (
           <>
             <label className="check">
               <input type="checkbox" checked={settings.notify && notifStatus === 'granted'} onChange={(e) => toggleNotify(e.target.checked)} disabled={!natal} />
-              <span>Ativar notificação diária {natal ? `para ${natal.birth?.name}` : '(crie um mapa primeiro)'}</span>
+              <span>{t('Ativar notificação diária')} {natal ? t('para {name}', { name: natal.birth?.name ?? '' }) : t('(crie um mapa primeiro)')}</span>
             </label>
-            {notifStatus === 'denied' && <p className="warn">As notificações foram bloqueadas. Libere nas configurações do navegador para este site.</p>}
+            {notifStatus === 'denied' && <p className="warn">{t('As notificações foram bloqueadas. Libere nas configurações do navegador para este site.')}</p>}
             <label className="select">
-              <span>Horário</span>
+              <span>{t('Horário')}</span>
               <select
                 value={settings.notifyHour}
                 onChange={async (e) => {
@@ -85,44 +92,43 @@ export function SettingsPage({ natal, settings, setSettings, go }: Props) {
               </select>
             </label>
             <fieldset className="notif-topics">
-              <legend className="eyebrow">O que avisar</legend>
+              <legend className="eyebrow">{t('O que avisar')}</legend>
               {TOPICS.map(([k, label, hint]) => (
                 <label key={k} className="check">
                   <input type="checkbox" checked={settings.notifyTopics[k]} onChange={(e) => setSettings((s) => ({ ...s, notifyTopics: { ...s.notifyTopics, [k]: e.target.checked } }))} />
-                  <span>{label} <small className="muted">· {hint}</small></span>
+                  <span>{t(label)} <small className="muted">· {t(hint)}</small></span>
                 </label>
               ))}
             </fieldset>
-            {settings.notify && notifStatus === 'granted' && <button className="ghost" onClick={() => testNotification()}>Enviar notificação de teste</button>}
+            {settings.notify && notifStatus === 'granted' && <button className="ghost" onClick={() => testNotification()}>{t('Enviar notificação de teste')}</button>}
             {preview.length > 0 && (
               <div className="notif-preview">
-                <p className="eyebrow">Prévia dos próximos dias</p>
+                <p className="eyebrow">{t('Prévia dos próximos dias')}</p>
                 {preview.map((m) => (
                   <div key={m.date} className="notif-card glass-soft">
                     <span className="nc-icon">✶</span>
                     <div>
                       <strong>{m.title}</strong>
                       {m.body.split('\n').map((l, i) => <p key={i}>{l}</p>)}
-                      <small className="muted">{new Date(m.date + 'T12:00').toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'short' })}</small>
+                      <small className="muted">{new Date(m.date + 'T12:00').toLocaleDateString(locale(), { weekday: 'long', day: 'numeric', month: 'short' })}</small>
                     </div>
                   </div>
                 ))}
               </div>
             )}
             <p className="muted small">
-              As mensagens são calculadas no seu aparelho. Com o app instalado (Chrome/Android), elas chegam mesmo com o app fechado;
-              em outros navegadores, aparecem quando você abre o app após o horário escolhido.
+              {t('As mensagens são calculadas no seu aparelho. Com o app instalado (Chrome/Android), elas chegam mesmo com o app fechado; em outros navegadores, aparecem quando você abre o app após o horário escolhido.')}
             </p>
           </>
         )}
       </section>
 
       <section className="glass pad settings-card">
-        <h2>✦ Análise completa</h2>
+        <h2>✦ {t('Análise completa')}</h2>
         {BILLING && !access.owner ? (
-          <p>As análises completas fazem parte da sua conta. Veja seu saldo e as opções em <a href="#/planos">Planos</a>.</p>
+          <p>{t('As análises completas fazem parte da sua conta. Veja seu saldo e as opções em')} <a href="#/planos">{t('Planos')}</a>.</p>
         ) : AI_ENDPOINT ? (
-          <p>A análise completa está ativada. Gere análises nas páginas Mapa Natal, Sinastria, Revolução Solar e Previsões.</p>
+          <p>{t('A análise completa está ativada. Gere análises nas páginas Mapa Natal, Sinastria, Revolução Solar e Previsões.')}</p>
         ) : (
           <>
             <p className="muted">
@@ -142,20 +148,20 @@ export function SettingsPage({ natal, settings, setSettings, go }: Props) {
             </div>
           </>
         )}
-        <button className="link" onClick={clearAiCache}>Apagar análises salvas neste aparelho</button>
+        <button className="link" onClick={clearAiCache}>{t('Apagar análises salvas neste aparelho')}</button>
       </section>
 
       <section className="glass pad settings-card">
-        <h2>⌂ Cálculo e visual</h2>
+        <h2>⌂ {t('Cálculo e visual')}</h2>
         <label className="select">
-          <span>Sistema de casas</span>
+          <span>{t('Sistema de casas')}</span>
           <select value={settings.houseSystem} onChange={(e) => setSettings((s) => ({ ...s, houseSystem: e.target.value as Settings['houseSystem'] }))}>
-            {HOUSE_SYSTEMS.map((h) => <option key={h.key} value={h.key}>{h.name}</option>)}
+            {HOUSE_SYSTEMS.map((h) => <option key={h.key} value={h.key}>{t(h.name)}</option>)}
           </select>
         </label>
         <label className="check">
           <input type="checkbox" checked={settings.motion} onChange={(e) => setSettings((s) => ({ ...s, motion: e.target.checked }))} />
-          <span>Animações do céu estrelado</span>
+          <span>{t('Animações do céu estrelado')}</span>
         </label>
       </section>
     </div>

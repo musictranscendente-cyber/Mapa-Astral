@@ -1,9 +1,12 @@
 import type { Chart } from '../astro/chart'
 import { POINTS, SIGNS, norm360, type PointKey } from '../astro/constants'
 import { HOUSE_TEXT, planetInHouse } from './planets'
+import { byLang, t } from '../i18n'
+import { HOUSE_DETAIL_EN, SIGN_STYLE_EN } from './en/houses'
+import { HOUSE_DETAIL_ES, SIGN_STYLE_ES } from './es/houses'
 
 /** What each house covers in practice — a fuller version of HOUSE_TEXT.description. */
-const HOUSE_DETAIL = [
+const HOUSE_DETAIL_PT = [
   'Mostra como você chega no mundo: a primeira impressão, o jeito de começar as coisas, o corpo e a vitalidade. É a "porta de entrada" do mapa — o filtro pelo qual todo o resto se expressa.',
   'Fala de como você ganha, gasta e guarda dinheiro, mas também dos seus talentos naturais e da sua autoestima: aquilo que você sente que tem valor, em você e no mundo.',
   'Rege a mente do dia a dia: como você aprende, conversa, escreve e se informa. Inclui irmãos, primos, vizinhos, a escola dos primeiros anos e as pequenas viagens.',
@@ -19,7 +22,7 @@ const HOUSE_DETAIL = [
 ]
 
 /** How the sign on the cusp colours the matters of a house. */
-const SIGN_STYLE = [
+const SIGN_STYLE_PT = [
   'com iniciativa, pressa e coragem — você prefere agir primeiro e pensar depois',
   'com calma, constância e senso prático — você busca segurança e conforto',
   'com curiosidade, conversa e variedade — você precisa de troca e movimento',
@@ -33,6 +36,9 @@ const SIGN_STYLE = [
   'com originalidade, independência e espírito de grupo — você faz do seu jeito',
   'com intuição, empatia e um toque de idealismo — você sente mais do que explica',
 ]
+
+const HOUSE_DETAIL = byLang({ pt: HOUSE_DETAIL_PT, en: HOUSE_DETAIL_EN, es: HOUSE_DETAIL_ES })
+const SIGN_STYLE = byLang({ pt: SIGN_STYLE_PT, en: SIGN_STYLE_EN, es: SIGN_STYLE_ES })
 
 export interface HouseReading {
   house: number
@@ -56,8 +62,8 @@ export function houseReading(chart: Chart, index: number): HouseReading {
     planet: rulerKey,
     house: rulerHouse,
     text: rulerHouse === n
-      ? `${POINTS[rulerKey].name}, o regente de ${SIGNS[sign].name}, está na própria casa ${n}: estes temas ganham força e independência — você tende a resolver tudo aqui com os próprios recursos.`
-      : `${POINTS[rulerKey].name}, o regente de ${SIGNS[sign].name}, está na casa ${rulerHouse} (${rulerTheme}): os temas de ${theme} se ligam diretamente aos temas de ${rulerTheme}. Uma área alimenta a outra.`,
+      ? t('{planet}, o regente de {sign}, está na própria casa {n}: estes temas ganham força e independência — você tende a resolver tudo aqui com os próprios recursos.', { planet: POINTS[rulerKey].name, sign: SIGNS[sign].name, n })
+      : t('{planet}, o regente de {sign}, está na casa {house} ({rulerTheme}): os temas de {theme} se ligam diretamente aos temas de {rulerTheme}. Uma área alimenta a outra.', { planet: POINTS[rulerKey].name, sign: SIGNS[sign].name, house: rulerHouse, rulerTheme, theme }),
   }
   const planets = (Object.keys(chart.points) as PointKey[])
     .filter((k) => !['asc', 'mc', 'dsc', 'ic', 'southNode'].includes(k) && chart.points[k].house === n)
@@ -66,12 +72,12 @@ export function houseReading(chart: Chart, index: number): HouseReading {
     house: n,
     sign,
     detail: HOUSE_DETAIL[index],
-    cusp: `Com ${SIGNS[sign].name} na cúspide, você vive os temas de ${theme} ${SIGN_STYLE[sign]}.`,
+    cusp: t('Com {sign} na cúspide, você vive os temas de {theme} {style}.', { sign: SIGNS[sign].name, theme, style: SIGN_STYLE[sign] }),
     ruler,
     planets,
     empty: planets.length
       ? null
-      : 'Casa sem planetas não é uma área parada: só não pede tanta atenção. Ela funciona pelo signo da cúspide e pelo regente acima.',
+      : t('Casa sem planetas não é uma área parada: só não pede tanta atenção. Ela funciona pelo signo da cúspide e pelo regente acima.'),
   }
 }
 
@@ -80,6 +86,7 @@ export function housesSummary(chart: Chart): string[] {
   return chart.cusps.map((_, i) => {
     const r = houseReading(chart, i)
     const inside = r.planets.map((p) => POINTS[p.planet].name).join(', ')
-    return `- Casa ${r.house} (${HOUSE_TEXT[i].theme}): cúspide em ${SIGNS[r.sign].name}; regente ${POINTS[r.ruler.planet].name} na casa ${r.ruler.house}${inside ? `; planetas: ${inside}` : '; sem planetas'}`
+    const base = t('- Casa {n} ({theme}): cúspide em {sign}; regente {planet} na casa {house}', { n: r.house, theme: HOUSE_TEXT[i].theme, sign: SIGNS[r.sign].name, planet: POINTS[r.ruler.planet].name, house: r.ruler.house })
+    return `${base}${inside ? t('; planetas: {list}', { list: inside }) : t('; sem planetas')}`
   })
 }

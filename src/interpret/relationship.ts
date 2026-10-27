@@ -1,10 +1,13 @@
-import { SIGNS } from '../astro/constants'
+import { POINTS, SIGNS } from '../astro/constants'
 import type { Chart } from '../astro/chart'
 import { HOUSE_TEXT } from './planets'
 import { SIGN_TEXT } from './signs'
+import { byLang, t } from '../i18n'
+import { REL_MOON_EN, REL_SUN_EN } from './en/returns'
+import { REL_MOON_ES, REL_SUN_ES } from './es/returns'
 
 /** Sol do mapa do casal: o propósito da relação. */
-const REL_SUN = [
+const REL_SUN_PT = [
   'uma relação que nasceu para agir: vocês se impulsionam, começam projetos e enfrentam desafios juntos.',
   'uma relação que busca construir: estabilidade, prazer e segurança material são o centro do vínculo.',
   'uma relação de troca e amizade: conversas, aprendizado e leveza mantêm a chama acesa.',
@@ -20,7 +23,7 @@ const REL_SUN = [
 ]
 
 /** Lua do mapa do casal: o clima emocional. */
-const REL_MOON = [
+const REL_MOON_PT = [
   'emoções rápidas e diretas — vocês precisam de movimento e sinceridade.',
   'emoções serenas — segurança, carinho físico e constância nutrem o casal.',
   'emoções que passam pela palavra — conversar é o jeito de se sentirem próximos.',
@@ -35,17 +38,21 @@ const REL_MOON = [
   'emoções sensíveis — empatia e intuição unem vocês sem precisar de explicações.',
 ]
 
-export function relationshipReading(c: Chart, kind: 'composto' | 'davison'): { title: string; text: string }[] {
+const REL_SUN = byLang({ pt: REL_SUN_PT, en: REL_SUN_EN, es: REL_SUN_ES })
+const REL_MOON = byLang({ pt: REL_MOON_PT, en: REL_MOON_EN, es: REL_MOON_ES })
+
+export function relationshipReading(c: Chart): { title: string; text: string }[] {
   const P = c.points
-  const label = kind === 'composto' ? 'composto' : 'do Davison'
+  const title = (glyph: string, planet: string, sign: number) => `${glyph} ${t('{planet} composto em {sign}', { planet, sign: SIGNS[sign].name })}`
+  const sunHouse = HOUSE_TEXT[P.sun.house - 1]
   const out = [
-    { title: `☉ Sol ${label} em ${SIGNS[P.sun.sign].name}`, text: `O propósito do casal: ${REL_SUN[P.sun.sign]}${c.hasHouses ? ` Na ${HOUSE_TEXT[P.sun.house - 1].name.toLowerCase()}, a relação se realiza através de ${HOUSE_TEXT[P.sun.house - 1].keywords.join(', ')}.` : ''}` },
-    { title: `☽ Lua ${label} em ${SIGNS[P.moon.sign].name}`, text: `O clima emocional: ${REL_MOON[P.moon.sign]}` },
-    { title: `♀ Vênus ${label} em ${SIGNS[P.venus.sign].name}`, text: `O amor entre vocês se expressa ${SIGN_TEXT[P.venus.sign].style}.` },
-    { title: `♂ Marte ${label} em ${SIGNS[P.mars.sign].name}`, text: `A energia e o desejo do casal agem ${SIGN_TEXT[P.mars.sign].style}.` },
+    { title: title('☉', POINTS.sun.name, P.sun.sign), text: `${t('O propósito do casal:')} ${REL_SUN[P.sun.sign]}${c.hasHouses ? ` ${t('Na {house}, a relação se realiza através de {kw}.', { house: sunHouse.name.toLowerCase(), kw: sunHouse.keywords.join(', ') })}` : ''}` },
+    { title: title('☽', POINTS.moon.name, P.moon.sign), text: `${t('O clima emocional:')} ${REL_MOON[P.moon.sign]}` },
+    { title: title('♀', POINTS.venus.name, P.venus.sign), text: t('O amor entre vocês se expressa {style}.', { style: SIGN_TEXT[P.venus.sign].style }) },
+    { title: title('♂', POINTS.mars.name, P.mars.sign), text: t('A energia e o desejo do casal agem {style}.', { style: SIGN_TEXT[P.mars.sign].style }) },
   ]
   if (c.hasHouses) {
-    out.splice(2, 0, { title: `AC Ascendente ${label} em ${SIGNS[P.asc.sign].name}`, text: `Como os outros veem o casal: ${SIGN_TEXT[P.asc.sign].keywords.slice(0, 3).join(', ')} — vocês juntos se apresentam ${SIGN_TEXT[P.asc.sign].style}.` })
+    out.splice(2, 0, { title: title('AC', POINTS.asc.name, P.asc.sign), text: t('Como os outros veem o casal: {kw} — vocês juntos se apresentam {style}.', { kw: SIGN_TEXT[P.asc.sign].keywords.slice(0, 3).join(', '), style: SIGN_TEXT[P.asc.sign].style }) })
   }
   return out
 }

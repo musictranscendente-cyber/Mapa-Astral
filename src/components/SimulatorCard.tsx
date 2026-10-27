@@ -3,6 +3,7 @@ import { PLAN_ANALYSES, PRODUCTS, formatBRL, type PlanKey } from '../billing/rul
 import { DEFAULT_SIM, SIM_START_BALANCE, setSim, simAccess, useSim } from '../billing/sim'
 import { useAccess } from '../billing/context'
 import type { Route } from '../App'
+import { locale } from '../i18n'
 
 type Tier = 'anon' | 'free' | PlanKey
 
@@ -68,7 +69,7 @@ export function SimulatorCard({ go }: { go: (r: Route) => void }) {
           </div>
           {planActive && (
             <p className="muted small">
-              Plano ativo até {new Date(sim.planUntil!).toLocaleDateString('pt-BR')} · {Math.max(0, PLAN_ANALYSES[sim.plan!] - data.planUsedThisMonth)} de {PLAN_ANALYSES[sim.plan!]} análises disponíveis neste mês.
+              Plano ativo até {new Date(sim.planUntil!).toLocaleDateString(locale())} · {Math.max(0, PLAN_ANALYSES[sim.plan!] - data.planUsedThisMonth)} de {PLAN_ANALYSES[sim.plan!]} análises disponíveis neste mês.
             </p>
           )}
 

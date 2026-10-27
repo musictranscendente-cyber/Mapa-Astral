@@ -3,6 +3,7 @@ import { PRODUCTS, formatBRL } from '../billing/rules'
 import { useAccess, type Offer } from '../billing/context'
 import { rememberReturn } from '../lib/auth'
 import type { Route } from '../App'
+import { t } from '../i18n'
 
 interface Props {
   /** What the person gets by unlocking (one line). */
@@ -19,7 +20,7 @@ export function Locked({ title, text, offer, go }: Props) {
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState('')
   if (!access.enabled) return null
-  if (access.loading) return <div className="loader"><span /> Verificando seu acesso…</div>
+  if (access.loading) return <div className="loader"><span /> {t('Verificando seu acesso…')}</div>
 
   const buy = async () => {
     if (!offer) return
@@ -41,18 +42,18 @@ export function Locked({ title, text, offer, go }: Props) {
       {text && <p className="muted">{text}</p>}
       {!access.loggedIn ? (
         <div className="locked-actions">
-          <button className="cta" onClick={() => { rememberReturn(); go(access.simulated ? 'ajustes' : 'conta') }}><span>Entrar grátis para ver</span></button>
-          <p className="muted small">Com Google ou e-mail, sem senha.</p>
+          <button className="cta" onClick={() => { rememberReturn(); go(access.simulated ? 'ajustes' : 'conta') }}><span>{t('Entrar grátis para ver')}</span></button>
+          <p className="muted small">{t('Com Google ou e-mail, sem senha.')}</p>
         </div>
       ) : (
         <div className="locked-actions">
           {offer && (
             <button className="cta" disabled={busy} onClick={buy}>
-              <span>{busy ? 'Abrindo pagamento…' : `Liberar por ${formatBRL(PRODUCTS[offer.product].price)}`}</span>
+              <span>{busy ? t('Abrindo pagamento…') : t('Liberar por {price}', { price: formatBRL(PRODUCTS[offer.product].price) })}</span>
             </button>
           )}
-          <button className="ghost" onClick={() => go('planos')}>Ver planos · a partir de {formatBRL(PRODUCTS.estrela_mensal.price)}/mês</button>
-          {offer && <p className="muted small">{access.simulated ? '🧪 Simulação · ' : ''}Pagamento único por Pix ou cartão · {PRODUCTS[offer.product].name}{offer.label ? ` · ${offer.label}` : ''}</p>}
+          <button className="ghost" onClick={() => go('planos')}>{t('Ver planos · a partir de {price}/mês', { price: formatBRL(PRODUCTS.estrela_mensal.price) })}</button>
+          {offer && <p className="muted small">{access.simulated ? `🧪 ${t('Simulação')} · ` : ''}{t('Pagamento único por Pix ou cartão')} · {t(PRODUCTS[offer.product].name)}{offer.label ? ` · ${offer.label}` : ''}</p>}
         </div>
       )}
       {error && <p className="error">{error}</p>}

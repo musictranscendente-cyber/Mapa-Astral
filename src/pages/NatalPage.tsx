@@ -21,6 +21,7 @@ import { Locked } from '../components/Locked'
 import { ShareDialog } from '../components/ShareDialog'
 import { PrintReport } from '../components/PrintReport'
 import type { Route } from '../App'
+import { t } from '../i18n'
 
 type Tab = 'relatorio' | 'ia' | 'planetas' | 'casas' | 'aspectos' | 'elementos'
 
@@ -41,9 +42,9 @@ export function NatalPage({ natal, settings, setSettings, go }: Props) {
   if (!natal || !natal.birth) {
     return (
       <div className="empty glass">
-        <h2>Nenhum mapa ainda</h2>
-        <p>Crie seu primeiro mapa astral para desbloquear o relatório completo.</p>
-        <button className="cta" onClick={() => go('inicio')}><span>✦ Criar mapa</span></button>
+        <h2>{t('Nenhum mapa ainda')}</h2>
+        <p>{t('Crie seu primeiro mapa astral para desbloquear o relatório completo.')}</p>
+        <button className="cta" onClick={() => go('inicio')}><span>✦ {t('Criar mapa')}</span></button>
       </div>
     )
   }
@@ -52,29 +53,29 @@ export function NatalPage({ natal, settings, setSettings, go }: Props) {
   const utc = localToUtc(b.local, b.timeZone)
   const bk = birthKey(b)
   const needsLogin = access.enabled && !access.loggedIn
-  const loginLock = (title: string) => <Locked title={title} text="Crie sua conta grátis: seus mapas ficam salvos e você libera o relatório completo." go={go} />
+  const loginLock = (title: string) => <Locked title={title} text={t('Crie sua conta grátis: seus mapas ficam salvos e você libera o relatório completo.')} go={go} />
   const when = formatInZone(utc, b.timeZone, { dateStyle: 'long', ...(b.timeUnknown ? {} : { timeStyle: 'short' }) })
 
   return (
     <div className="natal">
       <header className="page-head">
-        <p className="eyebrow">Mapa Natal</p>
+        <p className="eyebrow">{t('Mapa Natal')}</p>
         <h1 className="title-glow">{b.name}</h1>
         <p className="muted">
           {when} · {b.place} · {offsetLabel(utc, b.timeZone)}
-          {b.timeUnknown && ' · hora desconhecida (mapa solar ao meio-dia)'}
+          {b.timeUnknown && ` · ${t('hora desconhecida (mapa solar ao meio-dia)')}`}
         </p>
         <div className="head-tools">
           <label className="select">
-            <span>Sistema de casas</span>
+            <span>{t('Sistema de casas')}</span>
             <select value={settings.houseSystem} onChange={(e) => setSettings((s) => ({ ...s, houseSystem: e.target.value as Settings['houseSystem'] }))}>
-              {HOUSE_SYSTEMS.map((h) => <option key={h.key} value={h.key}>{h.name}</option>)}
+              {HOUSE_SYSTEMS.map((h) => <option key={h.key} value={h.key}>{t(h.name)}</option>)}
             </select>
           </label>
-          <button className="ghost share-btn" onClick={() => setSharing(true)}>✦ Compartilhar meu mapa</button>
-          <button className="ghost" onClick={() => window.print()}>⎙ Baixar PDF</button>
+          <button className="ghost share-btn" onClick={() => setSharing(true)}>✦ {t('Compartilhar meu mapa')}</button>
+          <button className="ghost" onClick={() => window.print()}>⎙ {t('Baixar PDF')}</button>
         </div>
-        {natal.houseFallback && <p className="warn">Latitude polar: o sistema escolhido não é definido aqui — usando Porfírio.</p>}
+        {natal.houseFallback && <p className="warn">{t('Latitude polar: o sistema escolhido não é definido aqui — usando Porfírio.')}</p>}
       </header>
 
       {sharing && <ShareDialog chart={natal} onClose={() => setSharing(false)} />}
@@ -83,7 +84,7 @@ export function NatalPage({ natal, settings, setSettings, go }: Props) {
       <section className="wheel-layout">
         <div className="wheel-box">
           <ChartWheel chart={natal} selected={selected} onSelect={setSelected} />
-          <p className="hint">Toque em um planeta para ver seus aspectos e interpretação</p>
+          <p className="hint">{t('Toque em um planeta para ver seus aspectos e interpretação')}</p>
         </div>
         <aside className="glass detail">
           {selected ? <PointDetail chart={natal} k={selected} /> : <Overview chart={natal} />}
@@ -93,13 +94,13 @@ export function NatalPage({ natal, settings, setSettings, go }: Props) {
       <nav className="tabs">
         {([
           ['relatorio', 'Relatório'],
-          ['ia', '✦ Análise completa'],
+          ['ia', 'Análise completa'],
           ['planetas', 'Planetas'],
           ['casas', 'Casas'],
           ['aspectos', 'Aspectos'],
           ['elementos', 'Elementos'],
         ] as [Tab, string][]).map(([k, l]) => (
-          <button key={k} className={tab === k ? 'active' : ''} onClick={() => setTab(k)}>{l}</button>
+          <button key={k} className={tab === k ? 'active' : ''} onClick={() => setTab(k)}>{k === 'ia' ? '✦ ' : ''}{t(l)}</button>
         ))}
       </nav>
 
@@ -113,7 +114,7 @@ export function NatalPage({ natal, settings, setSettings, go }: Props) {
                   <h3>{s.title}</h3>
                   {s.subtitle && <p className="subtitle">{s.subtitle}</p>}
                   {s.paragraphs.filter(Boolean).map((p, j) => <p key={j}>{p}</p>)}
-                  {s.tags && <div className="tags">{s.tags.map((t) => <span key={t}>{t}</span>)}</div>}
+                  {s.tags && <div className="tags">{s.tags.map((tag) => <span key={tag}>{tag}</span>)}</div>}
                 </div>
               </article>
             ))}
@@ -132,7 +133,7 @@ export function NatalPage({ natal, settings, setSettings, go }: Props) {
           />
         )}
         {tab === 'planetas' && <PlanetTable chart={natal} onPick={(k) => { setSelected(k); window.scrollTo({ top: 0, behavior: 'smooth' }) }} />}
-        {needsLogin && (tab === 'casas' || tab === 'aspectos' || tab === 'elementos') && loginLock('Casas, aspectos e elementos do seu mapa')}
+        {needsLogin && (tab === 'casas' || tab === 'aspectos' || tab === 'elementos') && loginLock(t('Casas, aspectos e elementos do seu mapa'))}
         {!needsLogin && tab === 'casas' && <HouseTable chart={natal} />}
         {!needsLogin && tab === 'aspectos' && <AspectGrid chart={natal} />}
         {!needsLogin && tab === 'elementos' && (
@@ -151,21 +152,21 @@ function Overview({ chart }: { chart: Chart }) {
   const el = Object.entries(chart.balance.elements).sort((a, b) => b[1] - a[1])[0][0] as keyof typeof ELEMENT_INFO
   return (
     <div className="overview">
-      <p className="eyebrow">Síntese</p>
+      <p className="eyebrow">{t('Síntese')}</p>
       <h3>{SIGN_TEXT[P.sun.sign].title}</h3>
       <ul className="trio">
-        <li><span style={{ color: POINTS.sun.color }}>{POINTS.sun.glyph}</span> Sol <b>{formatDegree(P.sun.lon)}</b></li>
-        <li><span style={{ color: POINTS.moon.color }}>{POINTS.moon.glyph}</span> Lua <b>{formatDegree(P.moon.lon)}</b></li>
-        {chart.hasHouses && <li><span className="ac">AC</span> Ascendente <b>{formatDegree(chart.asc)}</b></li>}
-        {chart.hasHouses && <li><span className="ac">MC</span> Meio do Céu <b>{formatDegree(chart.mc)}</b></li>}
+        <li><span style={{ color: POINTS.sun.color }}>{POINTS.sun.glyph}</span> {POINTS.sun.name} <b>{formatDegree(P.sun.lon)}</b></li>
+        <li><span style={{ color: POINTS.moon.color }}>{POINTS.moon.glyph}</span> {POINTS.moon.name} <b>{formatDegree(P.moon.lon)}</b></li>
+        {chart.hasHouses && <li><span className="ac">AC</span> {POINTS.asc.name} <b>{formatDegree(chart.asc)}</b></li>}
+        {chart.hasHouses && <li><span className="ac">MC</span> {POINTS.mc.name} <b>{formatDegree(chart.mc)}</b></li>}
       </ul>
       <p>
-        Elemento dominante: <b style={{ color: ELEMENT_INFO[el].color }}>{ELEMENT_INFO[el].name}</b> — {ELEMENT_INFO[el].essence}.
+        {t('Elemento dominante:')} <b style={{ color: ELEMENT_INFO[el].color }}>{ELEMENT_INFO[el].name}</b> — {ELEMENT_INFO[el].essence}.
       </p>
       <p className="muted">
-        {chart.hasHouses ? (chart.isDayChart ? 'Mapa diurno: o Sol estava acima do horizonte.' : 'Mapa noturno: o Sol estava abaixo do horizonte.') : 'Sem hora de nascimento, as casas e o ascendente não são exibidos.'}
+        {t(chart.hasHouses ? (chart.isDayChart ? 'Mapa diurno: o Sol estava acima do horizonte.' : 'Mapa noturno: o Sol estava abaixo do horizonte.') : 'Sem hora de nascimento, as casas e o ascendente não são exibidos.')}
       </p>
-      <p className="muted small">Obliquidade {chart.obliquity.toFixed(4)}° · RAMC {chart.ramc.toFixed(3)}° · {chart.aspects.length} aspectos</p>
+      <p className="muted small">{t('Obliquidade {obl}° · RAMC {ramc}° · {n} aspectos', { obl: chart.obliquity.toFixed(4), ramc: chart.ramc.toFixed(3), n: chart.aspects.length })}</p>
     </div>
   )
 }
@@ -179,19 +180,19 @@ function PointDetail({ chart, k }: { chart: Chart; k: PointKey }) {
       <div className="pd-head">
         <span className="pd-glyph" style={{ color: info.color }}>{info.glyph}</span>
         <div>
-          <h3>{info.name} em {SIGNS[p.sign].name}</h3>
+          <h3>{t('{planet} em {sign}', { planet: info.name, sign: SIGNS[p.sign].name })}</h3>
           <p className="muted">
-            {formatDegree(p.lon)}{chart.hasHouses ? ` · Casa ${p.house}` : ''}{p.retro ? ' · ℞ Retrógrado' : ''}{p.dignity ? ` · ${p.dignity}` : ''}
+            {formatDegree(p.lon)}{chart.hasHouses ? ` · ${t('Casa {n}', { n: p.house })}` : ''}{p.retro ? ` · ℞ ${t('Retrógrado')}` : ''}{p.dignity ? ` · ${t(p.dignity)}` : ''}
           </p>
         </div>
       </div>
       {PLANET_TEXT[k] && <p>{PLANET_TEXT[k]!.description}</p>}
       {PLANET_TEXT[k] && k !== 'asc' && k !== 'mc' && <p>{planetInSign(k, p.sign)}</p>}
       {chart.hasHouses && PLANET_TEXT[k] && k !== 'asc' && k !== 'mc' && <p>{planetInHouse(k, p.house)}</p>}
-      {k === 'fortune' && <p>A Roda da Fortuna indica onde você encontra prosperidade e alegria espontânea — na {HOUSE_TEXT[p.house - 1].name}: {HOUSE_TEXT[p.house - 1].theme.toLowerCase()}.</p>}
+      {k === 'fortune' && <p>{t('A Roda da Fortuna indica onde você encontra prosperidade e alegria espontânea — na {house}: {theme}.', { house: HOUSE_TEXT[p.house - 1].name, theme: HOUSE_TEXT[p.house - 1].theme.toLowerCase() })}</p>}
       {aspects.length > 0 && (
         <>
-          <p className="eyebrow">Aspectos</p>
+          <p className="eyebrow">{t('Aspectos')}</p>
           <ul className="aspect-list">
             {aspects.map((a, i) => {
               const other = a.a === k ? a.b : a.a
@@ -199,7 +200,7 @@ function PointDetail({ chart, k }: { chart: Chart; k: PointKey }) {
                 <li key={i} title={natalAspectText(a.a, a.b, a.type.key)}>
                   <span style={{ color: a.type.color }}>{a.type.glyph}</span>
                   {a.type.name} {POINTS[other].name}
-                  <small>{a.orb.toFixed(1)}° {a.applying ? 'aplicativo' : 'separativo'}</small>
+                  <small>{a.orb.toFixed(1)}° {t(a.applying ? 'aplicativo' : 'separativo')}</small>
                 </li>
               )
             })}
@@ -217,7 +218,7 @@ function PlanetTable({ chart, onPick }: { chart: Chart; onPick: (k: PointKey) =>
     <div className="glass table-wrap">
       <table className="astro-table">
         <thead>
-          <tr><th>Ponto</th><th>Posição</th><th>Signo</th>{chart.hasHouses && <th>Casa</th>}<th>Velocidade</th><th>Dignidade</th></tr>
+          <tr><th>{t('Ponto')}</th><th>{t('Posição')}</th><th>{t('Signo')}</th>{chart.hasHouses && <th>{t('Casa')}</th>}<th>{t('Velocidade')}</th><th>{t('Dignidade')}</th></tr>
         </thead>
         <tbody>
           {keys.map((k) => {
@@ -230,7 +231,7 @@ function PlanetTable({ chart, onPick }: { chart: Chart; onPick: (k: PointKey) =>
                 <td><span style={{ color: ELEMENT_INFO[s.element].color }}>{s.glyph}</span> {s.name}</td>
                 {chart.hasHouses && <td>{p.house}</td>}
                 <td className="mono">{p.speed ? `${p.speed.toFixed(3)}°/d` : '—'}</td>
-                <td>{p.dignity ?? '—'}</td>
+                <td>{p.dignity ? t(p.dignity) : '—'}</td>
               </tr>
             )
           })}
@@ -241,12 +242,11 @@ function PlanetTable({ chart, onPick }: { chart: Chart; onPick: (k: PointKey) =>
 }
 
 function HouseTable({ chart }: { chart: Chart }) {
-  if (!chart.hasHouses) return <div className="glass pad"><p>Sem hora de nascimento não é possível calcular as casas.</p></div>
+  if (!chart.hasHouses) return <div className="glass pad"><p>{t('Sem hora de nascimento não é possível calcular as casas.')}</p></div>
   return (
     <>
       <p className="muted house-intro">
-        As 12 casas são as áreas da sua vida. O <b>signo na cúspide</b> mostra o jeito como você vive cada área, o <b>regente</b> mostra
-        com que outra área ela se conecta e os <b>planetas</b> dentro dela mostram onde está a sua energia. Toque em uma casa para ver tudo.
+        {t('As 12 casas são as áreas da sua vida. O signo na cúspide mostra o jeito como você vive cada área, o regente mostra com que outra área ela se conecta e os planetas dentro dela mostram onde está a sua energia. Toque em uma casa para ver tudo.')}
       </p>
       <div className="house-grid">
         {chart.cusps.map((c, i) => {
@@ -262,15 +262,15 @@ function HouseTable({ chart }: { chart: Chart }) {
                 {r.planets.length > 0 && (
                   <p className="inside">{r.planets.map(({ planet }) => <span key={planet} style={{ color: POINTS[planet].color }} title={POINTS[planet].name}>{POINTS[planet].glyph}</span>)}</p>
                 )}
-                <span className="house-more">Ver interpretação</span>
+                <span className="house-more">{t('Ver interpretação')}</span>
               </summary>
               <div className="house-body">
                 <p>{r.detail}</p>
-                <h5>{s.glyph} Signo na cúspide: {s.name}</h5>
+                <h5>{s.glyph} {t('Signo na cúspide: {sign}', { sign: s.name })}</h5>
                 <p>{r.cusp}</p>
-                <h5><span style={{ color: POINTS[r.ruler.planet].color }}>{POINTS[r.ruler.planet].glyph}</span> Regente da casa</h5>
+                <h5><span style={{ color: POINTS[r.ruler.planet].color }}>{POINTS[r.ruler.planet].glyph}</span> {t('Regente da casa')}</h5>
                 <p>{r.ruler.text}</p>
-                <h5>Planetas nesta casa</h5>
+                <h5>{t('Planetas nesta casa')}</h5>
                 {r.empty ? <p className="muted">{r.empty}</p> : r.planets.map(({ planet, text }) => (
                   <p key={planet}><b style={{ color: POINTS[planet].color }}>{POINTS[planet].glyph} {POINTS[planet].name}{chart.points[planet].retro ? ' ℞' : ''}:</b> {text}</p>
                 ))}
@@ -313,14 +313,14 @@ function AspectGrid({ chart }: { chart: Chart }) {
           </tbody>
         </table>
       </div>
-      <p className="aspect-hover">{hover || 'Passe o dedo/mouse sobre um aspecto para ler sua interpretação.'}</p>
+      <p className="aspect-hover">{hover || t('Passe o dedo/mouse sobre um aspecto para ler sua interpretação.')}</p>
       <ul className="aspect-cards">
         {chart.aspects.map((a, i) => (
           <li key={i} className="glass-soft">
             <span className="ag" style={{ color: a.type.color }}>{a.type.glyph}</span>
             <div>
               <strong>{POINTS[a.a].name} {a.type.name.toLowerCase()} {POINTS[a.b].name}</strong>
-              <small> · orbe {a.orb.toFixed(2)}° · {a.applying ? 'aplicativo' : 'separativo'}</small>
+              <small> · {t('orbe')} {a.orb.toFixed(2)}° · {t(a.applying ? 'aplicativo' : 'separativo')}</small>
               <p>{natalAspectText(a.a, a.b, a.type.key)}</p>
             </div>
           </li>
@@ -340,14 +340,14 @@ function Hemispheres({ chart }: { chart: Chart }) {
       <div className="hemi-box">
         <div className="hemi-fill top" style={{ height: `${above}%` }} />
         <div className="hemi-fill left" style={{ width: `${east}%` }} />
-        <span className="hl t">Acima do horizonte {above}%</span>
-        <span className="hl b">Abaixo {100 - above}%</span>
-        <span className="hl l">Leste {east}%</span>
-        <span className="hl r">Oeste {100 - east}%</span>
+        <span className="hl t">{t('Acima do horizonte')} {above}%</span>
+        <span className="hl b">{t('Abaixo')} {100 - above}%</span>
+        <span className="hl l">{t('Leste')} {east}%</span>
+        <span className="hl r">{t('Oeste')} {100 - east}%</span>
       </div>
       <p>
-        {above > 55 ? 'Com a maioria dos planetas acima do horizonte, sua vida tende a se voltar para o mundo, a carreira e a vida pública.' : above < 45 ? 'Com a maioria dos planetas abaixo do horizonte, sua força está na vida interior, na intimidade e na construção de bases sólidas.' : 'Seus planetas se dividem entre o mundo interior e o exterior: equilíbrio entre vida privada e pública.'}{' '}
-        {east > 55 ? 'A ênfase no Leste indica autonomia: você é o autor do próprio destino.' : east < 45 ? 'A ênfase no Oeste indica que você se realiza através das relações e parcerias.' : ''}
+        {t(above > 55 ? 'Com a maioria dos planetas acima do horizonte, sua vida tende a se voltar para o mundo, a carreira e a vida pública.' : above < 45 ? 'Com a maioria dos planetas abaixo do horizonte, sua força está na vida interior, na intimidade e na construção de bases sólidas.' : 'Seus planetas se dividem entre o mundo interior e o exterior: equilíbrio entre vida privada e pública.')}{' '}
+        {east > 55 ? t('A ênfase no Leste indica autonomia: você é o autor do próprio destino.') : east < 45 ? t('A ênfase no Oeste indica que você se realiza através das relações e parcerias.') : ''}
       </p>
     </div>
   )

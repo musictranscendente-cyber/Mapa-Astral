@@ -3,6 +3,7 @@ import { SYSTEM_PROMPT, buildUserPrompt, clampSummary, type ReadingKind } from '
 import { AI_ENDPOINT, AI_MODEL, AiError, getUserKey } from './config'
 import { BILLING } from '../billing/api'
 import { supabase, supabaseAnonKey, supabaseUrl } from '../lib/supabase'
+import { getLang, t } from '../i18n'
 
 interface Options {
   kind: ReadingKind
@@ -28,7 +29,7 @@ export async function generateReading({ kind, summary, accessKey, simulated, onT
   if (BILLING) return viaAccount(kind, data, accessKey, onText, signal)
   if (AI_ENDPOINT) return viaEndpoint(kind, data, onText, signal)
   const key = getUserKey()
-  if (!key) throw new AiError('Ative a análise completa em Ajustes.')
+  if (!key) throw new AiError(t('Ative a análise completa em Ajustes.'))
   return viaBrowser(key, kind, data, onText, signal)
 }
 
@@ -36,14 +37,14 @@ export async function generateReading({ kind, summary, accessKey, simulated, onT
 async function viaAccount(kind: ReadingKind, summary: string, accessKey: string, onText: (d: string) => void, signal?: AbortSignal) {
   const { data } = (await supabase?.auth.getSession()) ?? { data: { session: null } }
   const token = data.session?.access_token
-  if (!token) throw new AiError('Entre na sua conta para gerar a análise completa.')
+  if (!token) throw new AiError(t('Entre na sua conta para gerar a análise completa.'))
   const res = await fetch(`${supabaseUrl}/functions/v1/analysis`, {
     method: 'POST',
     headers: { 'content-type': 'application/json', authorization: `Bearer ${token}`, apikey: supabaseAnonKey! },
-    body: JSON.stringify({ kind, summary, key: accessKey }),
+    body: JSON.stringify({ kind, summary, key: accessKey, lang: getLang() }),
     signal,
   })
-  if (res.status === 402) throw new AiError('Seu saldo de análises acabou. Libere esta análise ou escolha um plano.')
+  if (res.status === 402) throw new AiError(t('Seu saldo de análises acabou. Libere esta análise ou escolha um plano.'))
   return readStream(res, onText)
 }
 
@@ -51,14 +52,14 @@ async function viaEndpoint(kind: ReadingKind, summary: string, onText: (d: strin
   const res = await fetch(AI_ENDPOINT!, {
     method: 'POST',
     headers: { 'content-type': 'application/json' },
-    body: JSON.stringify({ kind, summary }),
+    body: JSON.stringify({ kind, summary, lang: getLang() }),
     signal,
   })
   return readStream(res, onText)
 }
 
 async function readStream(res: Response, onText: (d: string) => void) {
-  if (!res.ok || !res.body) throw new AiError(`O serviço de análise respondeu com erro (${res.status}).`)
+  if (!res.ok || !res.body) throw new AiError(t('O serviço de análise respondeu com erro ({code}).', { code: res.status }))
   const reader = res.body.getReader()
   const decoder = new TextDecoder()
   let full = ''
@@ -85,20 +86,20 @@ async function viaBrowser(apiKey: string, kind: ReadingKind, summary: string, on
         betas: ['server-side-fallback-2026-07-01'],
         fallbacks: 'default',
         system: [{ type: 'text', text: SYSTEM_PROMPT, cache_control: { type: 'ephemeral' } }],
-        messages: [{ role: 'user', content: buildUserPrompt(kind, summary) }],
+        messages: [{ role: 'user', content: buildUserPrompt(kind, summary, getLang()) }],
       },
       { signal },
     )
     stream.on('text', (delta) => onText(delta))
     const message = await stream.finalMessage()
-    if (message.stop_reason === 'refusal') throw new AiError('Não foi possível gerar esta análise. Tente novamente.')
+    if (message.stop_reason === 'refusal') throw new AiError(t('Não foi possível gerar esta análise. Tente novamente.'))
     return message.content.map((b) => (b.type === 'text' ? b.text : '')).join('')
   } catch (e) {
     if (e instanceof AiError) throw e
-    if (e instanceof Anthropic.AuthenticationError) throw new AiError('Chave de ativação inválida. Verifique em Ajustes.')
-    if (e instanceof Anthropic.RateLimitError) throw new AiError('Limite de uso atingido. Aguarde alguns instantes.')
+    if (e instanceof Anthropic.AuthenticationError) throw new AiError(t('Chave de ativação inválida. Verifique em Ajustes.'))
+    if (e instanceof Anthropic.RateLimitError) throw new AiError(t('Limite de uso atingido. Aguarde alguns instantes.'))
     if (e instanceof Anthropic.APIUserAbortError) throw e
-    if (e instanceof Anthropic.APIError) throw new AiError(`Erro no serviço de análise (${e.status ?? 'rede'}).`)
+    if (e instanceof Anthropic.APIError) throw new AiError(t('Erro no serviço de análise ({code}).', { code: e.status ?? t('rede') }))
     throw e
   }
 }

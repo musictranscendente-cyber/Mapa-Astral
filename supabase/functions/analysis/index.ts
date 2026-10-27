@@ -2,11 +2,18 @@
 // charged to a purchase, the plan's monthly allowance or the welcome gift (see _shared/rules.ts).
 // Secret: ANTHROPIC_API_KEY.
 import Anthropic from 'npm:@anthropic-ai/sdk@0.131.0'
-import { SYSTEM_PROMPT, buildUserPrompt, clampSummary, type ReadingKind } from '../_shared/promptCore.ts'
+import { READING_LANGS, SYSTEM_PROMPT, buildUserPrompt, clampSummary, type ReadingKind, type ReadingLang } from '../_shared/promptCore.ts'
 import { OWNER_EMAIL_HASHES, analysisAllowance, validAnalysisKey } from '../_shared/rules.ts'
 import { adminClient, corsHeaders, json, loadAccess, requestUser } from '../_shared/server.ts'
 
 const KINDS: ReadingKind[] = ['natal', 'sinastria', 'revolucao', 'previsao']
+
+/** Notes appended to the streamed text, in the reader's language. */
+const STREAM_TEXT: Record<ReadingLang, Record<'refused' | 'failed' | 'notCharged' | 'error' | 'network' | 'unexpected', string>> = {
+  pt: { refused: 'Não foi possível concluir esta análise. Ela não foi descontada do seu saldo.', failed: 'Falha ao gerar a análise', notCharged: 'Ela não foi descontada do seu saldo.', error: 'erro', network: 'de rede', unexpected: 'erro inesperado' },
+  en: { refused: 'This analysis could not be completed. It was not deducted from your balance.', failed: 'The analysis could not be generated', notCharged: 'It was not deducted from your balance.', error: 'error', network: '(network)', unexpected: 'unexpected error' },
+  es: { refused: 'No fue posible completar este análisis. No se descontó de tu saldo.', failed: 'No se pudo generar el análisis', notCharged: 'No se descontó de tu saldo.', error: 'error', network: 'de red', unexpected: 'error inesperado' },
+}
 
 async function isOwner(email: string | undefined): Promise<boolean> {
   if (!email) return false
@@ -27,6 +34,8 @@ Deno.serve(async (req) => {
   try { body = await req.json() } catch { return json({ error: 'JSON inválido' }, 400) }
   const kind = body.kind as ReadingKind
   const key = body.key ?? ''
+  const lang: ReadingLang = READING_LANGS.includes(body.lang) ? body.lang : 'pt'
+  const say = STREAM_TEXT[lang]
   if (!KINDS.includes(kind) || typeof body.summary !== 'string' || body.summary.length < 50 || !validAnalysisKey(kind, key)) {
     return json({ error: 'parâmetros inválidos' }, 400)
   }
@@ -56,7 +65,7 @@ Deno.serve(async (req) => {
     betas: ['server-side-fallback-2026-07-01'],
     fallbacks: 'default',
     system: [{ type: 'text', text: SYSTEM_PROMPT, cache_control: { type: 'ephemeral' } }],
-    messages: [{ role: 'user', content: buildUserPrompt(kind, clampSummary(body.summary)) }],
+    messages: [{ role: 'user', content: buildUserPrompt(kind, clampSummary(body.summary), lang) }],
   })
 
   const encoder = new TextEncoder()
@@ -68,13 +77,13 @@ Deno.serve(async (req) => {
         const message = await stream.finalMessage()
         if (message.stop_reason === 'refusal') {
           if (!wrote) await refund()
-          controller.enqueue(encoder.encode('\n\n_Não foi possível concluir esta análise. Ela não foi descontada do seu saldo._'))
+          controller.enqueue(encoder.encode(`\n\n_${say.refused}_`))
         }
       } catch (e) {
         // Nothing delivered: give the analysis back.
         if (!wrote) await refund()
-        const msg = e instanceof Anthropic.APIError ? `erro ${e.status ?? 'de rede'}` : 'erro inesperado'
-        controller.enqueue(encoder.encode(`\n\n_Falha ao gerar a análise (${msg}).${wrote ? '' : ' Ela não foi descontada do seu saldo.'}_`))
+        const msg = e instanceof Anthropic.APIError ? `${say.error} ${e.status ?? say.network}` : say.unexpected
+        controller.enqueue(encoder.encode(`\n\n_${say.failed} (${msg}).${wrote ? '' : ` ${say.notCharged}`}_`))
       } finally {
         controller.close()
       }

@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import type { BirthData } from '../astro/chart'
 import { localToUtc, offsetLabel } from '../astro/time'
 import { placeLabel, searchPlaces, type Place } from '../lib/geo'
+import { t } from '../i18n'
 
 interface Props {
   initial?: BirthData | null
@@ -11,7 +12,7 @@ interface Props {
 
 const pad = (n: number) => String(n).padStart(2, '0')
 
-export function BirthForm({ initial, onSubmit, submitLabel = 'Revelar meu mapa' }: Props) {
+export function BirthForm({ initial, onSubmit, submitLabel = t('Revelar meu mapa') }: Props) {
   const [name, setName] = useState(initial?.name ?? '')
   const [date, setDate] = useState(initial ? `${initial.local.year}-${pad(initial.local.month)}-${pad(initial.local.day)}` : '')
   const [time, setTime] = useState(initial ? `${pad(initial.local.hour)}:${pad(initial.local.minute)}` : '')
@@ -54,18 +55,18 @@ export function BirthForm({ initial, onSubmit, submitLabel = 'Revelar meu mapa' 
   const submit = (e: React.FormEvent) => {
     e.preventDefault()
     setError('')
-    if (!date) return setError('Informe a data de nascimento.')
-    if (!unknown && !time) return setError('Informe a hora de nascimento (ou marque "não sei a hora").')
-    if (!place) return setError('Escolha a cidade de nascimento na lista.')
+    if (!date) return setError(t('Informe a data de nascimento.'))
+    if (!unknown && !time) return setError(t('Informe a hora de nascimento (ou marque "não sei a hora").'))
+    if (!place) return setError(t('Escolha a cidade de nascimento na lista.'))
     const [y, m, d] = date.split('-').map(Number)
     const [hh, mm] = (unknown ? '12:00' : time).split(':').map(Number)
     try {
       localToUtc({ year: y, month: m, day: d, hour: hh, minute: mm }, place.timeZone)
     } catch {
-      return setError('Fuso horário inválido. Use um nome IANA (ex.: America/Sao_Paulo) ou UTC-3.')
+      return setError(t('Fuso horário inválido. Use um nome IANA (ex.: America/Sao_Paulo) ou UTC-3.'))
     }
     onSubmit({
-      name: name.trim() || 'Meu mapa',
+      name: name.trim() || t('Meu mapa'),
       local: { year: y, month: m, day: d, hour: hh, minute: mm },
       timeZone: place.timeZone,
       latitude: place.latitude,
@@ -90,31 +91,31 @@ export function BirthForm({ initial, onSubmit, submitLabel = 'Revelar meu mapa' 
   return (
     <form className="birth-form glass" onSubmit={submit}>
       <label className="field">
-        <span>Nome</span>
-        <input value={name} onChange={(e) => setName(e.target.value)} placeholder="Como você quer ser chamado" autoComplete="name" />
+        <span>{t('Nome')}</span>
+        <input value={name} onChange={(e) => setName(e.target.value)} placeholder={t('Como você quer ser chamado')} autoComplete="name" />
       </label>
       <div className="row">
         <label className="field">
-          <span>Data de nascimento</span>
+          <span>{t('Data de nascimento')}</span>
           <input type="date" value={date} onChange={(e) => setDate(e.target.value)} min="1800-01-01" max="2100-12-31" required />
         </label>
         <label className="field">
-          <span>Hora</span>
+          <span>{t('Hora')}</span>
           <input type="time" value={time} onChange={(e) => setTime(e.target.value)} disabled={unknown} />
         </label>
       </div>
       <label className="check">
         <input type="checkbox" checked={unknown} onChange={(e) => setUnknown(e.target.checked)} />
-        <span>Não sei a hora exata (sem casas e ascendente)</span>
+        <span>{t('Não sei a hora exata (sem casas e ascendente)')}</span>
       </label>
       <div className="field city">
-        <span>Cidade de nascimento</span>
+        <span>{t('Cidade de nascimento')}</span>
         <input
           value={query}
           onChange={(e) => { setQuery(e.target.value); setOpen(true); setPlace(null) }}
           onFocus={() => setOpen(true)}
           onBlur={() => setTimeout(() => setOpen(false), 180)}
-          placeholder="Digite a cidade…"
+          placeholder={t('Digite a cidade…')}
           autoComplete="off"
         />
         {loading && <span className="spinner" />}
@@ -137,7 +138,7 @@ export function BirthForm({ initial, onSubmit, submitLabel = 'Revelar meu mapa' 
         </p>
       )}
       <button type="button" className="link" onClick={() => setAdvanced((v) => !v)}>
-        {advanced ? '− Ocultar ajustes manuais' : '+ Ajustar coordenadas / fuso manualmente'}
+        {advanced ? `− ${t('Ocultar ajustes manuais')}` : `+ ${t('Ajustar coordenadas / fuso manualmente')}`}
       </button>
       {advanced && (
         <div className="row three">
@@ -150,7 +151,7 @@ export function BirthForm({ initial, onSubmit, submitLabel = 'Revelar meu mapa' 
             <input type="number" step="0.0001" value={place?.longitude ?? ''} onChange={(e) => setPlace((p) => ({ ...(p ?? { name: query || 'Local', latitude: 0, timeZone: 'UTC' }), longitude: Number(e.target.value) }))} />
           </label>
           <label className="field">
-            <span>Fuso (IANA ou UTC±h)</span>
+            <span>{t('Fuso (IANA ou UTC±h)')}</span>
             <input value={place?.timeZone ?? ''} placeholder="America/Sao_Paulo" onChange={(e) => setPlace((p) => ({ ...(p ?? { name: query || 'Local', latitude: 0, longitude: 0 }), timeZone: e.target.value }))} />
           </label>
         </div>

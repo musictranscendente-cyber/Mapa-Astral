@@ -2,6 +2,7 @@ import type { Chart } from '../astro/chart'
 import { ELEMENT_INFO, POINTS, SIGNS, type PointKey } from '../astro/constants'
 import { SIGN_TEXT } from '../interpret/signs'
 import { WHEEL_POINTS, spread } from './wheelLayout'
+import { t } from '../i18n'
 
 export type ShareFormat = 'story' | 'feed'
 
@@ -241,7 +242,7 @@ export async function renderShareImage(chart: Chart, { format, showName }: Share
   ctx.font = `500 30px ${SANS}`
   spaced(ctx, '✶  COSMIC SKY  ✶', w / 2, top, 6)
 
-  const title = showName && name ? name : 'Meu mapa astral'
+  const title = showName && name ? name : t('Meu mapa astral')
   const grad = ctx.createLinearGradient(w * 0.2, 0, w * 0.8, 0)
   grad.addColorStop(0, '#ffe8a3')
   grad.addColorStop(0.5, '#ffffff')
@@ -265,10 +266,10 @@ export async function renderShareImage(chart: Chart, { format, showName }: Share
   wheel(ctx, chart, w / 2, wheelY, R)
 
   const cards: [string, number][] = [
-    ['☉ Sol', chart.points.sun.sign],
-    ['☽ Lua', chart.points.moon.sign],
+    [`☉ ${POINTS.sun.name}`, chart.points.sun.sign],
+    [`☽ ${POINTS.moon.name}`, chart.points.moon.sign],
   ]
-  if (chart.hasHouses) cards.push(['Ascendente', chart.points.asc.sign])
+  if (chart.hasHouses) cards.push([POINTS.asc.name, chart.points.asc.sign])
   const gap = 24
   const cw = (w - 120 - gap * (cards.length - 1)) / cards.length
   const ch = story ? 250 : 210
@@ -279,7 +280,7 @@ export async function renderShareImage(chart: Chart, { format, showName }: Share
   const footY = h - (story ? 190 : 95)
   ctx.fillStyle = '#f3efff'
   ctx.font = `600 ${story ? 44 : 38}px ${DISPLAY}`
-  centerText(ctx, 'Descubra o seu mapa ✦ grátis', w / 2, footY, w - 100)
+  centerText(ctx, t('Descubra o seu mapa ✦ grátis'), w / 2, footY, w - 100)
   ctx.fillStyle = GOLD
   ctx.font = `500 ${story ? 30 : 26}px ${SANS}`
   centerText(ctx, shareUrlLabel(), w / 2, footY + (story ? 62 : 50), w - 80)
