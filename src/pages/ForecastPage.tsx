@@ -93,7 +93,7 @@ export function ForecastPage({ natal, go }: { natal: Chart | null; go: (r: Route
           {RANGES.map((r) => (
             <button
               key={r.days}
-              className={range === r.days ? 'active' : ''}
+              className={(askRange ?? range) === r.days ? 'active' : ''}
               onClick={() => {
                 if (r.days > maxRange) { setAskRange(r.days); return }
                 setAskRange(null); setRange(r.days); setDay(0)
