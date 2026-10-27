@@ -3,7 +3,7 @@ import { createPortal } from 'react-dom'
 import { AiError, aiAvailable } from '../ai/config'
 import { READING_TITLES, type ReadingKind } from '../ai/prompts'
 import { useAccess, type Offer } from '../billing/context'
-import type { Allowance } from '../billing/rules'
+import type { Allowance, PlanKey } from '../billing/rules'
 import { Locked } from './Locked'
 import type { Route } from '../App'
 import { locale, t } from '../i18n'
@@ -46,11 +46,15 @@ function AiReadingInner({ kind, subject, getSummary, accessKey, offer, go, stora
   const [text, setText] = useState<string>(() => readCache(key) ?? '')
   const [status, setStatus] = useState<'idle' | 'loading' | 'done' | 'error'>(() => (readCache(key) ? 'done' : 'idle'))
   const [error, setError] = useState('')
+  /** Waiting for the person to confirm what this generation will use. */
+  const [confirming, setConfirming] = useState(false)
+  const [buying, setBuying] = useState(false)
   const abort = useRef<AbortController | null>(null)
 
   useEffect(() => () => abort.current?.abort(), [])
 
   const run = async () => {
+    setConfirming(false)
     abort.current?.abort()
     const ctl = new AbortController()
     abort.current = ctl
@@ -83,13 +87,33 @@ function AiReadingInner({ kind, subject, getSummary, accessKey, offer, go, stora
 
   const available = access.enabled || aiAvailable()
   const canRun = !access.enabled || (allowance.ok && !access.loading)
+  // Anything that spends a balance asks first and says exactly what it uses.
+  const ask = () => (access.enabled && allowance.source ? setConfirming(true) : run())
 
   return (
     <section className="glass ai-reading">
       <div className="section-title">
         <h2><span className="ai-spark">✦</span> {t(READING_TITLES[kind])}</h2>
-        {status === 'done' && canRun && <button className="ghost" onClick={run}>↻ {t('Gerar nova versão')}</button>}
+        {status === 'done' && !confirming && (canRun || access.enabled) && <button className="ghost" onClick={() => (canRun ? ask() : setBuying((b) => !b))}>↻ {t('Gerar nova versão')}</button>}
       </div>
+      {confirming && (
+        <div className="ai-confirm">
+          <p>{costText(allowance, access.plan)}</p>
+          {status === 'done' && <p className="muted small">{t('A versão atual será substituída pela nova.')}</p>}
+          <div className="ai-confirm-actions">
+            <button className="cta" onClick={run}><span>{t('Confirmar e gerar')}</span></button>
+            <button className="ghost" onClick={() => setConfirming(false)}>{t('Cancelar')}</button>
+          </div>
+        </div>
+      )}
+      {status === 'done' && buying && !canRun && (
+        <Locked
+          title={t('Gerar uma nova versão')}
+          text={t('As versões incluídas nesta análise já foram usadas. Libere de novo ou escolha um plano com análises todo mês.')}
+          offer={offer}
+          go={go}
+        />
+      )}
       {status === 'idle' && access.enabled && !canRun && (
         <Locked
           title={access.loggedIn ? t('Libere esta análise completa') : t('Entre para receber sua análise completa')}
@@ -100,11 +124,11 @@ function AiReadingInner({ kind, subject, getSummary, accessKey, offer, go, stora
           go={go}
         />
       )}
-      {status === 'idle' && canRun && (
+      {status === 'idle' && canRun && !confirming && (
         <div className="ai-intro">
           <p>{t('Uma análise escrita sob medida, que integra todos os fatores calculados num texto único e profundo.')}</p>
           {available ? (
-            <button className="cta" onClick={run}><span>✧ {t('Gerar análise completa')} ✧</span></button>
+            <button className="cta" onClick={ask}><span>✧ {t('Gerar análise completa')} ✧</span></button>
           ) : (
             <button className="ghost" onClick={() => go('ajustes')}>⚙ {t('Ativar a análise completa em Ajustes')}</button>
           )}
@@ -171,6 +195,20 @@ function ReadingActions({ kind, subject, text }: { kind: ReadingKind; subject: s
       )}
     </>
   )
+}
+
+/** What confirming will spend, in plain words. */
+function costText(a: Allowance, plan: PlanKey | null): string {
+  if (a.source === 'grant') {
+    if (!a.left) return t('Esta é a última versão incluída na sua compra desta análise. Nenhum valor será cobrado.')
+    return t(a.left === 1 ? 'Incluída na sua compra desta análise: nenhum valor será cobrado. Depois desta, você ainda poderá gerar 1 nova versão.' : 'Incluída na sua compra desta análise: nenhum valor será cobrado. Depois desta, você ainda poderá gerar {n} novas versões.', { n: a.left })
+  }
+  if (a.source === 'plan') {
+    const name = plan === 'cosmos' ? 'Cosmos' : 'Estrela'
+    return t(a.left === 1 ? 'Vai usar 1 análise do seu plano {plan} (sem cobrança extra). Depois desta, resta 1 neste mês.' : 'Vai usar 1 análise do seu plano {plan} (sem cobrança extra). Depois desta, restam {n} neste mês.', { plan: name, n: a.left ?? 0 })
+  }
+  if (a.source === 'welcome') return t('Vai usar sua análise de presente de boas-vindas (grátis). Depois dela, novas análises são liberadas por compra avulsa ou plano.')
+  return ''
 }
 
 function allowanceNote(a: Allowance): string {

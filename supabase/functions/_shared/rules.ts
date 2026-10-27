@@ -13,6 +13,9 @@ export type ProductKey =
   | 'revolucao'
   | 'previsao12'
   | 'pacote'
+  | 'retorno_lunar'
+  | 'progressoes'
+  | 'astrocarto'
   | 'estrela_mensal'
   | 'estrela_anual'
   | 'cosmos_mensal'
@@ -36,6 +39,9 @@ export const PRODUCTS: Record<ProductKey, Product> = {
   sinastria: { key: 'sinastria', name: 'Sinastria completa', description: 'Todas as áreas, sobreposição de casas e análise completa do casal.', price: 29, scope: 'pair' },
   revolucao: { key: 'revolucao', name: 'Revolução Solar do ano', description: 'Mapa do ano completo, comparador de cidades e análise completa.', price: 39, scope: 'birthYear' },
   previsao12: { key: 'previsao12', name: 'Previsão de 12 meses', description: 'Trânsitos de 1 ano, meses-chave e análise completa.', price: 59, days: 365, scope: 'birth' },
+  retorno_lunar: { key: 'retorno_lunar', name: 'Retorno Lunar · 12 meses', description: 'Todas as posições e aspectos de cada mês, em qualquer cidade, por 1 ano.', price: 24, days: 365, scope: 'birth' },
+  progressoes: { key: 'progressoes', name: 'Progressões completas', description: 'Aspectos progredidos e de arco solar, marcos dos próximos 3 anos e todas as posições.', price: 24, scope: 'birth' },
+  astrocarto: { key: 'astrocarto', name: 'Astrocartografia completa', description: 'Análise de qualquer cidade do mundo: linhas próximas e o que cada uma traz.', price: 24, scope: 'birth' },
   pacote: { key: 'pacote', name: 'Pacote Aniversário', description: 'Revolução Solar + comparador de cidades + previsão de 12 meses.', price: 89, days: 365, scope: 'birthYear' },
   estrela_mensal: { key: 'estrela_mensal', name: 'Plano Estrela · 1 mês', description: 'Acesso Estrela por 30 dias.', price: 29.9, plan: 'estrela', days: 30 },
   estrela_anual: { key: 'estrela_anual', name: 'Plano Estrela · 1 ano', description: 'Acesso Estrela por 365 dias.', price: 239, plan: 'estrela', days: 365 },
@@ -75,6 +81,12 @@ export function grantKeys(product: ProductKey, scope: Scope): string[] | null {
       return [natalKey(scope.birth)]
     case 'previsao12':
       return [forecastKey(scope.birth)]
+    case 'retorno_lunar':
+      return [lunarKey(scope.birth)]
+    case 'progressoes':
+      return [progressionsKey(scope.birth)]
+    case 'astrocarto':
+      return [astroMapKey(scope.birth)]
     case 'sinastria':
       return validId(scope.other) && scope.other !== scope.birth ? [pairKey(scope.birth, scope.other)] : null
     case 'revolucao':
@@ -88,6 +100,9 @@ export function grantKeys(product: ProductKey, scope: Scope): string[] | null {
 export const natalKey = (birth: string) => `natal:${birth}`
 export const forecastKey = (birth: string) => `previsao:${birth}`
 export const solarKey = (birth: string, year: number) => `revolucao:${birth}:${year}`
+export const lunarKey = (birth: string) => `retorno-lunar:${birth}`
+export const progressionsKey = (birth: string) => `progressoes:${birth}`
+export const astroMapKey = (birth: string) => `astrocartografia:${birth}`
 export const pairKey = (a: string, b: string) => `sinastria:${[a, b].sort().join('+')}`
 
 export interface Grant {

@@ -927,3 +927,16 @@ p { margin: 0 0 0.8em; }
 .ai-saved { text-align: center; margin: 0.6rem 0 0; }
 .lang-picker { margin: 0 0 0.8rem; flex-wrap: wrap; }
 .menu-panel .lang-picker { margin: 0.2rem 0 0.8rem; }
+
+/* Confirmation before an analysis uses a balance */
+.ai-confirm { margin: 1rem 0; padding: 1.1rem 1.2rem; border: 1px solid rgba(255, 232, 163, 0.35); border-radius: 18px; background: rgba(255, 232, 163, 0.06); text-align: center; }
+.ai-confirm p { margin: 0 0 0.5rem; }
+.ai-confirm-actions { display: flex; flex-wrap: wrap; gap: 0.6rem; justify-content: center; margin-top: 0.8rem; }
+
+/* Header: which plan is active */
+.plans-btn { position: relative; }
+.plans-btn.plan-estrela { color: #1a1033; background: linear-gradient(135deg, #ffe8a3, #f6c768); border-color: #ffe8a3; box-shadow: 0 0 12px rgba(255, 232, 163, 0.45); }
+.plans-btn.plan-cosmos { color: #fff; background: linear-gradient(135deg, #7b5cff, #d26bff 60%, #ff8fc7); border-color: #e3c6ff; box-shadow: 0 0 14px rgba(210, 107, 255, 0.6); }
+.plan-tag { position: absolute; left: 50%; bottom: -9px; transform: translateX(-50%); font-size: 0.56rem; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; line-height: 1; padding: 2px 5px; border-radius: 6px; white-space: nowrap; pointer-events: none; }
+.plan-estrela .plan-tag { background: #ffe8a3; color: #1a1033; }
+.plan-cosmos .plan-tag { background: #b45cff; color: #fff; }

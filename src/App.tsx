@@ -238,8 +238,14 @@ function Main({ auth }: { auth: AuthState }) {
             </select>
           )}
           {access.enabled && (
-            <button className={`icon-btn plans-btn ${route === 'planos' ? 'on' : ''}`} title={t('Planos')} aria-label={t('Planos')} onClick={() => go('planos')}>
-              {access.plan ? '✦' : '💎'}
+            <button
+              className={`icon-btn plans-btn ${access.plan ? `plan-${access.plan}` : ''} ${route === 'planos' ? 'on' : ''}`}
+              title={access.plan ? t('Seu plano: {plan}', { plan: access.plan === 'cosmos' ? 'Cosmos' : 'Estrela' }) : t('Planos')}
+              aria-label={access.plan ? t('Seu plano: {plan}', { plan: access.plan === 'cosmos' ? 'Cosmos' : 'Estrela' }) : t('Planos')}
+              onClick={() => go('planos')}
+            >
+              {access.plan === 'cosmos' ? '✺' : access.plan === 'estrela' ? '★' : '💎'}
+              {access.plan && <small className="plan-tag">{access.plan === 'cosmos' ? 'Cosmos' : 'Estrela'}</small>}
             </button>
           )}
           <button className={`icon-btn account-btn ${route === 'conta' ? 'on' : ''}`} title={auth.user ? t('Minha conta') : t('Entrar')} aria-label={t('Conta')} onClick={() => go('conta')}>

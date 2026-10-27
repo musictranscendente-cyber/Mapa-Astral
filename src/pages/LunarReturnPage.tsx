@@ -113,7 +113,7 @@ export function LunarReturnPage({ natal, houseSystem, go }: Props) {
               </div>
             </section>
           ) : (
-            <Locked title={t('Retorno Lunar completo')} text={t('Todas as posições e aspectos do mês, para qualquer mês e qualquer cidade — incluso nos planos.')} go={go} />
+            <Locked title={t('Retorno Lunar completo')} text={t('Todas as posições e aspectos do mês, para qualquer mês e qualquer cidade. Libere só este serviço por 12 meses ou tenha tudo num plano.')} offer={{ product: 'retorno_lunar', scope: { birth: birthKey(natal.birth) }, label: natal.birth.name }} go={go} />
           )}
         </>
       )}

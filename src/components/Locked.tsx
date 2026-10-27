@@ -52,7 +52,7 @@ export function Locked({ title, text, offer, go }: Props) {
               <span>{busy ? t('Abrindo pagamento…') : t('Liberar por {price}', { price: formatBRL(PRODUCTS[offer.product].price) })}</span>
             </button>
           )}
-          <button className="ghost" onClick={() => go('planos')}>{t('Ver planos · a partir de {price}/mês', { price: formatBRL(PRODUCTS.estrela_mensal.price) })}</button>
+          <button className="ghost" onClick={() => go('planos')}>{t(offer ? 'Ou tudo liberado num plano · a partir de {price}/mês' : 'Ver planos · a partir de {price}/mês', { price: formatBRL(PRODUCTS.estrela_mensal.price) })}</button>
           {offer && <p className="muted small">{access.simulated ? `🧪 ${t('Simulação')} · ` : ''}{t('Pagamento único por Pix ou cartão')} · {t(PRODUCTS[offer.product].name)}{offer.label ? ` · ${offer.label}` : ''}</p>}
         </div>
       )}

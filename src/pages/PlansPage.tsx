@@ -90,6 +90,9 @@ export function PlansPage({ natal, go }: Props) {
     { icon: '☼', offer: { product: 'revolucao', scope: { birth: bk, year }, label: `${name} · ${year}` } },
     { icon: '✧', offer: { product: 'previsao12', scope: { birth: bk }, label: name } },
     { icon: '✦', offer: { product: 'pacote', scope: { birth: bk, year }, label: `${name} · ${year}` } },
+    { icon: '☾', offer: { product: 'retorno_lunar', scope: { birth: bk }, label: name } },
+    { icon: '➶', offer: { product: 'progressoes', scope: { birth: bk }, label: name } },
+    { icon: '⌖', offer: { product: 'astrocarto', scope: { birth: bk }, label: name } },
   ] : []
   const until = access.data.planUntil ? new Date(access.data.planUntil).toLocaleDateString(locale(), { dateStyle: 'long' }) : ''
 

@@ -150,7 +150,7 @@ export function AstroMapPage({ natal, go }: { natal: Chart | null; go: (r: Route
               )}
             </section>
           ) : (
-            <Locked title={t('Análise de cidades')} text={t('Toque no mapa ou busque uma cidade para ver quais linhas passam perto e o que elas trazem — incluso nos planos.')} go={go} />
+            <Locked title={t('Análise de cidades')} text={t('Toque no mapa ou busque uma cidade para ver quais linhas passam perto e o que elas trazem. Libere só este serviço ou tenha tudo num plano.')} offer={{ product: 'astrocarto', scope: { birth: birthKey(natal.birth) }, label: natal.birth.name }} go={go} />
           )}
         </>
       )}
