@@ -7,7 +7,7 @@ import { moonSignOfDayText } from '../interpret/report'
 import { calendarEvents, type CalEvent } from '../astro/calendar'
 import { eventTime, eventTitle } from '../interpret/calendar'
 import { DEFAULT_TOPICS, type NotifyTopics } from './profiles'
-import { locale } from '../i18n'
+import { locale, t } from '../i18n'
 
 const FAST = ['moon', 'sun', 'mercury', 'venus', 'mars']
 
@@ -41,6 +41,7 @@ export function buildDailyMessages(natal: Chart, hour: number, days = 21, topics
     const key = localDay(d)
     const moonSign = Math.floor(bodyLongitude('moon', toTime(d)) / 30)
     const phase = moonPhaseInfo(d)
+    const moonIn = t('{phase} em {sign}', { phase: t(phase.name), sign: SIGNS[moonSign].name })
     const today = events.filter((e) => localDay(e.date) === key || (e.kind === 'fora-de-curso' && localDay(e.end!) === key))
     const pick = (kinds: CalEvent['kind'][]) => today.filter((e) => kinds.includes(e.kind))
     const featured = [
@@ -60,10 +61,10 @@ export function buildDailyMessages(natal: Chart, hour: number, days = 21, topics
       const hits = transitsAt(natal, d)
       const top = [...hits.filter((h) => FAST.includes(h.transit)), ...hits].find((h) => transitHeadline(h.transit, h.natal, h.type.key) !== previous)
       previous = top ? transitHeadline(top.transit, top.natal, top.type.key) : ''
-      const mood = score.flow > 25 ? 'dia de fluxo ✦' : score.flow < -25 ? 'dia de atenção ⚠' : 'dia de equilíbrio ☯'
-      title = top ? `${previous} · ${mood}` : `${phase.name} em ${SIGNS[moonSign].name} · ${mood}`
+      const mood = score.flow > 25 ? t('dia de fluxo ✦') : score.flow < -25 ? t('dia de atenção ⚠') : t('dia de equilíbrio ☯')
+      title = top ? `${previous} · ${mood}` : `${moonIn} · ${mood}`
     } else {
-      title = `${phase.emoji} ${phase.name} em ${SIGNS[moonSign].name}`
+      title = `${phase.emoji} ${moonIn}`
     }
     const lines = [`${phase.emoji} ${moonSignOfDayText(moonSign)}`]
     for (const e of [...featured.slice(1), ...extras]) lines.push(`${ICON[e.kind] ?? '✦'} ${eventTitle(e)} · ${eventTime(e)}`)

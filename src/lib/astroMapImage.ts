@@ -2,6 +2,7 @@ import { POINTS, type PlanetKey } from '../astro/constants'
 import type { AcgLine } from '../astro/astrocarto'
 import { WORLD_LAND_PATH } from './worldPath'
 import { DISPLAY, GOLD, SANS, SERIF, SYMBOLS, background, centerText, loadFonts, roundRect, spaced } from './shareImage'
+import { t } from '../i18n'
 
 export const astroMapUrl = () => `${window.location.origin}${window.location.pathname}?ref=astrocartografia#/astrocartografia`
 
@@ -23,7 +24,7 @@ export async function renderAstroMapImage(name: string, lines: AcgLine[], planet
   spaced(ctx, '✶  COSMIC SKY  ✶', w / 2, 100, 6)
   ctx.fillStyle = '#c9c3e6'
   ctx.font = `italic 500 46px ${SERIF}`
-  centerText(ctx, 'Onde no mundo o meu céu brilha', w / 2, 180, w - 120)
+  centerText(ctx, t('Onde no mundo o meu céu brilha'), w / 2, 180, w - 120)
   ctx.fillStyle = '#f3efff'
   ctx.font = `600 64px ${DISPLAY}`
   centerText(ctx, name, w / 2, 262, w - 120)
@@ -105,7 +106,7 @@ export async function renderAstroMapImage(name: string, lines: AcgLine[], planet
   ctx.beginPath(); ctx.arc(w / 2 - 130, y + 66, 11, 0, Math.PI * 2); ctx.fill()
   ctx.fillStyle = '#c9c3e6'
   ctx.textAlign = 'left'
-  ctx.fillText('meu nascimento', w / 2 - 106, y + 66)
+  ctx.fillText(t('meu nascimento'), w / 2 - 106, y + 66)
 
   // Planets shown
   y += 170
@@ -125,7 +126,7 @@ export async function renderAstroMapImage(name: string, lines: AcgLine[], planet
 
   ctx.fillStyle = GOLD
   ctx.font = `500 28px ${SANS}`
-  centerText(ctx, `Faça a sua em ${`${window.location.host}${window.location.pathname}`.replace(/\/$/, '')}`, w / 2, h - 60, w - 80)
+  centerText(ctx, t('Faça a sua em {site}', { site: `${window.location.host}${window.location.pathname}`.replace(/\/$/, '') }), w / 2, h - 60, w - 80)
 
   return new Promise((resolve, reject) => canvas.toBlob((bl) => (bl ? resolve(bl) : reject(new Error('Falha ao gerar a imagem.'))), 'image/png'))
 }

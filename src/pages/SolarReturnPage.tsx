@@ -82,7 +82,7 @@ export function SolarReturnPage({ natal, houseSystem, go }: Props) {
 
       {needsLogin ? (
         <Locked
-          title={`O mapa do seu ano ${year}`}
+          title={t('O mapa do seu ano {year}', { year })}
           text={t('Entre grátis para ver o Ascendente do ano e onde estão o Sol e a Lua: as áreas da vida em destaque até o próximo aniversário.')}
           go={go}
         />

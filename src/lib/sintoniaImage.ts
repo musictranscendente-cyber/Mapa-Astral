@@ -3,6 +3,7 @@ import type { Chart } from '../astro/chart'
 import { SYN_AREAS, type SynScore } from '../astro/synastry'
 import { synSummary } from '../interpret/synastry'
 import { DISPLAY, GOLD, SANS, SERIF, SYMBOLS, background, centerText, loadFonts, roundRect, spaced } from './shareImage'
+import { t } from '../i18n'
 
 export const sintoniaUrl = () => `${window.location.origin}${window.location.pathname}?ref=sintonia#/sintonia`
 
@@ -22,7 +23,7 @@ export async function renderSintoniaImage(a: { name: string; chart: Chart }, b: 
   spaced(ctx, '✶  COSMIC SKY  ✶', w / 2, 170, 6)
   ctx.fillStyle = '#c9c3e6'
   ctx.font = `italic 500 52px ${SERIF}`
-  centerText(ctx, 'Qual é a nossa sintonia?', w / 2, 260, w - 120)
+  centerText(ctx, t('Qual é a nossa sintonia?'), w / 2, 260, w - 120)
 
   // Names and Sun signs
   const person = (x: number, name: string, c: Chart) => {
@@ -89,7 +90,7 @@ export async function renderSintoniaImage(a: { name: string; chart: Chart }, b: 
 
   ctx.fillStyle = '#f3efff'
   ctx.font = `600 46px ${DISPLAY}`
-  centerText(ctx, 'Faça o teste com quem você ama ✦', w / 2, h - 150, w - 100)
+  centerText(ctx, t('Faça o teste com quem você ama ✦'), w / 2, h - 150, w - 100)
   ctx.fillStyle = GOLD
   ctx.font = `500 30px ${SANS}`
   centerText(ctx, `${window.location.host}${window.location.pathname}`.replace(/\/$/, ''), w / 2, h - 92, w - 80)

@@ -123,7 +123,7 @@ export function HoroscopePage({ natal, go }: { natal: Chart | null; go: (r: Rout
           </>
         )}
       </section>
-      <p className="muted small center">Planetas hoje: {(['sun', 'moon', 'mercury', 'venus', 'mars'] as const).map((k) => `${POINTS[k].name} em ${SIGNS[h.planets[k].sign].name}${h.planets[k].retro ? ' ℞' : ''}`).join(' · ')}</p>
+      <p className="muted small center">{t('Planetas hoje:')} {(['sun', 'moon', 'mercury', 'venus', 'mars'] as const).map((k) => `${t('{planet} em {sign}', { planet: POINTS[k].name, sign: SIGNS[h.planets[k].sign].name })}${h.planets[k].retro ? ' ℞' : ''}`).join(' · ')}</p>
     </div>
   )
 }
