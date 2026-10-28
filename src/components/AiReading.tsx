@@ -109,7 +109,7 @@ function AiReadingInner({ kind, subject, getSummary, accessKey, offer, go, stora
       {status === 'done' && buying && !canRun && (
         <Locked
           title={t('Gerar uma nova versão')}
-          text={t('As versões incluídas nesta análise já foram usadas. Libere de novo ou escolha um plano com análises todo mês.')}
+          text={t('A compra avulsa inclui uma análise, e ela já foi gerada (continua salva aqui). Para uma nova versão, libere de novo ou escolha um plano: no plano você gera novas versões com as análises do mês.')}
           offer={offer}
           go={go}
         />
@@ -200,7 +200,7 @@ function ReadingActions({ kind, subject, text }: { kind: ReadingKind; subject: s
 /** What confirming will spend, in plain words. */
 function costText(a: Allowance, plan: PlanKey | null): string {
   if (a.source === 'grant') {
-    if (!a.left) return t('Esta é a última versão incluída na sua compra desta análise. Nenhum valor será cobrado.')
+    if (!a.left) return t('Esta é a análise incluída na sua compra (nenhum valor será cobrado). A compra avulsa inclui uma geração: novas versões depois dela só com nova compra ou plano.')
     return t(a.left === 1 ? 'Incluída na sua compra desta análise: nenhum valor será cobrado. Depois desta, você ainda poderá gerar 1 nova versão.' : 'Incluída na sua compra desta análise: nenhum valor será cobrado. Depois desta, você ainda poderá gerar {n} novas versões.', { n: a.left })
   }
   if (a.source === 'plan') {

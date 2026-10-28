@@ -57,8 +57,8 @@ export const OWNER_EMAIL_HASHES = ['038af17a8e8b545e9547aaac6d35d608d98f92a05bb4
 
 export const PLAN_ANALYSES: Record<PlanKey, number> = { estrela: 3, cosmos: 30 }
 export const WELCOME_ANALYSES = 1
-/** Generations allowed for each analysis bought separately (first + 2 new versions). */
-export const GRANT_ANALYSES = 3
+/** Generations included in each analysis bought separately: one. New versions are a plan perk (or a new purchase). */
+export const GRANT_ANALYSES = 1
 export const PROFILE_LIMIT = { anon: 2, free: 3, estrela: 10, cosmos: Infinity } as const
 
 export interface Scope {
@@ -186,7 +186,7 @@ export interface Allowance {
 
 /** Which allowance pays for generating an analysis of `key`, if any. */
 export function analysisAllowance(a: AccessData, key: string, now = new Date()): Allowance {
-  // Each purchase of the same item adds its own generations (buying again tops it up).
+  // Each purchase of the same item adds its own generation (buying again unlocks one more).
   const bought = a.grants.filter((g) => g.key === key && (!g.expiresAt || Date.parse(g.expiresAt) > now.getTime())).length
   const used = a.usedByKey[key] ?? 0
   if (bought && used < bought * GRANT_ANALYSES) return { ok: true, source: 'grant', left: bought * GRANT_ANALYSES - used - 1 }

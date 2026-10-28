@@ -71,7 +71,8 @@ function Terms() {
         <ul>
           <li>Os pagamentos são processados pelo <b>Mercado Pago</b> (Pix ou cartão). O Cosmic Sky não recebe nem armazena dados de cartão.</li>
           <li>Os planos <b>não renovam automaticamente</b>: valem pelo período comprado (1 mês ou 1 ano). Comprar de novo soma o tempo restante do mesmo plano; trocar de plano inicia um novo período.</li>
-          <li>Os serviços avulsos ficam liberados para o mapa escolhido; a Previsão de 12 meses e o Pacote Aniversário valem por 1 ano.</li>
+          <li>Os serviços avulsos ficam liberados para o mapa escolhido; a Previsão de 12 meses, o Pacote Aniversário e o Retorno Lunar valem por 1 ano. Cada compra avulsa inclui uma geração da análise completa daquele serviço; novas versões exigem nova compra ou um plano.</li>
+          <li>As análises completas dos planos formam uma cota mensal única, válida para todos os serviços, que se renova no dia 1º de cada mês e não acumula.</li>
           <li>As análises incluídas em planos e compras têm os limites descritos na página Planos.</li>
           <li>
             <b>Direito de arrependimento:</b> você pode pedir o reembolso em até 7 dias após a compra (art. 49 do Código de Defesa do

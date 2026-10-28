@@ -22,12 +22,13 @@ const PLAN_FEATURES = {
     'Retorno Lunar completo: o mapa de todo mês',
     'Progressões e arcos solares com os marcos dos próximos anos',
     'Astrocartografia com análise de qualquer cidade',
-    `${PLAN_ANALYSES.estrela} análises completas por mês`,
+    `${PLAN_ANALYSES.estrela} análises completas por mês, em qualquer serviço`,
+    'Gere novas versões das análises usando a cota do mês',
   ],
   cosmos: [
     'Mapas ilimitados (família, amigos, clientes)',
     'Tudo do plano Estrela',
-    `Até ${PLAN_ANALYSES.cosmos} análises completas por mês`,
+    `Até ${PLAN_ANALYSES.cosmos} análises completas por mês, em qualquer serviço`,
     'Ideal para quem estuda ou atende com astrologia',
   ],
 }
