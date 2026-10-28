@@ -1,6 +1,6 @@
 import { useEffect, useState, useSyncExternalStore } from 'react'
 import {
-  OWNER_EMAIL_HASHES, PRODUCTS, buildAccess, extendPlan, grantKeys,
+  FULL_ACCESS_EMAIL_HASHES, OWNER_EMAIL_HASHES, PRODUCTS, buildAccess, extendPlan, grantKeys,
   type AccessData, type AnalysisLogRow, type AnalysisSource, type PlanKey, type ProductKey, type Scope,
 } from './rules'
 
@@ -102,13 +102,17 @@ async function sha256(text: string): Promise<string> {
 }
 
 /** True when the signed-in e-mail belongs to the app owner. */
-export function useIsOwner(email: string | null | undefined): boolean {
+function useEmailIn(email: string | null | undefined, hashes: string[]): boolean {
   const [hit, setHit] = useState<{ email: string; ok: boolean } | null>(null)
   useEffect(() => {
     if (!email || !crypto.subtle) return
     let cancelled = false
-    sha256(email.trim().toLowerCase()).then((h) => { if (!cancelled) setHit({ email, ok: OWNER_EMAIL_HASHES.includes(h) }) })
+    sha256(email.trim().toLowerCase()).then((h) => { if (!cancelled) setHit({ email, ok: hashes.includes(h) }) })
     return () => { cancelled = true }
-  }, [email])
+  }, [email, hashes])
   return !!email && hit?.email === email && hit.ok
 }
+
+export const useIsOwner = (email: string | null | undefined) => useEmailIn(email, OWNER_EMAIL_HASHES)
+/** Owner or review account: the real account sees everything and generates analyses freely. */
+export const useHasFullAccess = (email: string | null | undefined) => useEmailIn(email, FULL_ACCESS_EMAIL_HASHES)

@@ -2,10 +2,11 @@ import { useCallback, useEffect, useMemo, useState, type ReactNode } from 'react
 import { BILLING, fetchAccess, startCheckout } from './api'
 import { AccessContext, OPEN, type Access } from './context'
 import { EMPTY_ACCESS, PROFILE_LIMIT, activePlan, analysisAllowance, unlocked, type AccessData } from './rules'
-import { simAccess, simBuy, simRecordUse, useIsOwner, useSim } from './sim'
+import { simAccess, simBuy, simRecordUse, useHasFullAccess, useIsOwner, useSim } from './sim'
 
 export function AccessProvider({ userId, email, children }: { userId: string | null; email: string | null; children: ReactNode }) {
   const owner = useIsOwner(email)
+  const unlimited = useHasFullAccess(email)
   const sim = useSim()
   // Tagged with the account it was loaded for, so a different account never sees stale data.
   const [state, setState] = useState<{ uid: string | null; data: AccessData }>({ uid: null, data: EMPTY_ACCESS })
@@ -59,17 +60,17 @@ export function AccessProvider({ userId, email, children }: { userId: string | n
       loading: !!userId && state.uid !== userId,
       plan,
       data,
-      // the owner's real account sees everything and generates analyses freely (the server agrees)
-      full: (key) => owner || (!!userId && unlocked(data, key)),
-      allowance: (key) => (owner ? { ok: true } : userId ? analysisAllowance(data, key) : { ok: false }),
-      profileLimit: owner ? Infinity : !userId ? PROFILE_LIMIT.anon : plan ? PROFILE_LIMIT[plan] : PROFILE_LIMIT.free,
+      // the owner and the Play review account see everything and generates analyses freely (the server agrees)
+      full: (key) => unlimited || (!!userId && unlocked(data, key)),
+      allowance: (key) => (unlimited ? { ok: true } : userId ? analysisAllowance(data, key) : { ok: false }),
+      profileLimit: unlimited ? Infinity : !userId ? PROFILE_LIMIT.anon : plan ? PROFILE_LIMIT[plan] : PROFILE_LIMIT.free,
       refresh,
       buy: (offer) => (typeof offer === 'string' ? startCheckout(offer) : startCheckout(offer.product, offer.scope, offer.label)),
       owner,
       simulated: false,
       recordUse: () => {},
     }
-  }, [data, userId, refresh, state.uid, owner, sim])
+  }, [data, userId, refresh, state.uid, owner, unlimited, sim])
 
   return <AccessContext.Provider value={value}>{children}</AccessContext.Provider>
 }
