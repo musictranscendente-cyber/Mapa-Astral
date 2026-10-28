@@ -3,7 +3,7 @@
 // Secret: ANTHROPIC_API_KEY.
 import Anthropic from 'npm:@anthropic-ai/sdk@0.131.0'
 import { READING_LANGS, SYSTEM_PROMPT, buildUserPrompt, clampSummary, type ReadingKind, type ReadingLang } from '../_shared/promptCore.ts'
-import { OWNER_EMAIL_HASHES, analysisAllowance, validAnalysisKey } from '../_shared/rules.ts'
+import { FULL_ACCESS_EMAIL_HASHES, analysisAllowance, validAnalysisKey } from '../_shared/rules.ts'
 import { adminClient, corsHeaders, json, loadAccess, requestUser } from '../_shared/server.ts'
 
 const KINDS: ReadingKind[] = ['natal', 'sinastria', 'revolucao', 'previsao']
@@ -19,7 +19,7 @@ async function isOwner(email: string | undefined): Promise<boolean> {
   if (!email) return false
   const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(email.trim().toLowerCase()))
   const hex = [...new Uint8Array(buf)].map((b) => b.toString(16).padStart(2, '0')).join('')
-  return OWNER_EMAIL_HASHES.includes(hex)
+  return FULL_ACCESS_EMAIL_HASHES.includes(hex)
 }
 
 Deno.serve(async (req) => {

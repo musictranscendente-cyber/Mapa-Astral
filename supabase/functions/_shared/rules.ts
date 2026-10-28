@@ -60,6 +60,8 @@ export const isProductKey = (k: unknown): k is ProductKey => typeof k === 'strin
 /** Monthly analysis allowance per plan. New accounts get the 30-day forecast (calculation only) instead of a free analysis. */
 /** SHA-256 of the owner's e-mail (lower-case): unlimited analyses and full access, never stored in plain text. */
 export const OWNER_EMAIL_HASHES = ['038af17a8e8b545e9547aaac6d35d608d98f92a05bb47142805ecb58e10f2510']
+/** Owner plus the Google Play review account: everything unlocked and unlimited analyses (no owner tools). */
+export const FULL_ACCESS_EMAIL_HASHES = [...OWNER_EMAIL_HASHES, '171c57dcd48868878df5c968557db78552f637aee404f9b0107e399ca3ab2d94']
 
 export const PLAN_ANALYSES: Record<PlanKey, number> = { estrela: 3, cosmos: 30 }
 export const WELCOME_ANALYSES = 0
