@@ -50,6 +50,8 @@ describe('billing rules', () => {
     const bought: AccessData = { ...welcomed, grants: [{ key: 'natal:abcd', expiresAt: null }] }
     expect(analysisAllowance(bought, 'natal:abcd', now)).toMatchObject({ ok: true, source: 'grant', left: 2 })
     expect(analysisAllowance({ ...bought, usedByKey: { 'natal:abcd': 3 } }, 'natal:abcd', now).ok).toBe(false)
+    const rebought: AccessData = { ...bought, grants: [...bought.grants, { key: 'natal:abcd', expiresAt: null }], usedByKey: { 'natal:abcd': 3 } }
+    expect(analysisAllowance(rebought, 'natal:abcd', now)).toMatchObject({ ok: true, source: 'grant', left: 2 })
 
     const estrela = buildAccess({ plan: 'estrela', plan_until: '2026-11-01T00:00:00Z' }, [], [
       { source: 'welcome', access_key: 'x', created_at: '2026-01-01T00:00:00Z' },
