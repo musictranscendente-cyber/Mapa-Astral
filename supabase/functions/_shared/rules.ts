@@ -186,10 +186,10 @@ export interface Allowance {
 
 /** Which allowance pays for generating an analysis of `key`, if any. */
 export function analysisAllowance(a: AccessData, key: string, now = new Date()): Allowance {
-  if (hasGrant(a, key, now)) {
-    const used = a.usedByKey[key] ?? 0
-    if (used < GRANT_ANALYSES) return { ok: true, source: 'grant', left: GRANT_ANALYSES - used - 1 }
-  }
+  // Each purchase of the same item adds its own generations (buying again tops it up).
+  const bought = a.grants.filter((g) => g.key === key && (!g.expiresAt || Date.parse(g.expiresAt) > now.getTime())).length
+  const used = a.usedByKey[key] ?? 0
+  if (bought && used < bought * GRANT_ANALYSES) return { ok: true, source: 'grant', left: bought * GRANT_ANALYSES - used - 1 }
   const plan = activePlan(a, now)
   if (plan && a.planUsedThisMonth < PLAN_ANALYSES[plan]) {
     return { ok: true, source: 'plan', left: PLAN_ANALYSES[plan] - a.planUsedThisMonth - 1 }
