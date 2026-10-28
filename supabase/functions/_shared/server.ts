@@ -1,6 +1,6 @@
 // Helpers shared by the Edge Functions (Deno).
 import { createClient, type SupabaseClient, type User } from 'npm:@supabase/supabase-js@2'
-import { buildAccess, type AccessData, type AnalysisLogRow, type EntitlementRow, type PurchaseRow } from './rules.ts'
+import { PRODUCTS, buildAccess, extendPlan, type AccessData, type AnalysisLogRow, type EntitlementRow, type PlanKey, type ProductKey, type PurchaseRow } from './rules.ts'
 
 export const corsHeaders: Record<string, string> = {
   'access-control-allow-origin': Deno.env.get('ALLOWED_ORIGIN') ?? '*',
@@ -38,3 +38,31 @@ export async function loadAccess(admin: SupabaseClient, userId: string): Promise
 }
 
 export const APP_URL = Deno.env.get('APP_URL') ?? 'https://musictranscendente-cyber.github.io/Mapa-Astral/'
+
+/**
+ * Marks a paid order as approved and grants what it bought (plan time or single services).
+ * Safe to call more than once: only the first call applies it. `paymentRef` is the provider's
+ * payment id (Mercado Pago id, or `stripe:<payment_intent>`).
+ */
+export async function approvePurchase(admin: SupabaseClient, p: { id: string; user_id: string; product: ProductKey }, paymentRef: string): Promise<boolean> {
+  const product = PRODUCTS[p.product]
+  const now = new Date()
+  const expires = product.days && !product.plan ? new Date(now.getTime() + product.days * 86400000).toISOString() : null
+  // Conditional update: only one notification gets to apply the purchase.
+  const { data: updated } = await admin
+    .from('purchases')
+    .update({ status: 'approved', paid_at: now.toISOString(), mp_payment_id: paymentRef, expires_at: expires })
+    .eq('id', p.id)
+    .neq('status', 'approved')
+    .select('id')
+    .maybeSingle()
+  if (!updated) return false
+
+  if (product.plan) {
+    const { data: ent } = await admin.from('entitlements').select('plan, plan_until').eq('user_id', p.user_id).maybeSingle()
+    const until = extendPlan({ plan: (ent?.plan ?? null) as PlanKey | null, planUntil: ent?.plan_until ?? null }, product.plan, product.days ?? 30, now)
+    await admin.from('entitlements').upsert({ user_id: p.user_id, plan: product.plan, plan_until: until, updated_at: now.toISOString() })
+    await admin.from('purchases').update({ expires_at: until }).eq('id', p.id)
+  }
+  return true
+}

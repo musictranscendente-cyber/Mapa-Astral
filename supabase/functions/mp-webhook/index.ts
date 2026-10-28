@@ -1,8 +1,8 @@
 // POST /functions/v1/mp-webhook — Mercado Pago payment notifications (deploy with --no-verify-jwt).
 // The payment is always re-read from the Mercado Pago API with our token, so a forged
 // notification can't unlock anything. Secrets: MP_ACCESS_TOKEN, MP_WEBHOOK_SECRET (optional, recommended).
-import { PRODUCTS, extendPlan, isProductKey, paidEnough, type PlanKey } from '../_shared/rules.ts'
-import { adminClient } from '../_shared/server.ts'
+import { PRODUCTS, isProductKey, paidEnough } from '../_shared/rules.ts'
+import { adminClient, approvePurchase } from '../_shared/server.ts'
 
 const ok = (msg = 'ok') => new Response(msg, { status: 200 })
 
@@ -49,24 +49,7 @@ Deno.serve(async (req) => {
       console.error('valor divergente', purchaseId, pay.transaction_amount)
       return ok('valor divergente')
     }
-    const now = new Date()
-    const expires = product.days && !product.plan ? new Date(now.getTime() + product.days * 86400000).toISOString() : null
-    // Conditional update: only one notification gets to apply the purchase.
-    const { data: updated } = await admin
-      .from('purchases')
-      .update({ status: 'approved', paid_at: now.toISOString(), mp_payment_id: String(pay.id), expires_at: expires })
-      .eq('id', p.id)
-      .neq('status', 'approved')
-      .select('id')
-      .maybeSingle()
-    if (!updated) return ok('já processado')
-
-    if (product.plan) {
-      const { data: ent } = await admin.from('entitlements').select('plan, plan_until').eq('user_id', p.user_id).maybeSingle()
-      const until = extendPlan({ plan: (ent?.plan ?? null) as PlanKey | null, planUntil: ent?.plan_until ?? null }, product.plan, product.days ?? 30, now)
-      await admin.from('entitlements').upsert({ user_id: p.user_id, plan: product.plan, plan_until: until, updated_at: now.toISOString() })
-      await admin.from('purchases').update({ expires_at: until }).eq('id', p.id)
-    }
+    if (!(await approvePurchase(admin, { id: p.id, user_id: p.user_id, product: product.key }, String(pay.id)))) return ok('já processado')
     return ok('aprovado')
   }
 

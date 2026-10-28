@@ -940,3 +940,5 @@ p { margin: 0 0 0.8em; }
 .plan-tag { position: absolute; left: 50%; bottom: -9px; transform: translateX(-50%); font-size: 0.56rem; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; line-height: 1; padding: 2px 5px; border-radius: 6px; white-space: nowrap; pointer-events: none; }
 .plan-estrela .plan-tag { background: #ffe8a3; color: #1a1033; }
 .plan-cosmos .plan-tag { background: #b45cff; color: #fff; }
+
+.currency-switch { margin: 0.9rem auto 0; justify-content: center; }

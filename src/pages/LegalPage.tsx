@@ -1,37 +1,30 @@
-import type { ReactNode } from 'react'
 import type { Route } from '../App'
+import { getLang, t } from '../i18n'
+import { Section } from './legal/common'
+import { CONTACT_EMAIL } from './legal/contact'
+import { PrivacyEn, TermsEn } from './legal/en'
+import { PrivacyEs, TermsEs } from './legal/es'
 
-/** E-mail shown in the legal pages for privacy requests. Fill in before publishing in the stores. */
-const CONTACT_EMAIL = ''
+const UPDATED = '29 de outubro de 2026'
 
-const UPDATED = '24 de outubro de 2026'
-
-const contact = CONTACT_EMAIL
-  ? <>pelo e-mail <b>{CONTACT_EMAIL}</b></>
-  : <>pelos canais de contato informados no app</>
-
-function Section({ title, children }: { title: string; children: ReactNode }) {
-  return (
-    <section>
-      <h2>{title}</h2>
-      {children}
-    </section>
-  )
-}
+const contact = <>pelo e-mail <b>{CONTACT_EMAIL}</b></>
 
 export function LegalPage({ doc, go }: { doc: 'termos' | 'privacidade'; go: (r: Route) => void }) {
+  const lang = getLang()
+  const Body = lang === 'en' ? TermsEn : lang === 'es' ? TermsEs : Terms
+  const PrivacyBody = lang === 'en' ? PrivacyEn : lang === 'es' ? PrivacyEs : Privacy
   return (
     <div className="legal">
       <header className="page-head">
         <p className="eyebrow">Cosmic Sky</p>
-        <h1 className="title-glow">{doc === 'termos' ? 'Termos de Uso' : 'Política de Privacidade'}</h1>
-        <p className="muted">Última atualização: {UPDATED}</p>
+        <h1 className="title-glow">{doc === 'termos' ? t('Termos de Uso') : t('Política de Privacidade')}</h1>
+        <p className="muted">{t('Última atualização: {date}', { date: lang === 'pt' ? UPDATED : new Date(2026, 9, 29).toLocaleDateString(lang === 'en' ? 'en-US' : 'es-ES', { dateStyle: 'long' }) })}</p>
         <div className="segmented">
-          <button className={doc === 'termos' ? 'active' : ''} onClick={() => go('termos')}>Termos de Uso</button>
-          <button className={doc === 'privacidade' ? 'active' : ''} onClick={() => go('privacidade')}>Privacidade</button>
+          <button className={doc === 'termos' ? 'active' : ''} onClick={() => go('termos')}>{t('Termos de Uso')}</button>
+          <button className={doc === 'privacidade' ? 'active' : ''} onClick={() => go('privacidade')}>{t('Privacidade')}</button>
         </div>
       </header>
-      <article className="glass pad legal-body">{doc === 'termos' ? <Terms /> : <Privacy />}</article>
+      <article className="glass pad legal-body">{doc === 'termos' ? <Body /> : <PrivacyBody />}</article>
     </div>
   )
 }
@@ -69,7 +62,7 @@ function Terms() {
       </Section>
       <Section title="4. Planos e compras avulsas">
         <ul>
-          <li>Os pagamentos são processados pelo <b>Mercado Pago</b> (Pix ou cartão). O Cosmic Sky não recebe nem armazena dados de cartão.</li>
+          <li>Os pagamentos são processados pelo <b>Mercado Pago</b> (Pix, cartão ou boleto, em reais) e, para clientes fora do Brasil, pelo <b>Stripe</b> (cartão, em dólares). O Cosmic Sky não recebe nem armazena dados de cartão.</li>
           <li>Os planos <b>não renovam automaticamente</b>: valem pelo período comprado (1 mês ou 1 ano). Comprar de novo soma o tempo restante do mesmo plano; trocar de plano inicia um novo período.</li>
           <li>Os serviços avulsos ficam liberados para o mapa escolhido; as Previsões valem pelo período comprado (30 dias, 3 meses ou 12 meses) e o Pacote Aniversário e o Retorno Lunar valem por 1 ano. Cada compra avulsa inclui uma geração da análise completa daquele serviço; novas versões exigem nova compra ou um plano.</li>
           <li>As análises completas dos planos formam uma cota mensal única, válida para todos os serviços, que se renova no dia 1º de cada mês e não acumula.</li>
@@ -100,7 +93,10 @@ function Terms() {
           do uso das interpretações.
         </p>
       </Section>
-      <Section title="8. Alterações e lei aplicável">
+      <Section title="8. Contato">
+        <p>Dúvidas, suporte e pedidos de reembolso: <b>{CONTACT_EMAIL}</b>.</p>
+      </Section>
+      <Section title="9. Alterações e lei aplicável">
         <p>
           Estes Termos podem ser atualizados; a data acima indica a versão vigente. Aplica-se a legislação brasileira, incluindo o
           Código de Defesa do Consumidor e a Lei Geral de Proteção de Dados (LGPD).
@@ -121,7 +117,7 @@ function Privacy() {
         <ul>
           <li><b>Dados de nascimento</b> (nome, data, hora e local) que você informa para calcular os mapas — seus e de outras pessoas que você cadastrar.</li>
           <li><b>Dados da conta</b>: e-mail e, se entrar com Google, nome e foto do perfil.</li>
-          <li><b>Compras</b>: produto, valor, data e situação do pagamento. Os dados de pagamento ficam com o Mercado Pago.</li>
+          <li><b>Compras</b>: produto, valor, data e situação do pagamento. Os dados de pagamento ficam com o Mercado Pago ou o Stripe.</li>
           <li><b>Uso das análises</b>: quantas análises completas foram geradas, para controlar o saldo.</li>
           <li><b>Contagem de acessos anônima</b>: um código aleatório do aparelho, sem nome, e-mail ou endereço IP, para saber quantas pessoas usam o app e de onde vêm (ex.: link compartilhado).</li>
           <li><b>Localização</b>: só quando você toca em "Onde estou", para calcular a revolução solar. Não guardamos seu histórico de localização.</li>
@@ -141,7 +137,7 @@ function Privacy() {
         <ul>
           <li><b>No seu aparelho</b>: mapas, preferências e análises já geradas ficam salvos no navegador.</li>
           <li><b>Supabase</b>: hospedagem do login, dos mapas sincronizados, das compras e das estatísticas.</li>
-          <li><b>Mercado Pago</b>: processamento dos pagamentos.</li>
+          <li><b>Mercado Pago</b> e <b>Stripe</b>: processamento dos pagamentos.</li>
           <li><b>Anthropic</b>: serviço de redação automatizada que gera o texto das análises completas.</li>
           <li><b>Google</b>: login com conta Google, se você escolher essa opção.</li>
         </ul>

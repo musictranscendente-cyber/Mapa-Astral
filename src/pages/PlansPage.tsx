@@ -2,8 +2,9 @@ import { useEffect, useState } from 'react'
 import type { Chart } from '../astro/chart'
 import { currentReturnYear } from '../astro/solarReturn'
 import { useAccess, type Offer } from '../billing/context'
+import { setCurrency, useCurrency } from '../billing/currency'
 import { birthKey } from '../billing/keys'
-import { PLAN_ANALYSES, PRODUCTS, PROFILE_LIMIT, formatBRL, type ProductKey } from '../billing/rules'
+import { PLAN_ANALYSES, PRODUCTS, PROFILE_LIMIT, formatPrice, priceOf, type Currency, type ProductKey } from '../billing/rules'
 import { rememberReturn } from '../lib/auth'
 import type { Route } from '../App'
 import { locale, t } from '../i18n'
@@ -13,31 +14,35 @@ interface Props {
   go: (r: Route) => void
 }
 
-const PLAN_FEATURES = {
+const planFeatures = () => ({
   estrela: [
-    `Até ${PROFILE_LIMIT.estrela} mapas salvos`,
-    'Previsões de até 1 ano e linha do tempo completa',
-    'Sinastria completa, sem limite',
-    'Revolução Solar completa de qualquer ano + comparador de cidades',
-    'Retorno Lunar completo: o mapa de todo mês',
-    'Progressões e arcos solares com os marcos dos próximos anos',
-    'Astrocartografia com análise de qualquer cidade',
-    `${PLAN_ANALYSES.estrela} análises completas por mês, em qualquer serviço`,
-    'Gere novas versões das análises usando a cota do mês',
+    t('Até {n} mapas salvos', { n: PROFILE_LIMIT.estrela }),
+    t('Previsões de até 1 ano e linha do tempo completa'),
+    t('Sinastria completa, sem limite'),
+    t('Revolução Solar completa de qualquer ano + comparador de cidades'),
+    t('Retorno Lunar completo: o mapa de todo mês'),
+    t('Progressões e arcos solares com os marcos dos próximos anos'),
+    t('Astrocartografia com análise de qualquer cidade'),
+    t('{n} análises completas por mês, em qualquer serviço', { n: PLAN_ANALYSES.estrela }),
+    t('Gere novas versões das análises usando a cota do mês'),
   ],
   cosmos: [
-    'Mapas ilimitados (família, amigos, clientes)',
-    'Tudo do plano Estrela',
-    `Até ${PLAN_ANALYSES.cosmos} análises completas por mês, em qualquer serviço`,
-    'Ideal para quem estuda ou atende com astrologia',
+    t('Mapas ilimitados (família, amigos, clientes)'),
+    t('Tudo do plano Estrela'),
+    t('Até {n} análises completas por mês, em qualquer serviço', { n: PLAN_ANALYSES.cosmos }),
+    t('Ideal para quem estuda ou atende com astrologia'),
   ],
-}
+})
 
-/** Status of a payment coming back from Mercado Pago (`#/planos?status=approved…`). */
+/** Status of a payment coming back from the checkout (`#/planos?status=approved…`). */
 const returnStatus = () => new URLSearchParams(window.location.hash.split('?')[1] ?? '').get('status')
 
 export function PlansPage({ natal, go }: Props) {
   const access = useAccess()
+  const currency = useCurrency()
+  // The simulator always uses the fictitious balance in reais.
+  const cur: Currency = access.simulated ? 'BRL' : currency
+  const price = (k: ProductKey) => formatPrice(priceOf(k, cur), cur)
   const [busy, setBusy] = useState<string>('')
   const [error, setError] = useState('')
   const [done, setDone] = useState('')
@@ -64,7 +69,7 @@ export function PlansPage({ natal, go }: Props) {
     try {
       await access.buy(offer)
       // Real purchases leave for Mercado Pago; simulated ones finish here.
-      if (access.simulated) { setDone(PRODUCTS[k].name); setBusy('') }
+      if (access.simulated) { setDone(t(PRODUCTS[k].name)); setBusy('') }
     } catch (e) {
       setError(e instanceof Error ? e.message : String(e))
       setBusy('')
@@ -75,7 +80,7 @@ export function PlansPage({ natal, go }: Props) {
     return (
       <div className="plans">
         <header className="page-head">
-          <p className="eyebrow">Planos</p>
+          <p className="eyebrow">{t('Planos')}</p>
           <h1 className="title-glow">{t('Em breve')}</h1>
           <p className="muted">{t('Por enquanto, todos os recursos do app estão liberados.')}</p>
         </header>
@@ -102,50 +107,57 @@ export function PlansPage({ natal, go }: Props) {
   return (
     <div className="plans">
       <header className="page-head">
-        <p className="eyebrow">Planos e análises</p>
-        <h1 className="title-glow">Vá mais fundo no seu céu</h1>
-        <p className="muted">O cálculo do mapa é sempre grátis. Os planos liberam as análises completas, as previsões longas e as comparações.</p>
+        <p className="eyebrow">{t('Planos e análises')}</p>
+        <h1 className="title-glow">{t('Vá mais fundo no seu céu')}</h1>
+        <p className="muted">{t('O cálculo do mapa é sempre grátis. Os planos liberam as análises completas, as previsões longas e as comparações.')}</p>
+        {!access.simulated && (
+          <div className="segmented small currency-switch" role="group" aria-label={t('Moeda')}>
+            <button className={cur === 'BRL' ? 'active' : ''} onClick={() => setCurrency('BRL')}>🇧🇷 R$ · {t('Brasil')}</button>
+            <button className={cur === 'USD' ? 'active' : ''} onClick={() => setCurrency('USD')}>🌎 US$ · {t('Internacional')}</button>
+          </div>
+        )}
       </header>
 
-      {access.simulated && <p className="glass pad notice sim">🧪 Simulação ligada: as compras usam o saldo fictício de Ajustes e nada é cobrado.</p>}
-      {done && <p className="glass pad notice good">✓ Compra simulada concluída: {done}. O acesso já está liberado.</p>}
-      {status === 'approved' && <p className="glass pad notice good">✓ Pagamento aprovado! Seu acesso é liberado em instantes.</p>}
-      {(status === 'pending' || status === 'in_process') && <p className="glass pad notice">⏳ Pagamento em processamento. Assim que for confirmado (no Pix, em segundos), o acesso é liberado automaticamente.</p>}
-      {status === 'rejected' && <p className="glass pad notice bad">O pagamento não foi aprovado. Você pode tentar de novo com outra forma de pagamento.</p>}
+      {access.simulated && <p className="glass pad notice sim">🧪 {t('Simulação ligada: as compras usam o saldo fictício de Ajustes e nada é cobrado.')}</p>}
+      {done && <p className="glass pad notice good">✓ {t('Compra simulada concluída: {item}. O acesso já está liberado.', { item: done })}</p>}
+      {status === 'approved' && <p className="glass pad notice good">✓ {t('Pagamento aprovado! Seu acesso é liberado em instantes.')}</p>}
+      {(status === 'pending' || status === 'in_process') && <p className="glass pad notice">⏳ {t('Pagamento em processamento. Assim que for confirmado (no Pix, em segundos), o acesso é liberado automaticamente.')}</p>}
+      {status === 'rejected' && <p className="glass pad notice bad">{t('O pagamento não foi aprovado. Você pode tentar de novo com outra forma de pagamento.')}</p>}
 
       {access.plan && (
         <section className="glass pad current-plan">
-          <p className="eyebrow">Seu plano</p>
+          <p className="eyebrow">{t('Seu plano')}</p>
           <h2>{access.plan === 'cosmos' ? '🌌 Cosmos' : '✦ Estrela'}</h2>
           <p className="muted">
-            Ativo até {until} · {Math.max(0, PLAN_ANALYSES[access.plan] - access.data.planUsedThisMonth)} de {PLAN_ANALYSES[access.plan]} análises disponíveis neste mês.
-            Para continuar depois dessa data, renove abaixo: o tempo é somado ao que falta.
+            {t('Ativo até {date} · {left} de {total} análises disponíveis neste mês.', { date: until, left: Math.max(0, PLAN_ANALYSES[access.plan] - access.data.planUsedThisMonth), total: PLAN_ANALYSES[access.plan] })}{' '}
+            {t('Para continuar depois dessa data, renove abaixo: o tempo é somado ao que falta.')}
           </p>
         </section>
       )}
 
       <section className="plan-cards">
         <PlanCard
-          title="✦ Estrela" tagline="Para acompanhar o seu céu no dia a dia"
-          monthly="estrela_mensal" yearly="estrela_anual" features={PLAN_FEATURES.estrela}
+          title="✦ Estrela" tagline={t('Para acompanhar o seu céu no dia a dia')}
+          monthly="estrela_mensal" yearly="estrela_anual" features={planFeatures().estrela} price={price}
           current={access.plan === 'estrela'} busy={busy} onBuy={buy}
         />
         <PlanCard
-          title="🌌 Cosmos" tagline="Para apaixonados e profissionais da astrologia"
-          monthly="cosmos_mensal" yearly="cosmos_anual" features={PLAN_FEATURES.cosmos}
+          title="🌌 Cosmos" tagline={t('Para apaixonados e profissionais da astrologia')}
+          monthly="cosmos_mensal" yearly="cosmos_anual" features={planFeatures().cosmos} price={price}
           current={access.plan === 'cosmos'} busy={busy} onBuy={buy} featured
         />
       </section>
       <p className="muted small center">
-        Pagamento por Pix ou cartão pelo Mercado Pago. Sem renovação automática: você escolhe se quer continuar.
-        Trocar de plano começa um novo período a partir do dia da compra. Veja os <a href="#/termos">Termos de Uso</a>.
+        {t(cur === 'USD' ? 'Pagamento com cartão pelo Stripe, em dólares.' : 'Pagamento por Pix ou cartão pelo Mercado Pago.')}{' '}
+        {t('Sem renovação automática: você escolhe se quer continuar. Trocar de plano começa um novo período a partir do dia da compra.')}{' '}
+        <a href="#/termos">{t('Termos de Uso')}</a>
       </p>
 
       <section className="glass pad">
-        <h2>Análises avulsas</h2>
-        <p className="muted">Pague uma vez e a análise fica com você para sempre.{natal?.birth ? ` Para o mapa de ${name}:` : ''}</p>
+        <h2>{t('Análises avulsas')}</h2>
+        <p className="muted">{t('Pague uma vez: cada serviço fica liberado para o mapa escolhido, com uma análise completa incluída quando houver.')}{natal?.birth ? ` ${t('Para o mapa de {name}:', { name })}` : ''}</p>
         {singles.length === 0 ? (
-          <p>Crie seu mapa para ver as análises disponíveis. <button className="link" onClick={() => go('inicio')}>Criar mapa</button></p>
+          <p>{t('Crie seu mapa para ver as análises disponíveis.')} <button className="link" onClick={() => go('inicio')}>{t('Criar mapa')}</button></p>
         ) : (
           <div className="single-list">
             {singles.map(({ offer, icon }) => {
@@ -154,11 +166,11 @@ export function PlansPage({ natal, go }: Props) {
                 <article key={p.key} className={`single ${p.key === 'pacote' ? 'featured' : ''}`}>
                   <span className="single-icon">{icon}</span>
                   <div>
-                    <h3>{p.name}{p.key === 'pacote' && <span className="badge">Mais vantajoso</span>}</h3>
-                    <p className="muted small">{p.description}</p>
+                    <h3>{t(p.name)}{p.key === 'pacote' && <span className="badge">{t('Mais vantajoso')}</span>}</h3>
+                    <p className="muted small">{t(p.description)}</p>
                   </div>
                   <button className="ghost" disabled={!!busy} onClick={() => buy(offer)}>
-                    {busy === p.key ? 'Abrindo…' : formatBRL(p.price)}
+                    {busy === p.key ? t('Abrindo…') : price(p.key)}
                   </button>
                 </article>
               )
@@ -166,10 +178,10 @@ export function PlansPage({ natal, go }: Props) {
             <article className="single">
               <span className="single-icon">♡</span>
               <div>
-                <h3>{PRODUCTS.sinastria.name}</h3>
-                <p className="muted small">Escolha as duas pessoas na página de Sinastria.</p>
+                <h3>{t(PRODUCTS.sinastria.name)}</h3>
+                <p className="muted small">{t('Escolha as duas pessoas na página de Sinastria.')}</p>
               </div>
-              <button className="ghost" onClick={() => go('sinastria')}>{formatBRL(PRODUCTS.sinastria.price)}</button>
+              <button className="ghost" onClick={() => go('sinastria')}>{price('sinastria')}</button>
             </article>
           </div>
         )}
@@ -189,27 +201,28 @@ interface CardProps {
   current: boolean
   featured?: boolean
   busy: string
+  price: (k: ProductKey) => string
   onBuy: (k: ProductKey) => void
 }
 
-function PlanCard({ title, tagline, monthly, yearly, features, current, featured, busy, onBuy }: CardProps) {
+function PlanCard({ title, tagline, monthly, yearly, features, current, featured, busy, price, onBuy }: CardProps) {
   const m = PRODUCTS[monthly]
   const y = PRODUCTS[yearly]
   const saving = Math.round((1 - y.price / (m.price * 12)) * 100)
   return (
     <article className={`glass pad plan-card ${featured ? 'featured' : ''}`}>
-      {featured && <span className="badge">Mais completo</span>}
+      {featured && <span className="badge">{t('Mais completo')}</span>}
       <h2>{title}</h2>
       <p className="muted">{tagline}</p>
-      <p className="plan-price">{formatBRL(m.price)}<small>/mês</small></p>
+      <p className="plan-price">{price(monthly)}<small>{t('/mês')}</small></p>
       <ul className="plan-features">{features.map((f) => <li key={f}>✓ {f}</li>)}</ul>
       <div className="plan-buttons">
         <button className="cta" disabled={!!busy} onClick={() => onBuy(yearly)}>
-          <span>{busy === yearly ? 'Abrindo…' : `${current ? 'Renovar' : 'Assinar'} 1 ano · ${formatBRL(y.price)}`}</span>
+          <span>{busy === yearly ? t('Abrindo…') : `${t(current ? 'Renovar 1 ano' : 'Assinar 1 ano')} · ${price(yearly)}`}</span>
         </button>
-        <small className="muted">Economize {saving}% no anual</small>
+        <small className="muted">{t('Economize {n}% no anual', { n: saving })}</small>
         <button className="ghost" disabled={!!busy} onClick={() => onBuy(monthly)}>
-          {busy === monthly ? 'Abrindo…' : `${current ? 'Renovar' : 'Assinar'} 1 mês · ${formatBRL(m.price)}`}
+          {busy === monthly ? t('Abrindo…') : `${t(current ? 'Renovar 1 mês' : 'Assinar 1 mês')} · ${price(monthly)}`}
         </button>
       </div>
     </article>

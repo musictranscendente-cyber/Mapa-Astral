@@ -1,4 +1,6 @@
 import { authConfigured, supabase } from '../lib/supabase'
+import { getLang, t } from '../i18n'
+import { getCurrency } from './currency'
 import { EMPTY_ACCESS, buildAccess, type AccessData, type AnalysisLogRow, type EntitlementRow, type ProductKey, type PurchaseRow, type Scope } from './rules'
 
 /** Paid features are on unless the build sets VITE_BILLING=off (see docs/configurar-pagamentos.md). */
@@ -37,12 +39,12 @@ export async function fetchPurchases(): Promise<PurchaseSummary[]> {
   return data as PurchaseSummary[]
 }
 
-/** Creates the order and sends the person to the Mercado Pago checkout (Pix or card). */
+/** Creates the order and sends the person to the checkout: Mercado Pago in reais, Stripe in dollars. */
 export async function startCheckout(product: ProductKey, scope: Scope = {}, label = ''): Promise<void> {
-  if (!supabase) throw new Error('Pagamentos indisponíveis.')
+  if (!supabase) throw new Error(t('Pagamentos indisponíveis.'))
   const { data, error } = await supabase.functions.invoke<{ url?: string; error?: string }>('checkout', {
-    body: { product, scope, label: label.slice(0, 80) },
+    body: { product, scope, label: label.slice(0, 80), currency: getCurrency(), lang: getLang() },
   })
-  if (error || !data?.url) throw new Error(data?.error ?? 'Não foi possível abrir o pagamento agora. Tente novamente.')
+  if (error || !data?.url) throw new Error(t('Não foi possível abrir o pagamento agora. Tente novamente.'))
   window.location.href = data.url
 }
