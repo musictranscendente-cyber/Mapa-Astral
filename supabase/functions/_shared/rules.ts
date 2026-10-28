@@ -27,8 +27,10 @@ export interface Product {
   key: ProductKey
   name: string
   description: string
-  /** Price in BRL. */
+  /** Price in BRL (Mercado Pago, Brazil). */
   price: number
+  /** Price in USD (Stripe, everywhere else). */
+  priceUSD: number
   plan?: PlanKey
   /** Plan length, or how long the grant lasts (none = forever). */
   days?: number
@@ -37,20 +39,20 @@ export interface Product {
 }
 
 export const PRODUCTS: Record<ProductKey, Product> = {
-  natal: { key: 'natal', name: 'Análise completa do Mapa Natal', description: 'Análise profunda e personalizada do seu mapa.', price: 14.9, scope: 'birth' },
-  sinastria: { key: 'sinastria', name: 'Sinastria completa', description: 'Todas as áreas, sobreposição de casas e análise completa do casal.', price: 14.9, scope: 'pair' },
-  revolucao: { key: 'revolucao', name: 'Revolução Solar do ano', description: 'Mapa do ano completo, comparador de cidades e análise completa.', price: 19.9, scope: 'birthYear' },
-  previsao30: { key: 'previsao30', name: 'Previsão de 30 dias', description: 'Trânsitos dos próximos 30 dias, dia a dia, e análise completa do período.', price: 9.9, days: 30, scope: 'birth' },
-  previsao90: { key: 'previsao90', name: 'Previsão de 3 meses', description: 'Trânsitos dos próximos 3 meses, meses-chave e análise completa do período.', price: 14.9, days: 90, scope: 'birth' },
-  previsao12: { key: 'previsao12', name: 'Previsão de 12 meses', description: 'Trânsitos de 1 ano, meses-chave e análise completa.', price: 24.9, days: 365, scope: 'birth' },
-  retorno_lunar: { key: 'retorno_lunar', name: 'Retorno Lunar · 12 meses', description: 'Todas as posições e aspectos de cada mês, em qualquer cidade, por 1 ano.', price: 9.9, days: 365, scope: 'birth' },
-  progressoes: { key: 'progressoes', name: 'Progressões completas', description: 'Aspectos progredidos e de arco solar, marcos dos próximos 3 anos e todas as posições.', price: 9.9, scope: 'birth' },
-  astrocarto: { key: 'astrocarto', name: 'Astrocartografia completa', description: 'Análise de qualquer cidade do mundo: linhas próximas e o que cada uma traz.', price: 9.9, scope: 'birth' },
-  pacote: { key: 'pacote', name: 'Pacote Aniversário', description: 'Revolução Solar + comparador de cidades + previsão de 12 meses.', price: 34.9, days: 365, scope: 'birthYear' },
-  estrela_mensal: { key: 'estrela_mensal', name: 'Plano Estrela · 1 mês', description: 'Acesso Estrela por 30 dias.', price: 29.9, plan: 'estrela', days: 30 },
-  estrela_anual: { key: 'estrela_anual', name: 'Plano Estrela · 1 ano', description: 'Acesso Estrela por 365 dias.', price: 239, plan: 'estrela', days: 365 },
-  cosmos_mensal: { key: 'cosmos_mensal', name: 'Plano Cosmos · 1 mês', description: 'Acesso Cosmos por 30 dias.', price: 49.9, plan: 'cosmos', days: 30 },
-  cosmos_anual: { key: 'cosmos_anual', name: 'Plano Cosmos · 1 ano', description: 'Acesso Cosmos por 365 dias.', price: 399, plan: 'cosmos', days: 365 },
+  natal: { key: 'natal', name: 'Análise completa do Mapa Natal', description: 'Análise profunda e personalizada do seu mapa.', price: 14.9, priceUSD: 4.99, scope: 'birth' },
+  sinastria: { key: 'sinastria', name: 'Sinastria completa', description: 'Todas as áreas, sobreposição de casas e análise completa do casal.', price: 14.9, priceUSD: 4.99, scope: 'pair' },
+  revolucao: { key: 'revolucao', name: 'Revolução Solar do ano', description: 'Mapa do ano completo, comparador de cidades e análise completa.', price: 19.9, priceUSD: 5.99, scope: 'birthYear' },
+  previsao30: { key: 'previsao30', name: 'Previsão de 30 dias', description: 'Trânsitos dos próximos 30 dias, dia a dia, e análise completa do período.', price: 9.9, priceUSD: 3.99, days: 30, scope: 'birth' },
+  previsao90: { key: 'previsao90', name: 'Previsão de 3 meses', description: 'Trânsitos dos próximos 3 meses, meses-chave e análise completa do período.', price: 14.9, priceUSD: 4.99, days: 90, scope: 'birth' },
+  previsao12: { key: 'previsao12', name: 'Previsão de 12 meses', description: 'Trânsitos de 1 ano, meses-chave e análise completa.', price: 24.9, priceUSD: 7.99, days: 365, scope: 'birth' },
+  retorno_lunar: { key: 'retorno_lunar', name: 'Retorno Lunar · 12 meses', description: 'Todas as posições e aspectos de cada mês, em qualquer cidade, por 1 ano.', price: 9.9, priceUSD: 3.99, days: 365, scope: 'birth' },
+  progressoes: { key: 'progressoes', name: 'Progressões completas', description: 'Aspectos progredidos e de arco solar, marcos dos próximos 3 anos e todas as posições.', price: 9.9, priceUSD: 3.99, scope: 'birth' },
+  astrocarto: { key: 'astrocarto', name: 'Astrocartografia completa', description: 'Análise de qualquer cidade do mundo: linhas próximas e o que cada uma traz.', price: 9.9, priceUSD: 3.99, scope: 'birth' },
+  pacote: { key: 'pacote', name: 'Pacote Aniversário', description: 'Revolução Solar + comparador de cidades + previsão de 12 meses.', price: 34.9, priceUSD: 10.99, days: 365, scope: 'birthYear' },
+  estrela_mensal: { key: 'estrela_mensal', name: 'Plano Estrela · 1 mês', description: 'Acesso Estrela por 30 dias.', price: 29.9, priceUSD: 9.99, plan: 'estrela', days: 30 },
+  estrela_anual: { key: 'estrela_anual', name: 'Plano Estrela · 1 ano', description: 'Acesso Estrela por 365 dias.', price: 239, priceUSD: 79, plan: 'estrela', days: 365 },
+  cosmos_mensal: { key: 'cosmos_mensal', name: 'Plano Cosmos · 1 mês', description: 'Acesso Cosmos por 30 dias.', price: 49.9, priceUSD: 14.99, plan: 'cosmos', days: 30 },
+  cosmos_anual: { key: 'cosmos_anual', name: 'Plano Cosmos · 1 ano', description: 'Acesso Cosmos por 365 dias.', price: 399, priceUSD: 119, plan: 'cosmos', days: 365 },
 }
 
 export const isProductKey = (k: unknown): k is ProductKey => typeof k === 'string' && k in PRODUCTS
@@ -217,7 +219,14 @@ export function extendPlan(current: { plan: PlanKey | null; planUntil: string | 
 
 export const monthStart = (now = new Date()) => new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1)).toISOString()
 
+export type Currency = 'BRL' | 'USD'
+
+export const priceOf = (product: ProductKey, currency: Currency = 'BRL') => (currency === 'USD' ? PRODUCTS[product].priceUSD : PRODUCTS[product].price)
+
 /** Accept a payment when the amount paid covers the catalog price (cents rounding tolerated). */
-export const paidEnough = (product: ProductKey, amount: number) => amount + 0.01 >= PRODUCTS[product].price
+export const paidEnough = (product: ProductKey, amount: number, currency: Currency = 'BRL') => amount + 0.01 >= priceOf(product, currency)
 
 export const formatBRL = (v: number) => v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })
+
+export const formatPrice = (v: number, currency: Currency) =>
+  currency === 'USD' ? `US$ ${v.toLocaleString('en-US', { minimumFractionDigits: v % 1 ? 2 : 0, maximumFractionDigits: 2 })}` : formatBRL(v)

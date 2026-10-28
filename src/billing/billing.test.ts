@@ -4,7 +4,7 @@ import { SHARED } from '../../scripts/sync-functions.mjs'
 import { birthKey } from './keys'
 import {
   EMPTY_ACCESS, analysisAllowance, buildAccess, extendPlan, grantKeys, pairKey, paidEnough,
-  solarKey, unlocked, validAnalysisKey, type AccessData,
+  priceOf, solarKey, unlocked, validAnalysisKey, type AccessData,
 } from './rules'
 
 const now = new Date('2026-10-15T12:00:00Z')
@@ -82,5 +82,9 @@ describe('billing rules', () => {
   it('checks the amount paid', () => {
     expect(paidEnough('estrela_mensal', 29.9)).toBe(true)
     expect(paidEnough('cosmos_anual', 39.9)).toBe(false)
+    expect(priceOf('natal', 'USD')).toBe(4.99)
+    expect(paidEnough('natal', 4.99, 'USD')).toBe(true)
+    expect(paidEnough('natal', 4.99)).toBe(false) // reais price is higher
+    expect(paidEnough('estrela_mensal', 9.5, 'USD')).toBe(false)
   })
 })
