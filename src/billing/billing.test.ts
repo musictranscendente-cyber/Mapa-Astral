@@ -41,9 +41,9 @@ describe('billing rules', () => {
     expect(validAnalysisKey('natal', 'natal:../x')).toBe(false)
   })
 
-  it('analysis allowance: grant, then plan, then the welcome gift', () => {
+  it('analysis allowance: grant, then plan; no free analysis', () => {
     const free = buildAccess(null, [], [], now)
-    expect(analysisAllowance(free, 'natal:abcd', now)).toMatchObject({ ok: true, source: 'welcome' })
+    expect(analysisAllowance(free, 'natal:abcd', now).ok).toBe(false)
     const welcomed = buildAccess(null, [], [{ source: 'welcome', access_key: 'natal:abcd', created_at: now.toISOString() }], now)
     expect(analysisAllowance(welcomed, 'natal:abcd', now).ok).toBe(false)
 
