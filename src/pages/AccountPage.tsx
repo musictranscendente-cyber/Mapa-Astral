@@ -191,7 +191,7 @@ function MyAccess() {
         </p>
       ) : (
         <p className="muted">
-          {t('Conta gratuita')}{access.data.welcomeUsed === 0 ? ` · ${t('sua primeira análise completa é um presente')}` : ''}.
+          {t('Conta gratuita')}{` · ${t('presente: sua Previsão de 30 dias liberada')}`}.
         </p>
       )}
       {purchases.length > 0 && (

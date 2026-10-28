@@ -104,7 +104,7 @@ export function SimulatorCard({ go }: { go: (r: Route) => void }) {
 
           <p className="eyebrow">Análises completas usadas</p>
           <p className="muted small">
-            Boas-vindas: {data.welcomeUsed} de 1 · do plano neste mês: {data.planUsedThisMonth} · de compras avulsas: {grantUses}
+            Do plano neste mês: {data.planUsedThisMonth} · de compras avulsas: {grantUses}
           </p>
 
           <div className="head-tools left">

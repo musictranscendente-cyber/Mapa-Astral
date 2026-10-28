@@ -118,8 +118,8 @@ function AiReadingInner({ kind, subject, getSummary, accessKey, offer, go, stora
         <Locked
           title={access.loggedIn ? t('Libere esta análise completa') : t('Entre para receber sua análise completa')}
           text={access.loggedIn
-            ? t('Você já usou as análises disponíveis na sua conta. Libere esta análise ou escolha um plano com análises todo mês.')
-            : t('Ao criar sua conta grátis, sua primeira análise completa é por nossa conta.')}
+            ? t('Libere esta análise completa avulsa ou escolha um plano com análises todo mês.')
+            : t('Crie sua conta grátis para liberar esta análise completa — e ganhe a sua Previsão de 30 dias de presente.')}
           offer={offer}
           go={go}
         />

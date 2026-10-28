@@ -77,10 +77,12 @@ export function ForecastPage({ natal, go }: { natal: Chart | null; go: (r: Route
   const bk = natal.birth ? birthKey(natal.birth) : ''
   const needsLogin = access.enabled && !access.loggedIn
   // Each purchase unlocks its own period; a plan or the 12-month forecast unlocks all of them.
-  const maxRange = !access.enabled || access.full(forecastKey(bk)) ? 365 : access.full(forecast90Key(bk)) ? 90 : access.full(forecast30Key(bk)) ? 30 : 7
+  const tier = access.full(forecastKey(bk)) ? 365 : access.full(forecast90Key(bk)) ? 90 : access.full(forecast30Key(bk)) ? 30 : 7
+  // Welcome gift: any signed-in account sees the next 30 days (calculation only, no written analysis).
+  const maxRange = !access.enabled ? 365 : access.loggedIn ? Math.max(tier, 30) : tier
   const productFor = (d: number): ProductKey => (d <= 30 ? 'previsao30' : d <= 90 ? 'previsao90' : 'previsao12')
   const offerFor = (d: number) => (natal.birth ? { product: productFor(d), scope: { birth: bk }, label: natal.birth.name } : undefined)
-  // The analysis is paid by whatever unlocked the current period (7 days: plan or welcome gift).
+  // The analysis is paid by the purchase that unlocked the period (or the plan); the free 30 days include none.
   const analysisKey = maxRange === 30 ? forecast30Key(bk) : maxRange === 90 ? forecast90Key(bk) : forecastKey(bk)
   const groups = groupByMonth(events)
   const best = [...days].sort((a, b) => b.flow - a.flow).slice(0, 3)
@@ -170,7 +172,7 @@ export function ForecastPage({ natal, go }: { natal: Chart | null; go: (r: Route
           {needsLogin && (
             <Locked
               title={t('Linha do tempo e trânsitos da semana')}
-              text={t('Entre grátis para ver os trânsitos dos próximos 7 dias com a interpretação de cada um.')}
+              text={t('Crie sua conta grátis e ganhe de presente a Previsão de 30 dias: os trânsitos do próximo mês com a interpretação de cada um.')}
               go={go}
             />
           )}
@@ -230,7 +232,7 @@ export function ForecastPage({ natal, go }: { natal: Chart | null; go: (r: Route
               subject={`${natal.birth?.name ?? ''} · ${t('Os próximos {range}', { range: t(RANGES.find((r) => r.days === range)?.label ?? '') })}`}
               cacheKey={`${natal.birth?.name}|${natal.date.toISOString()}|${start.toISOString().slice(0, 10)}|${range}`}
               accessKey={analysisKey}
-              offer={offerFor(maxRange === 7 ? 30 : maxRange)}
+              offer={offerFor(maxRange)}
               getSummary={() => forecastSummary(natal, findTransitEvents(natal, start, range, [...FAST, ...SLOW]), days)}
               go={go}
             />
