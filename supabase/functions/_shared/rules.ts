@@ -11,6 +11,8 @@ export type ProductKey =
   | 'natal'
   | 'sinastria'
   | 'revolucao'
+  | 'previsao30'
+  | 'previsao90'
   | 'previsao12'
   | 'pacote'
   | 'retorno_lunar'
@@ -35,14 +37,16 @@ export interface Product {
 }
 
 export const PRODUCTS: Record<ProductKey, Product> = {
-  natal: { key: 'natal', name: 'Análise completa do Mapa Natal', description: 'Análise profunda e personalizada do seu mapa.', price: 29, scope: 'birth' },
-  sinastria: { key: 'sinastria', name: 'Sinastria completa', description: 'Todas as áreas, sobreposição de casas e análise completa do casal.', price: 29, scope: 'pair' },
-  revolucao: { key: 'revolucao', name: 'Revolução Solar do ano', description: 'Mapa do ano completo, comparador de cidades e análise completa.', price: 39, scope: 'birthYear' },
-  previsao12: { key: 'previsao12', name: 'Previsão de 12 meses', description: 'Trânsitos de 1 ano, meses-chave e análise completa.', price: 59, days: 365, scope: 'birth' },
-  retorno_lunar: { key: 'retorno_lunar', name: 'Retorno Lunar · 12 meses', description: 'Todas as posições e aspectos de cada mês, em qualquer cidade, por 1 ano.', price: 24, days: 365, scope: 'birth' },
-  progressoes: { key: 'progressoes', name: 'Progressões completas', description: 'Aspectos progredidos e de arco solar, marcos dos próximos 3 anos e todas as posições.', price: 24, scope: 'birth' },
-  astrocarto: { key: 'astrocarto', name: 'Astrocartografia completa', description: 'Análise de qualquer cidade do mundo: linhas próximas e o que cada uma traz.', price: 24, scope: 'birth' },
-  pacote: { key: 'pacote', name: 'Pacote Aniversário', description: 'Revolução Solar + comparador de cidades + previsão de 12 meses.', price: 89, days: 365, scope: 'birthYear' },
+  natal: { key: 'natal', name: 'Análise completa do Mapa Natal', description: 'Análise profunda e personalizada do seu mapa.', price: 14.9, scope: 'birth' },
+  sinastria: { key: 'sinastria', name: 'Sinastria completa', description: 'Todas as áreas, sobreposição de casas e análise completa do casal.', price: 14.9, scope: 'pair' },
+  revolucao: { key: 'revolucao', name: 'Revolução Solar do ano', description: 'Mapa do ano completo, comparador de cidades e análise completa.', price: 19.9, scope: 'birthYear' },
+  previsao30: { key: 'previsao30', name: 'Previsão de 30 dias', description: 'Trânsitos dos próximos 30 dias, dia a dia, e análise completa do período.', price: 9.9, days: 30, scope: 'birth' },
+  previsao90: { key: 'previsao90', name: 'Previsão de 3 meses', description: 'Trânsitos dos próximos 3 meses, meses-chave e análise completa do período.', price: 14.9, days: 90, scope: 'birth' },
+  previsao12: { key: 'previsao12', name: 'Previsão de 12 meses', description: 'Trânsitos de 1 ano, meses-chave e análise completa.', price: 24.9, days: 365, scope: 'birth' },
+  retorno_lunar: { key: 'retorno_lunar', name: 'Retorno Lunar · 12 meses', description: 'Todas as posições e aspectos de cada mês, em qualquer cidade, por 1 ano.', price: 9.9, days: 365, scope: 'birth' },
+  progressoes: { key: 'progressoes', name: 'Progressões completas', description: 'Aspectos progredidos e de arco solar, marcos dos próximos 3 anos e todas as posições.', price: 9.9, scope: 'birth' },
+  astrocarto: { key: 'astrocarto', name: 'Astrocartografia completa', description: 'Análise de qualquer cidade do mundo: linhas próximas e o que cada uma traz.', price: 9.9, scope: 'birth' },
+  pacote: { key: 'pacote', name: 'Pacote Aniversário', description: 'Revolução Solar + comparador de cidades + previsão de 12 meses.', price: 34.9, days: 365, scope: 'birthYear' },
   estrela_mensal: { key: 'estrela_mensal', name: 'Plano Estrela · 1 mês', description: 'Acesso Estrela por 30 dias.', price: 29.9, plan: 'estrela', days: 30 },
   estrela_anual: { key: 'estrela_anual', name: 'Plano Estrela · 1 ano', description: 'Acesso Estrela por 365 dias.', price: 239, plan: 'estrela', days: 365 },
   cosmos_mensal: { key: 'cosmos_mensal', name: 'Plano Cosmos · 1 mês', description: 'Acesso Cosmos por 30 dias.', price: 49.9, plan: 'cosmos', days: 30 },
@@ -79,6 +83,10 @@ export function grantKeys(product: ProductKey, scope: Scope): string[] | null {
   switch (product) {
     case 'natal':
       return [natalKey(scope.birth)]
+    case 'previsao30':
+      return [forecast30Key(scope.birth)]
+    case 'previsao90':
+      return [forecast90Key(scope.birth)]
     case 'previsao12':
       return [forecastKey(scope.birth)]
     case 'retorno_lunar':
@@ -99,6 +107,8 @@ export function grantKeys(product: ProductKey, scope: Scope): string[] | null {
 
 export const natalKey = (birth: string) => `natal:${birth}`
 export const forecastKey = (birth: string) => `previsao:${birth}`
+export const forecast30Key = (birth: string) => `previsao30:${birth}`
+export const forecast90Key = (birth: string) => `previsao90:${birth}`
 export const solarKey = (birth: string, year: number) => `revolucao:${birth}:${year}`
 export const lunarKey = (birth: string) => `retorno-lunar:${birth}`
 export const progressionsKey = (birth: string) => `progressoes:${birth}`
@@ -152,7 +162,7 @@ export function validAnalysisKey(kind: AnalysisKind, key: string): boolean {
   const id = '[a-z0-9]{4,40}'
   const re: Record<AnalysisKind, RegExp> = {
     natal: new RegExp(`^natal:${id}$`),
-    previsao: new RegExp(`^previsao:${id}$`),
+    previsao: new RegExp(`^previsao(30|90)?:${id}$`),
     sinastria: new RegExp(`^sinastria:${id}\\+${id}$`),
     revolucao: new RegExp(`^revolucao:${id}:\\d{4}$`),
   }

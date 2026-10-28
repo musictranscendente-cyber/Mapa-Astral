@@ -14,7 +14,7 @@ import { transitsAt } from '../astro/transits'
 import type { Route } from '../App'
 import { useAccess } from '../billing/context'
 import { birthKey } from '../billing/keys'
-import { forecastKey } from '../billing/rules'
+import { forecast30Key, forecast90Key, forecastKey, type ProductKey } from '../billing/rules'
 import { Locked } from '../components/Locked'
 import { locale, t } from '../i18n'
 
@@ -75,10 +75,13 @@ export function ForecastPage({ natal, go }: { natal: Chart | null; go: (r: Route
   }
 
   const bk = natal.birth ? birthKey(natal.birth) : ''
-  const fullForecast = access.full(forecastKey(bk))
   const needsLogin = access.enabled && !access.loggedIn
-  const maxRange = !access.enabled || fullForecast ? 365 : 7
-  const offer = natal.birth ? { product: 'previsao12' as const, scope: { birth: bk }, label: natal.birth.name } : undefined
+  // Each purchase unlocks its own period; a plan or the 12-month forecast unlocks all of them.
+  const maxRange = !access.enabled || access.full(forecastKey(bk)) ? 365 : access.full(forecast90Key(bk)) ? 90 : access.full(forecast30Key(bk)) ? 30 : 7
+  const productFor = (d: number): ProductKey => (d <= 30 ? 'previsao30' : d <= 90 ? 'previsao90' : 'previsao12')
+  const offerFor = (d: number) => (natal.birth ? { product: productFor(d), scope: { birth: bk }, label: natal.birth.name } : undefined)
+  // The analysis is paid by whatever unlocked the current period (7 days: plan or welcome gift).
+  const analysisKey = maxRange === 30 ? forecast30Key(bk) : maxRange === 90 ? forecast90Key(bk) : forecastKey(bk)
   const groups = groupByMonth(events)
   const best = [...days].sort((a, b) => b.flow - a.flow).slice(0, 3)
   const hard = [...days].sort((a, b) => a.flow - b.flow).slice(0, 3)
@@ -108,8 +111,8 @@ export function ForecastPage({ natal, go }: { natal: Chart | null; go: (r: Route
       {askRange && (
         <Locked
           title={t('Previsão de {range}', { range: t(RANGES.find((r) => r.days === askRange)?.label ?? '') })}
-          text={t('Veja os trânsitos de até 1 ano à frente, os meses-chave e a análise completa do período.')}
-          offer={offer}
+          text={t('Veja os trânsitos de todo o período, os meses-chave e a análise completa — ou libere todos os períodos num plano.')}
+          offer={offerFor(askRange)}
           go={go}
         />
       )}
@@ -226,8 +229,8 @@ export function ForecastPage({ natal, go }: { natal: Chart | null; go: (r: Route
               kind="previsao"
               subject={`${natal.birth?.name ?? ''} · ${t('Os próximos {range}', { range: t(RANGES.find((r) => r.days === range)?.label ?? '') })}`}
               cacheKey={`${natal.birth?.name}|${natal.date.toISOString()}|${start.toISOString().slice(0, 10)}|${range}`}
-              accessKey={forecastKey(bk)}
-              offer={offer}
+              accessKey={analysisKey}
+              offer={offerFor(maxRange === 7 ? 30 : maxRange)}
               getSummary={() => forecastSummary(natal, findTransitEvents(natal, start, range, [...FAST, ...SLOW]), days)}
               go={go}
             />

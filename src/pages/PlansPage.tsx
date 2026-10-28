@@ -89,6 +89,8 @@ export function PlansPage({ natal, go }: Props) {
   const singles: { offer: Offer; icon: string }[] = natal?.birth ? [
     { icon: '☉', offer: { product: 'natal', scope: { birth: bk }, label: name } },
     { icon: '☼', offer: { product: 'revolucao', scope: { birth: bk, year }, label: `${name} · ${year}` } },
+    { icon: '✧', offer: { product: 'previsao30', scope: { birth: bk }, label: name } },
+    { icon: '✧', offer: { product: 'previsao90', scope: { birth: bk }, label: name } },
     { icon: '✧', offer: { product: 'previsao12', scope: { birth: bk }, label: name } },
     { icon: '✦', offer: { product: 'pacote', scope: { birth: bk, year }, label: `${name} · ${year}` } },
     { icon: '☾', offer: { product: 'retorno_lunar', scope: { birth: bk }, label: name } },
