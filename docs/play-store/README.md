@@ -70,3 +70,17 @@ Para baixar: clique no link "baixar" (abre a imagem) e salve com o botão direit
 | 6 | Seus melhores dias | [06-previsoes.jpg](https://raw.githubusercontent.com/musictranscendente-cyber/Mapa-Astral/main/docs/play-store/es-419/06-previsoes.jpg) |
 | 7 | A química do casal | [07-sinastria.jpg](https://raw.githubusercontent.com/musictranscendente-cyber/Mapa-Astral/main/docs/play-store/es-419/07-sinastria.jpg) |
 | 8 | Onde seu céu brilha mais | [08-astrocarto.jpg](https://raw.githubusercontent.com/musictranscendente-cyber/Mapa-Astral/main/docs/play-store/es-419/08-astrocarto.jpg) |
+
+## Vídeo de divulgação (YouTube) — pt-BR
+
+1920×1080, 57 s, sem música: [baixar o vídeo](https://raw.githubusercontent.com/musictranscendente-cyber/Mapa-Astral/main/docs/play-store/video/cosmic-sky-pt.mp4) · [miniatura](https://raw.githubusercontent.com/musictranscendente-cyber/Mapa-Astral/main/docs/play-store/video/thumbnail-pt.jpg)
+
+<img src="video/thumbnail-pt.jpg" width="480">
+
+**Título no YouTube:** Cosmic Sky — Mapa Astral, Horóscopo e Previsões com o céu real
+
+**Descrição no YouTube:**
+Descubra o céu do seu nascimento com cálculos astronômicos de precisão. Mapa astral completo com as 12 casas explicadas, horóscopo do dia, céu ao vivo, previsões, sinastria, revolução solar e astrocartografia. Grátis para começar.
+👉 https://musictranscendente-cyber.github.io/Mapa-Astral/
+
+Publique como **Público** ou **Não listado** (não pode ser Privado), com anúncios desativados, e cole o link do vídeo em **Ficha da loja → Vídeo**.
