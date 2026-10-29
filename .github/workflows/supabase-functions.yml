@@ -43,10 +43,11 @@ jobs:
           MP_WEBHOOK_SECRET: ${{ secrets.MP_WEBHOOK_SECRET }}
           STRIPE_SECRET_KEY: ${{ secrets.STRIPE_SECRET_KEY }}
           STRIPE_WEBHOOK_SECRET: ${{ secrets.STRIPE_WEBHOOK_SECRET }}
+          PROMO_CODES: ${{ secrets.PROMO_CODES }}
           APP_URL: ${{ vars.APP_URL }}
         run: |
           args=()
-          for name in ANTHROPIC_API_KEY MP_ACCESS_TOKEN MP_WEBHOOK_SECRET STRIPE_SECRET_KEY STRIPE_WEBHOOK_SECRET APP_URL; do
+          for name in ANTHROPIC_API_KEY MP_ACCESS_TOKEN MP_WEBHOOK_SECRET STRIPE_SECRET_KEY STRIPE_WEBHOOK_SECRET PROMO_CODES APP_URL; do
             if [ -n "${!name}" ]; then args+=("$name=${!name}"); fi
           done
           if [ ${#args[@]} -gt 0 ]; then
@@ -55,6 +56,6 @@ jobs:
       - name: Deploy functions
         if: steps.cfg.outputs.skip != 'true'
         run: |
-          for fn in analysis checkout mp-webhook stripe-webhook; do
+          for fn in analysis checkout mp-webhook stripe-webhook redeem; do
             supabase functions deploy "$fn" --project-ref "${{ steps.cfg.outputs.ref }}" --no-verify-jwt --use-api
           done
