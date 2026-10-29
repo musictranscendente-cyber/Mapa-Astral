@@ -48,3 +48,12 @@ export async function startCheckout(product: ProductKey, scope: Scope = {}, labe
   if (error || !data?.url) throw new Error(t('Não foi possível abrir o pagamento agora. Tente novamente.'))
   window.location.href = data.url
 }
+
+export type RedeemResult = { ok: true; product: ProductKey } | { ok: false; error: 'login' | 'invalid' | 'used' | 'server' }
+
+/** Applies a promo code to the signed-in account (one use per code and account). */
+export async function redeemCode(code: string): Promise<RedeemResult> {
+  if (!supabase) return { ok: false, error: 'server' }
+  const { data, error } = await supabase.functions.invoke<RedeemResult>('redeem', { body: { code } })
+  return error || !data ? { ok: false, error: 'server' } : data
+}

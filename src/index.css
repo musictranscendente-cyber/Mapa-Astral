@@ -942,3 +942,10 @@ p { margin: 0 0 0.8em; }
 .plan-cosmos .plan-tag { background: #b45cff; color: #fff; }
 
 .currency-switch { margin: 0.9rem auto 0; justify-content: center; }
+
+/* Promo code */
+.promo-open { display: block; margin: 0.9rem auto 0; }
+.promo-form { display: flex; flex-wrap: wrap; gap: 0.6rem; margin-top: 1rem; align-items: center; }
+.promo-form input { flex: 1 1 160px; min-width: 0; text-transform: uppercase; letter-spacing: 0.08em; }
+.promo-form p { flex-basis: 100%; margin: 0; }
+.promo-ok { color: #7be0a6; }

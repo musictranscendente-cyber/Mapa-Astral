@@ -4,7 +4,7 @@ import { authErrorMessage, deleteAccount, useLoginError, sendEmailCode, signInWi
 import type { SyncStatus } from '../lib/profiles'
 import { authConfigured } from '../lib/supabase'
 import { useAccess } from '../billing/context'
-import { fetchPurchases, type PurchaseSummary } from '../billing/api'
+import { fetchPurchases, redeemCode, type PurchaseSummary } from '../billing/api'
 import { PLAN_ANALYSES, PRODUCTS } from '../billing/rules'
 import { locale, t } from '../i18n'
 
@@ -208,6 +208,47 @@ function MyAccess() {
         </ul>
       )}
       <a className="ghost inline" href="#/planos">{t(plan ? 'Renovar ou mudar de plano' : 'Ver planos e análises')}</a>
+      {!access.simulated && <PromoCode onDone={access.refresh} />}
     </section>
+  )
+}
+
+const REDEEM_ERROR = {
+  login: 'Entre na sua conta para usar o cupom.',
+  invalid: 'Cupom inválido ou expirado.',
+  used: 'Este cupom já foi usado nesta conta.',
+  server: 'Não foi possível aplicar o cupom agora. Tente novamente.',
+} as const
+
+/** Promo code field (e.g. a free month of Estrela for testers). */
+function PromoCode({ onDone }: { onDone: () => Promise<void> }) {
+  const [open, setOpen] = useState(false)
+  const [code, setCode] = useState('')
+  const [busy, setBusy] = useState(false)
+  const [msg, setMsg] = useState<{ good: boolean; text: string } | null>(null)
+
+  const apply = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!code.trim()) return
+    setBusy(true)
+    setMsg(null)
+    const r = await redeemCode(code)
+    setBusy(false)
+    if (r.ok) {
+      setMsg({ good: true, text: t('Cupom aplicado: {item} liberado na sua conta!', { item: t(PRODUCTS[r.product].name) }) })
+      setCode('')
+      await onDone()
+    } else {
+      setMsg({ good: false, text: t(REDEEM_ERROR[r.error]) })
+    }
+  }
+
+  if (!open) return <button className="link promo-open" onClick={() => setOpen(true)}>🎁 {t('Tenho um cupom')}</button>
+  return (
+    <form className="promo-form" onSubmit={apply}>
+      <input value={code} onChange={(e) => setCode(e.target.value.toUpperCase())} placeholder={t('Código do cupom')} aria-label={t('Código do cupom')} autoCapitalize="characters" spellCheck={false} />
+      <button className="cta" disabled={busy || !code.trim()}><span>{busy ? t('Aplicando…') : t('Aplicar')}</span></button>
+      {msg && <p className={msg.good ? 'promo-ok' : 'error'}>{msg.text}</p>}
+    </form>
   )
 }
