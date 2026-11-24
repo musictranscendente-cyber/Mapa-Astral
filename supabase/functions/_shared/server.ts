@@ -39,6 +39,16 @@ export async function loadAccess(admin: SupabaseClient, userId: string): Promise
 
 export const APP_URL = Deno.env.get('APP_URL') ?? 'https://musictranscendente-cyber.github.io/Mapa-Astral/'
 
+/** Where the app lives on each address it is served from (checkout returns the buyer to the same one). */
+const APP_ORIGINS: Record<string, string> = {
+  'https://cosmicsky.app': 'https://cosmicsky.app/',
+  'https://www.cosmicsky.app': 'https://cosmicsky.app/',
+  'https://musictranscendente-cyber.github.io': 'https://musictranscendente-cyber.github.io/Mapa-Astral/',
+}
+
+/** The app URL the request came from, or APP_URL for unknown origins. */
+export const appUrlFor = (req: Request) => APP_ORIGINS[req.headers.get('origin') ?? ''] ?? APP_URL
+
 /**
  * Marks a paid order as approved and grants what it bought (plan time or single services).
  * Safe to call more than once: only the first call applies it. `paymentRef` is the provider's

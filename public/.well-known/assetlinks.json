@@ -1,0 +1,11 @@
+[{
+  "relation": ["delegate_permission/common.handle_all_urls"],
+  "target": {
+    "namespace": "android_app",
+    "package_name": "com.cosmicsky.astrology",
+    "sha256_cert_fingerprints": [
+      "B6:D9:F6:44:46:60:B7:A0:42:FA:52:E4:B7:DD:ED:3B:15:06:2C:D6:C9:03:8A:3D:6D:12:A0:A2:C8:94:9A:E4",
+      "C1:8B:BF:22:A4:7C:AD:C5:9D:0F:F4:10:5D:AD:CB:C3:0B:57:98:A0:A2:F9:C3:4E:10:34:66:41:04:D8:30:54"
+    ]
+  }
+}]
