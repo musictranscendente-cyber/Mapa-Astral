@@ -1,0 +1,10 @@
+// Cloudflare Workers (cosmicsky.app): serves the built site from ./dist.
+// Build variables (VITE_SUPABASE_URL, VITE_SUPABASE_ANON_KEY) are set in the Cloudflare dashboard.
+{
+  "name": "mapa-astral",
+  "compatibility_date": "2026-11-01",
+  "assets": {
+    "directory": "./dist",
+    "not_found_handling": "single-page-application"
+  }
+}
