@@ -2,7 +2,7 @@
 // reais → Mercado Pago Checkout Pro (Pix, card, boleto); dollars → Stripe Checkout (card).
 // Secrets: MP_ACCESS_TOKEN, STRIPE_SECRET_KEY.
 import { PRODUCTS, grantKeys, isProductKey, priceOf, type Currency, type Scope } from '../_shared/rules.ts'
-import { APP_URL, adminClient, corsHeaders, json, requestUser } from '../_shared/server.ts'
+import { adminClient, appUrlFor, corsHeaders, json, requestUser } from '../_shared/server.ts'
 
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response(null, { status: 204, headers: corsHeaders })
@@ -35,7 +35,7 @@ Deno.serve(async (req) => {
   const title = label ? `${product.name} · ${label}` : product.name
 
   if (currency === 'USD') {
-    const back = `${APP_URL}?lang=${lang}#/planos`
+    const back = `${appUrlFor(req)}?lang=${lang}#/planos`
     const form = new URLSearchParams({
       mode: 'payment',
       'line_items[0][quantity]': '1',
@@ -64,7 +64,7 @@ Deno.serve(async (req) => {
     return json({ url: session.url })
   }
 
-  const back = `${APP_URL}#/planos`
+  const back = `${appUrlFor(req)}#/planos`
   const res = await fetch('https://api.mercadopago.com/checkout/preferences', {
     method: 'POST',
     headers: { authorization: `Bearer ${token}`, 'content-type': 'application/json', 'x-idempotency-key': purchase.id },
