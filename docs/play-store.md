@@ -155,8 +155,8 @@ Disponible en español, inglés y portugués.
 
 **Categoria:** Estilo de vida · **Tags:** Astrologia, Horóscopo
 **E-mail de contato:** raalquimianatural@gmail.com
-**Site:** https://musictranscendente-cyber.github.io/Mapa-Astral/
-**Política de privacidade:** https://musictranscendente-cyber.github.io/Mapa-Astral/#/privacidade
+**Site:** https://cosmicsky.app/
+**Política de privacidade:** https://cosmicsky.app/#/privacidade
 
 **Acesso ao app (para a revisão do Google):** "Todas ou algumas funcionalidades são restritas" → explique que a maior parte funciona sem login; para a conta, o revisor pode entrar com Google.
 

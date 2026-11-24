@@ -81,6 +81,6 @@ Para baixar: clique no link "baixar" (abre a imagem) e salve com o botão direit
 
 **Descrição no YouTube:**
 Descubra o céu do seu nascimento com cálculos astronômicos de precisão. Mapa astral completo com as 12 casas explicadas, horóscopo do dia, céu ao vivo, previsões, sinastria, revolução solar e astrocartografia. Grátis para começar.
-👉 https://musictranscendente-cyber.github.io/Mapa-Astral/
+👉 https://cosmicsky.app/
 
 Publique como **Público** ou **Não listado** (não pode ser Privado), com anúncios desativados, e cole o link do vídeo em **Ficha da loja → Vídeo**.
