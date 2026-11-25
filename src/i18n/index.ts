@@ -18,28 +18,44 @@ const STORAGE_KEY = 'cosmic-sky:lang'
 const LOCALES: Record<Lang, string> = { pt: 'pt-BR', en: 'en-US', es: 'es-ES' }
 const isLang = (v: unknown): v is Lang => v === 'pt' || v === 'en' || v === 'es'
 
+/** Opened from the Android app (Trusted Web Activity) rather than a browser. */
+const inAndroidApp = () => typeof document !== 'undefined' && document.referrer.startsWith('android-app://')
+
+/**
+ * The site leads in English: a link with ?lang= (remembered for next time) or an earlier choice
+ * wins; otherwise Spanish browsers get Spanish and everyone else English. The Android app keeps
+ * following the phone's language.
+ */
 function detect(): Lang {
-  if (typeof window === 'undefined') return 'pt'
+  // Tests are written against the source language.
+  if (import.meta.env?.MODE === 'test') return 'pt'
+  if (typeof window === 'undefined') return 'en'
   try {
     const fromUrl = new URLSearchParams(window.location.search).get('lang')
-    if (isLang(fromUrl)) return fromUrl
+    if (isLang(fromUrl)) {
+      try { localStorage.setItem(STORAGE_KEY, fromUrl) } catch { /* ignore */ }
+      return fromUrl
+    }
   } catch { /* ignore */ }
   try {
     const saved = localStorage.getItem(STORAGE_KEY)
     if (isLang(saved)) return saved
   } catch { /* ignore */ }
-  for (const l of navigator.languages ?? [navigator.language]) {
-    const base = l.slice(0, 2).toLowerCase()
-    if (base === 'pt') return 'pt'
-    if (base === 'es') return 'es'
-    if (base === 'en') return 'en'
-  }
+  const preferred = (navigator.languages ?? [navigator.language]).map((l) => l.slice(0, 2).toLowerCase())
+  if (inAndroidApp() && preferred[0] === 'pt') return 'pt'
+  if (preferred[0] === 'es') return 'es'
   return 'en'
+}
+
+const TITLES: Record<Lang, string> = {
+  pt: 'Cosmic Sky · Mapa Astral',
+  en: 'Cosmic Sky · Birth Chart & Astrology',
+  es: 'Cosmic Sky · Carta Astral',
 }
 
 let current: Lang = detect()
 const listeners = new Set<() => void>()
-if (typeof document !== 'undefined') document.documentElement.lang = LOCALES[current]
+if (typeof document !== 'undefined') { document.documentElement.lang = LOCALES[current]; document.title = TITLES[current] }
 
 export const getLang = () => current
 /** BCP 47 locale for dates and numbers in the current language. */
@@ -50,6 +66,7 @@ export function setLang(lang: Lang) {
   current = lang
   try { localStorage.setItem(STORAGE_KEY, lang) } catch { /* ignore */ }
   document.documentElement.lang = LOCALES[lang]
+  document.title = TITLES[lang]
   listeners.forEach((l) => l())
 }
 
