@@ -1,8 +1,26 @@
 // POST /functions/v1/checkout — creates the order and the payment link:
 // reais → Mercado Pago Checkout Pro (Pix, card, boleto); dollars → Stripe Checkout (card).
 // Secrets: MP_ACCESS_TOKEN, STRIPE_SECRET_KEY.
-import { PRODUCTS, grantKeys, isProductKey, priceOf, type Currency, type Scope } from '../_shared/rules.ts'
+import { PRODUCTS, grantKeys, isProductKey, priceOf, type Currency, type ProductKey, type Scope } from '../_shared/rules.ts'
 import { adminClient, appUrlFor, corsHeaders, json, requestUser } from '../_shared/server.ts'
+
+/** Product names shown on the checkout page for buyers using the app in English or Spanish. */
+const PRODUCT_NAMES: Record<'en' | 'es', Record<ProductKey, string>> = {
+  en: {
+    natal: 'Full Birth Chart analysis', sinastria: 'Full synastry', revolucao: 'Solar Return of the year',
+    previsao30: '30-day Forecast', previsao90: '3-month Forecast', previsao12: '12-month Forecast',
+    retorno_lunar: 'Lunar Return · 12 months', progressoes: 'Full Progressions', astrocarto: 'Full Astrocartography',
+    pacote: 'Birthday Bundle', estrela_mensal: 'Estrela plan · 1 month', estrela_anual: 'Estrela plan · 1 year',
+    cosmos_mensal: 'Cosmos plan · 1 month', cosmos_anual: 'Cosmos plan · 1 year',
+  },
+  es: {
+    natal: 'Análisis completo de la Carta Natal', sinastria: 'Sinastría completa', revolucao: 'Revolución Solar del año',
+    previsao30: 'Previsión de 30 días', previsao90: 'Previsión de 3 meses', previsao12: 'Previsión de 12 meses',
+    retorno_lunar: 'Retorno Lunar · 12 meses', progressoes: 'Progresiones completas', astrocarto: 'Astrocartografía completa',
+    pacote: 'Paquete Cumpleaños', estrela_mensal: 'Plan Estrela · 1 mes', estrela_anual: 'Plan Estrela · 1 año',
+    cosmos_mensal: 'Plan Cosmos · 1 mes', cosmos_anual: 'Plan Cosmos · 1 año',
+  },
+}
 
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response(null, { status: 204, headers: corsHeaders })
@@ -32,7 +50,8 @@ Deno.serve(async (req) => {
     .single()
   if (error) return json({ error: 'Não foi possível criar o pedido.' }, 500)
 
-  const title = label ? `${product.name} · ${label}` : product.name
+  const name = lang === 'pt' ? product.name : PRODUCT_NAMES[lang][product.key]
+  const title = label ? `${name} · ${label}` : name
 
   if (currency === 'USD') {
     const back = `${appUrlFor(req)}?lang=${lang}#/planos`
