@@ -45,7 +45,16 @@ export async function startCheckout(product: ProductKey, scope: Scope = {}, labe
   const { data, error } = await supabase.functions.invoke<{ url?: string; error?: string }>('checkout', {
     body: { product, scope, label: label.slice(0, 80), currency: getCurrency(), lang: getLang() },
   })
-  if (error || !data?.url) throw new Error(t('Não foi possível abrir o pagamento agora. Tente novamente.'))
+  if (error || !data?.url) {
+    // Show the server's reason (e.g. a payment provider setting) next to the friendly message.
+    let detail = ''
+    const ctx = (error as { context?: Response } | null)?.context
+    if (ctx && typeof ctx.json === 'function') {
+      const body = await ctx.json().catch(() => null) as { error?: string; detail?: string } | null
+      detail = body?.detail ?? body?.error ?? `HTTP ${ctx.status}`
+    }
+    throw new Error(`${t('Não foi possível abrir o pagamento agora. Tente novamente.')}${detail ? ` (${detail})` : ''}`)
+  }
   window.location.href = data.url
 }
 

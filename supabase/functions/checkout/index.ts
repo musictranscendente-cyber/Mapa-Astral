@@ -59,7 +59,8 @@ Deno.serve(async (req) => {
     if (!res.ok || !session.url) {
       console.error('stripe', res.status, session?.error?.message)
       await admin.from('purchases').update({ status: 'rejected' }).eq('id', purchase.id)
-      return json({ error: 'O pagamento não respondeu. Tente novamente em instantes.' }, 502)
+      // The provider's reason (no secrets in it) helps diagnose setup problems such as key permissions.
+      return json({ error: 'O pagamento não respondeu. Tente novamente em instantes.', detail: `Stripe ${res.status}: ${session?.error?.message ?? 'sem resposta'}` }, 502)
     }
     return json({ url: session.url })
   }
