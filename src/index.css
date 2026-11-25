@@ -941,7 +941,6 @@ p { margin: 0 0 0.8em; }
 .plan-estrela .plan-tag { background: #ffe8a3; color: #1a1033; }
 .plan-cosmos .plan-tag { background: #b45cff; color: #fff; }
 
-.currency-switch { margin: 0.9rem auto 0; justify-content: center; }
 
 /* Promo code */
 .promo-open { display: block; margin: 0.9rem auto 0; }

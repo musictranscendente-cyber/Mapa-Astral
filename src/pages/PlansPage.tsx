@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import type { Chart } from '../astro/chart'
 import { currentReturnYear } from '../astro/solarReturn'
 import { useAccess, type Offer } from '../billing/context'
-import { setCurrency, useCurrency } from '../billing/currency'
+import { useCurrency } from '../billing/currency'
 import { birthKey } from '../billing/keys'
 import { PLAN_ANALYSES, PRODUCTS, PROFILE_LIMIT, formatPrice, priceOf, type Currency, type ProductKey } from '../billing/rules'
 import { rememberReturn } from '../lib/auth'
@@ -110,12 +110,6 @@ export function PlansPage({ natal, go }: Props) {
         <p className="eyebrow">{t('Planos e análises')}</p>
         <h1 className="title-glow">{t('Vá mais fundo no seu céu')}</h1>
         <p className="muted">{t('O cálculo do mapa é sempre grátis. Os planos liberam as análises completas, as previsões longas e as comparações.')}</p>
-        {!access.simulated && (
-          <div className="segmented small currency-switch" role="group" aria-label={t('Moeda')}>
-            <button className={cur === 'BRL' ? 'active' : ''} onClick={() => setCurrency('BRL')}>🇧🇷 R$ · {t('Brasil')}</button>
-            <button className={cur === 'USD' ? 'active' : ''} onClick={() => setCurrency('USD')}>🌎 US$ · {t('Internacional')}</button>
-          </div>
-        )}
       </header>
 
       {access.simulated && <p className="glass pad notice sim">🧪 {t('Simulação ligada: as compras usam o saldo fictício de Ajustes e nada é cobrado.')}</p>}
